@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang=en>
+  <head>
+    <title>NameError: name 'CustomerDebtReportResource' is not defined
+ // Werkzeug Debugger</title>
+    <link rel="stylesheet" href="?__debugger__=yes&amp;cmd=resource&amp;f=style.css">
+    <link rel="shortcut icon"
+        href="?__debugger__=yes&amp;cmd=resource&amp;f=console.png">
+    <script src="?__debugger__=yes&amp;cmd=resource&amp;f=debugger.js"></script>
+    <script>
+      var CONSOLE_MODE = false,
+          EVALEX = true,
+          EVALEX_TRUSTED = false,
+          SECRET = "FcnWGSRKFwJ0tqLMhVdq";
+    </script>
+  </head>
+  <body style="background-color: #fff">
+    <div class="debugger">
+<h1>NameError</h1>
+<div class="detail">
+  <p class="errormsg">NameError: name &#39;CustomerDebtReportResource&#39; is not defined
+</p>
+</div>
+<h2 class="traceback">Traceback <em>(most recent call last)</em></h2>
+<div class="traceback">
+  <h3></h3>
+  <ul><li><div class="frame" id="frame-140214349215216">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349216896">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349216560">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349216000">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349215888">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349217232">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349215328">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349215440">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349216336">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349215552">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349215776">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349216784">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349215104">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349216448">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214735909600">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349234064">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349233392">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349233728">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349233280">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349233952">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349233504">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349233616">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349233840">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349148784">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349149680">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349148896">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349148336">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349149344">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349148448">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349149120">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349149232">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349149568">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349148224">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349149008">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349148672">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349148560">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349326032">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349325920">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349326144">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214735850512">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540928">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349541264">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539024">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540592">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540480">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349541152">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539136">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540704">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349538800">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540144">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539584">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349538912">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539696">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539360">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539920">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540032">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540368">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540256">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349540816">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539472">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539248">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349539808">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349541040">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349242432">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349242544">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349242656">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349242768">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349242880">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py"</cite>,
+      line <em class="line">329</em>,
+      in <code class="function">debug_application</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>if self.evalex:</pre>
+<pre class="line before"><span class="ws">            </span>environ[&#34;werkzeug.debug.preserve_context&#34;] = contexts.append</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">        </span>app_iter = None</pre>
+<pre class="line before"><span class="ws">        </span>try:</pre>
+<pre class="line current"><span class="ws">            </span>app_iter = self.app(environ, start_response)</pre>
+<pre class="line after"><span class="ws">            </span>yield from app_iter</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre>
+<pre class="line after"><span class="ws">                </span>app_iter.close()</pre>
+<pre class="line after"><span class="ws">        </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">            </span>if hasattr(app_iter, &#34;close&#34;):</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349242992">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">906</em>,
+      in <code class="function">app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line before"><span class="ws">            </span>traceback.print_exc()</pre>
+<pre class="line before"><span class="ws">            </span>err = e</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">            </span>def app(environ, start_response):</pre>
+<pre class="line current"><span class="ws">                </span>raise err from None</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws">        </span>else:</pre>
+<pre class="line after"><span class="ws">            </span># When not reloading, raise the error immediately so the</pre>
+<pre class="line after"><span class="ws">            </span># command fails.</pre>
+<pre class="line after"><span class="ws">            </span>raise e from None</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349243104">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">897</em>,
+      in <code class="function">run_command</code></h4>
+  <div class="source "><pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">    </span>The reloader and debugger are enabled by default with the &#39;--debug&#39;</pre>
+<pre class="line before"><span class="ws">    </span>option.</pre>
+<pre class="line before"><span class="ws">    </span>&#34;&#34;&#34;</pre>
+<pre class="line before"><span class="ws">    </span>try:</pre>
+<pre class="line current"><span class="ws">        </span>app = info.load_app()</pre>
+<pre class="line after"><span class="ws">    </span>except Exception as e:</pre>
+<pre class="line after"><span class="ws">        </span>if is_running_from_reloader():</pre>
+<pre class="line after"><span class="ws">            </span># When reloading, print out the error immediately, but raise</pre>
+<pre class="line after"><span class="ws">            </span># it later so the debugger or server can handle it.</pre>
+<pre class="line after"><span class="ws">            </span>traceback.print_exc()</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349243216">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">308</em>,
+      in <code class="function">load_app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">            </span>if self.app_import_path:</pre>
+<pre class="line before"><span class="ws">                </span>path, name = (</pre>
+<pre class="line before"><span class="ws">                    </span>re.split(r&#34;:(?![\\/])&#34;, self.app_import_path, 1) + [None]</pre>
+<pre class="line before"><span class="ws">                </span>)[:2]</pre>
+<pre class="line before"><span class="ws">                </span>import_name = prepare_import(path)</pre>
+<pre class="line current"><span class="ws">                </span>app = locate_app(import_name, name)</pre>
+<pre class="line after"><span class="ws">            </span>else:</pre>
+<pre class="line after"><span class="ws">                </span>for path in (&#34;wsgi.py&#34;, &#34;app.py&#34;):</pre>
+<pre class="line after"><span class="ws">                    </span>import_name = prepare_import(path)</pre>
+<pre class="line after"><span class="ws">                    </span>app = locate_app(import_name, None, raise_if_not_found=False)</pre>
+<pre class="line after"><span class="ws"></span> </pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349243328">
+  <h4>File <cite class="filename">"/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py"</cite>,
+      line <em class="line">218</em>,
+      in <code class="function">locate_app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">    </span>return &#34;.&#34;.join(module_name[::-1])</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws"></span>def locate_app(module_name, app_name, raise_if_not_found=True):</pre>
+<pre class="line before"><span class="ws">    </span>try:</pre>
+<pre class="line current"><span class="ws">        </span>__import__(module_name)</pre>
+<pre class="line after"><span class="ws">    </span>except ImportError:</pre>
+<pre class="line after"><span class="ws">        </span># Reraise the ImportError if it occurred within the imported module.</pre>
+<pre class="line after"><span class="ws">        </span># Determine this by checking whether the trace has a depth &gt; 1.</pre>
+<pre class="line after"><span class="ws">        </span>if sys.exc_info()[2].tb_next:</pre>
+<pre class="line after"><span class="ws">            </span>raise NoAppException(</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349243440">
+  <h4>File <cite class="filename">"/home/vincent/just/job-tracking-system/backend/app.py"</cite>,
+      line <em class="line">198</em>,
+      in <code class="function">&lt;module&gt;</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">        </span>return make_response_data(False, 500, &#34;An internal server error occurred.&#34;, [str(error)])</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws">    </span>return app</pre>
+<pre class="line before"><span class="ws"></span> </pre>
+<pre class="line before"><span class="ws"></span># Global app for Gunicorn</pre>
+<pre class="line current"><span class="ws"></span>app = create_app()</pre>
+<pre class="line after"><span class="ws"></span> </pre>
+<pre class="line after"><span class="ws"></span># Local Development</pre>
+<pre class="line after"><span class="ws"></span>if __name__ == &#39;__main__&#39;:</pre>
+<pre class="line after"><span class="ws">    </span>socketio.run(app, host=&#39;0.0.0.0&#39;, port=5000, debug=False)</pre></div>
+</div>
+
+<li><div class="frame" id="frame-140214349243552">
+  <h4>File <cite class="filename">"/home/vincent/just/job-tracking-system/backend/app.py"</cite>,
+      line <em class="line">142</em>,
+      in <code class="function">create_app</code></h4>
+  <div class="source "><pre class="line before"><span class="ws">    </span>api.add_resource(ClearSalesResource, &#39;/api/sales/clear&#39;)</pre>
+<pre class="line before"><span class="ws">    </span>api.add_resource(CustomerDebtResource, &#39;/api/sales/debts&#39;)</pre>
+<pre class="line before"><span class="ws">    </span>from backend.resources.seller_fruits_bulk import SellerFruitBulkResource</pre>
+<pre class="line before"><span class="ws">    </span>from backend.resources.stock_tracking import StockTrackingAggregatedResource, StockTrackingListResource, ClearStockTrackingResource</pre>
+<pre class="line before"><span class="ws">    </span>api.add_resource(DailySalesReportResource, &#39;/api/sales/report/&lt;string:date_str&gt;&#39;)</pre>
+<pre class="line current"><span class="ws">    </span>api.add_resource(CustomerDebtReportResource, &#39;/api/sales/debts/&lt;string:customer_email&gt;/report&#39;)</pre>
+<pre class="line after"><span class="ws">    </span>api.add_resource(DailyPurchasesReportResource, &#39;/api/purchases/report/&lt;string:date_str&gt;&#39;)</pre>
+<pre class="line after"><span class="ws">    </span>api.add_resource(AIAssistanceResource, &#39;/api/ai-assistance&#39;)</pre>
+<pre class="line after"><span class="ws">    </span>api.add_resource(ReceiptResource, &#39;/api/receipts&#39;, &#39;/api/receipts/&lt;string:receipt_num&gt;&#39;)</pre>
+<pre class="line after"><span class="ws">    </span>api.add_resource(SellerFruitListResource, &#39;/api/seller-fruits&#39;)</pre>
+<pre class="line after"><span class="ws">    </span>api.add_resource(SellerFruitResource, &#39;/api/seller-fruits/&lt;int:fruit_id&gt;&#39;)</pre></div>
+</div>
+</ul>
+  <blockquote>NameError: name &#39;CustomerDebtReportResource&#39; is not defined
+</blockquote>
+</div>
+
+<div class="plain">
+    <p>
+      This is the Copy/Paste friendly version of the traceback.
+    </p>
+    <textarea cols="50" rows="10" name="code" readonly>Traceback (most recent call last):
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py&#34;, line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 906, in app
+    raise err from None
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 897, in run_command
+    app = info.load_app()
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 308, in load_app
+    app = locate_app(import_name, name)
+  File &#34;/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py&#34;, line 218, in locate_app
+    __import__(module_name)
+  File &#34;/home/vincent/just/job-tracking-system/backend/app.py&#34;, line 198, in &lt;module&gt;
+    app = create_app()
+  File &#34;/home/vincent/just/job-tracking-system/backend/app.py&#34;, line 142, in create_app
+    api.add_resource(CustomerDebtReportResource, &#39;/api/sales/debts/&lt;string:customer_email&gt;/report&#39;)
+NameError: name &#39;CustomerDebtReportResource&#39; is not defined
+</textarea>
+</div>
+<div class="explanation">
+  The debugger caught an exception in your WSGI application.  You can now
+  look at the traceback which led to the error.  <span class="nojavascript">
+  If you enable JavaScript you can also use additional features such as code
+  execution (if the evalex feature is enabled), automatic pasting of the
+  exceptions and much more.</span>
+</div>
+      <div class="footer">
+        Brought to you by <strong class="arthur">DON'T PANIC</strong>, your
+        friendly Werkzeug powered traceback interpreter.
+      </div>
+    </div>
+
+    <div class="pin-prompt">
+      <div class="inner">
+        <h3>Console Locked</h3>
+        <p>
+          The console is locked and needs to be unlocked by entering the PIN.
+          You can find the PIN printed out on the standard output of your
+          shell that runs the server.
+        <form>
+          <p>PIN:
+            <input type=text name=pin size=14>
+            <input type=submit name=btn value="Confirm Pin">
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+
+<!--
+
+Traceback (most recent call last):
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/werkzeug/debug/__init__.py", line 329, in debug_application
+    app_iter = self.app(environ, start_response)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 906, in app
+    raise err from None
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 897, in run_command
+    app = info.load_app()
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 308, in load_app
+    app = locate_app(import_name, name)
+  File "/home/vincent/.local/lib/python3.8/site-packages/flask/cli.py", line 218, in locate_app
+    __import__(module_name)
+  File "/home/vincent/just/job-tracking-system/backend/app.py", line 198, in <module>
+    app = create_app()
+  File "/home/vincent/just/job-tracking-system/backend/app.py", line 142, in create_app
+    api.add_resource(CustomerDebtReportResource, '/api/sales/debts/<string:customer_email>/report')
+NameError: name 'CustomerDebtReportResource' is not defined
+
+
+-->

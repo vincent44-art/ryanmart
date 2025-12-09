@@ -1,0 +1,452 @@
+{
+	"info": {
+		"_postman_id": "c8e2a1b9-a4b4-4b9e-8c3b-d54b81c2f9d3",
+		"name": "🍊 FruitTrack API",
+		"description": "API collection for the FruitTrack Business Management System.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication & Users",
+			"item": [
+				{
+					"name": "Register New User (CEO, Purchaser, Seller, Driver)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Alice CEO\",\n    \"email\": \"alice.ceo@fruittrack.com\",\n    \"password\": \"supersecretpassword\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						},
+						"description": "Creates a new user. The role is automatically assigned based on the email containing 'ceo', 'purchaser', 'seller', or 'driver'."
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "supersecretpassword",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "alice.ceo@fruittrack.com",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						},
+						"description": "Logs in a user using Basic Auth (email for username). Returns a JWT token to be used in all other protected requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users [CEO]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "CEO Only. Retrieves a list of all users in the system, including their active status."
+					},
+					"response": []
+				},
+				{
+					"name": "Block a User (DELETE) [CEO]",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/user_public_id_here",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"user_public_id_here"
+							]
+						},
+						"description": "CEO Only. Blocks a user by their `public_id`. You must get the public_id from the 'Get All Users' request first."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Purchase Management",
+			"item": [
+				{
+					"name": "Create Purchase [Purchaser/CEO]",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fruit_type\": \"Golden Apples\",\n    \"quantity\": 150,\n    \"unit\": \"kg\",\n    \"buyer_name\": \"Green Valley Farms\",\n    \"amount\": 320.50,\n    \"date\": \"2023-11-21\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/purchases",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"purchases"
+							]
+						},
+						"description": "Log a new fruit purchase. Can be done by a user with the 'purchaser' or 'ceo' role."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Purchases [Purchaser/CEO]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/purchases",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"purchases"
+							]
+						},
+						"description": "Gets purchase history. If logged in as a purchaser, shows only their own purchases. If CEO, shows all."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Seller Assignment & Sales",
+			"item": [
+				{
+					"name": "Create Seller Assignment [CEO]",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"seller_public_id\": \"get_this_from_get_all_users_request\",\n    \"fruit_type\": \"Oranges\",\n    \"quantity_assigned\": 75,\n    \"money_issued\": 50.0,\n    \"travel_date\": \"2023-11-22\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/assignments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"assignments"
+							]
+						},
+						"description": "CEO Only. Assigns a quantity of fruit to a specific seller for distribution."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Assignments [Seller/CEO]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/assignments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"assignments"
+							]
+						},
+						"description": "Gets assignment history. If logged in as a seller, shows only their own assignments. If CEO, shows all."
+					},
+					"response": []
+				},
+				{
+					"name": "Record a Sale [Seller]",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"assignment_id\": 1,\n    \"quantity_sold\": 10,\n    \"revenue_collected\": 25.0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sales",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sales"
+							]
+						},
+						"description": "Seller only. Records a sale against one of their active assignments."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Expense Tracking",
+			"item": [
+				{
+					"name": "Log Car Expense [Driver/CEO]",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"expense_type\": \"Fuel\",\n    \"description\": \"Trip to southern market\",\n    \"amount\": 65.70,\n    \"date\": \"2023-11-22\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/car-expenses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"car-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Car Expenses [Driver/CEO]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/car-expenses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"car-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log Other Expense [CEO]",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Marketing Flyers\",\n    \"amount\": 120.00,\n    \"date\": \"2023-11-20\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/other-expenses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"other-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Other Expenses [CEO]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/other-expenses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"other-expenses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Get Analytics Summary [CEO]",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-access-token",
+								"value": "{{jwt_token}}",
+								"type": "string"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/analytics/summary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"summary"
+							]
+						},
+						"description": "CEO Only. Gets a financial summary of the entire business."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:5001",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "your_token_will_go_here_after_login",
+			"type": "string"
+		}
+	]
+}
