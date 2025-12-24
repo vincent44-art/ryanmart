@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, jsonify, send_from_directory, request
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -6,6 +7,13 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
 from datetime import timedelta
+
+# Ensure project root is on sys.path so `backend.*` imports work
+# whether this file is imported as `backend.app` or as top-level `app`.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
 from backend.config import Config
 from backend.extensions import db
