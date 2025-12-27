@@ -55,6 +55,7 @@ def create_app(config_class=Config):
     #     "http://localhost:5000",
     #     "http://127.0.0.1:5000"
     # ]
+    # Allowed origins — include local dev and deployed frontend domains
     app.config['CORS_ORIGINS'] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
@@ -62,25 +63,19 @@ def create_app(config_class=Config):
         "http://127.0.0.1:5000",
         "https://job-tracking-system-frontend.onrender.com",
         "https://job-tracking-system-pdnz.onrender.com",
-        "https://ryanmart-frontend.onrender.com"
+        "https://ryanmart-frontend.onrender.com",
         "https://ryanmart.store"
     ]
     cors.init_app(
         app,
         resources={r"/*": {
-            "origins": [
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "https://job-tracking-system-frontend.onrender.com",
-                "https://job-tracking-system-pdnz.onrender.com",
-                "https://ryanmart-frontend.onrender.com"
-                "https://ryanmart.store"
-            ],
+            "origins": app.config['CORS_ORIGINS'],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
+            "supports_credentials": True,
+            "automatic_options": True
         }}
-    ) 
+    )
 
     # JWT Expiry
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
@@ -95,24 +90,14 @@ def create_app(config_class=Config):
         identity = jwt_data["sub"]
         return User.query.get(identity)
 
-    cors.init_app(
-        app,
-        resources={r"/*": {
-            "origins": [
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }}
-    )
+    # Note: CORS already initialized above with production origins.
 
     migrate.init_app(app, db)
-    socketio.init_app(app, cors_allowed_origins=[
+    # Allow socketio connections from the same set of allowed origins
+    socketio.init_app(app, cors_allowed_origins=app.config.get('CORS_ORIGINS', [
         "http://localhost:3000",
         "http://127.0.0.1:3000"
-    ])
+    ]))
 
     # JWT error handlers
     @jwt.expired_token_loader
