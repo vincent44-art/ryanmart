@@ -71,7 +71,7 @@ def create_app(config_class=Config):
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
                 "https://job-tracking-system-frontend.onrender.com",
-                "https://job-tracking-system-pdnz.onrender.com",
+                "https://ryanmart-frontend.onrender.comhttps://job-tracking-system-pdnz.onrender.com",
                 "https://ryanmart.store"
             ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
