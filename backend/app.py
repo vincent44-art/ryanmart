@@ -47,14 +47,38 @@ def create_app(config_class=Config):
     app.config['DEBUG'] = False  # Always run in production mode for speed
 
     # CORS setup
-    app.config['CORS_HEADERS'] = 'Content-Type'
-    app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+    # app.config['CORS_HEADERS'] = 'Content-Type'
+    # app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+    # app.config['CORS_ORIGINS'] = [
+    #     "http://localhost:3000",
+    #     "http://127.0.0.1:3000",
+    #     "http://localhost:5000",
+    #     "http://127.0.0.1:5000"
+    # ]
     app.config['CORS_ORIGINS'] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:5000",
-        "http://127.0.0.1:5000"
+        "http://127.0.0.1:5000",
+        "https://job-tracking-system-frontend.onrender.com",
+        "https://job-tracking-system-pdnz.onrender.com",
+        "https://ryanmart.store"
     ]
+    cors.init_app(
+        app,
+        resources={r"/*": {
+            "origins": [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "https://job-tracking-system-frontend.onrender.com",
+                "https://job-tracking-system-pdnz.onrender.com",
+                "https://ryanmart.store"
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }}
+    ) 
 
     # JWT Expiry
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
