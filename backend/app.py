@@ -45,6 +45,9 @@ def create_app(config_class=Config):
     app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/')
     app.config.from_object(config_class)
     app.config['DEBUG'] = False  # Always run in production mode for speed
+    # Testing
+    api = Api(app, catch_all_404s=True)
+    
 
     # CORS setup
     # app.config['CORS_HEADERS'] = 'Content-Type'
@@ -69,6 +72,7 @@ def create_app(config_class=Config):
     cors.init_app(
         app,
         resources={r"/*": {
+    
             "origins": app.config['CORS_ORIGINS'],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
@@ -76,6 +80,8 @@ def create_app(config_class=Config):
             "automatic_options": True
         }}
     )
+
+    
 
     # JWT Expiry
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
@@ -122,7 +128,8 @@ def create_app(config_class=Config):
     from backend.resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
     from backend.resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
     from backend.resources.expenses import CarExpensesResource
-    api = Api(app)
+    # api = Api(app)
+    
     api.add_resource(LoginResource, '/api/auth/login')
     api.add_resource(RefreshResource, '/api/auth/refresh')
     api.add_resource(MeResource, '/api/auth/me')
@@ -234,6 +241,8 @@ def create_app(config_class=Config):
 
 # Global app for Gunicorn
 app = create_app()
+
+
 
 # Local Development
 if __name__ == '__main__':
