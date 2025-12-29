@@ -249,6 +249,9 @@
 #     socketio.run(app, host='0.0.0.0', port=5000, debug=False)
 
 
+import eventlet
+eventlet.monkey_patch()
+
 import os
 import logging
 from flask import Flask, jsonify, send_from_directory, request
