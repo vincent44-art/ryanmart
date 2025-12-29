@@ -302,15 +302,15 @@ def create_app(config_class=Config):
     # CORS setup
     app.config['CORS_HEADERS'] = 'Content-Type'
     app.config['CORS_SUPPORTS_CREDENTIALS'] = True
-    app.config['CORS_ORIGINS'] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5000",
-        "http://127.0.0.1:5000",
+    # app.config['CORS_ORIGINS'] = [
+    #     "http://localhost:3000",
+    #     "http://127.0.0.1:3000",
+    #     "http://localhost:5000",
+    #     "http://127.0.0.1:5000",
        
-        "https://ryanmart-frontend.onrender.com",
-        "https://ryanmart.store"
-    ]
+    #     "https://ryanmart-frontend.onrender.com",
+    #     "https://ryanmart.store"
+    # ]
 
     # JWT Expiry
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
@@ -343,18 +343,33 @@ def create_app(config_class=Config):
     #         "supports_credentials": True
     #     }}
     # )
-    cors.init_app(
-    app,
-    origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+#     cors.init_app(
+#     app,
+#     origins=[
+#         "http://localhost:3000",
+#         "http://127.0.0.1:3000",
       
-        "https://ryanmart-frontend.onrender.com",
-        "https://ryanmart.store"
-    ],
-    allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    supports_credentials=True
+#         "https://ryanmart-frontend.onrender.com",
+#         "https://ryanmart.store"
+#     ],
+#     allow_headers=["Content-Type", "Authorization"],
+#     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+#     supports_credentials=True
+# )
+
+    CORS(
+    app,
+    resources={r"/api/*": {
+        "origins": [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://ryanmart-frontend.onrender.com",
+            "https://ryanmart.store"
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }}
 )
 
 
