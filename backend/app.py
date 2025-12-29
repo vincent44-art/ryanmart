@@ -357,6 +357,7 @@ def create_app(config_class=Config):
 #     supports_credentials=True
 # )
 
+    # Testing
     CORS(
     app,
     resources={r"/api/*": {
@@ -456,6 +457,13 @@ def create_app(config_class=Config):
     api.add_resource(StockTrackingGroupPDFResource, '/api/stock-tracking/pdf/group')
     api.add_resource(StockTrackingUnmovedPDFResource, '/api/stock-tracking/pdf/unmoved')
     api.add_resource(StockTrackingCombinedPDFResource, '/api/stock-tracking/pdf/combined')
+
+    # Testing
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            response = jsonify({})
+            return response, 200
 
     # Health Check
     @app.route('/api/health')
