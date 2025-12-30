@@ -257,7 +257,7 @@ import logging
 from flask import Flask, jsonify, send_from_directory, request
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from flask_cors import CORS
+# from flask_cors import CORS
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -282,7 +282,7 @@ FRONTEND_BUILD_DIR = os.path.join(os.getcwd(), 'frontend', 'build')
 
 # Initialize extensions
 jwt = JWTManager()
-cors = CORS()
+# cors = CORS()
 # cors = CORS(supports_credentials=True)
 migrate = Migrate()
 socketio = SocketIO()
@@ -291,23 +291,6 @@ def create_app(config_class=Config):
     from backend.resources.user import UserListResource
     from backend.resources.salaries import SalaryPaymentsResource
     app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/')
-
-    # Testing
-    CORS(
-    app,
-    resources={
-        r"/api/*": {
-            "origins": [
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "https://ryanmart-frontend.onrender.com"
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }
-    }
-)
 
     
     app.config.from_object(config_class)
@@ -362,34 +345,23 @@ def create_app(config_class=Config):
     #         "supports_credentials": True
     #     }}
     # )
-#     cors.init_app(
-#     app,
-#     origins=[
-#         "http://localhost:3000",
-#         "http://127.0.0.1:3000",
-      
-#         "https://ryanmart-frontend.onrender.com",
-#         "https://ryanmart.store"
-#     ],
-#     allow_headers=["Content-Type", "Authorization"],
-#     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-#     supports_credentials=True
+
 # )
 
-#     CORS(
-#     app,
-#     resources={r"/api/*": {
-#         "origins": [
-#             "http://localhost:3000",
-#             "http://127.0.0.1:3000",
-#             "https://ryanmart-frontend.onrender.com",
-#             "https://ryanmart.store"
-#         ],
-#         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-#         "allow_headers": ["Content-Type", "Authorization"],
-#         "supports_credentials": True
-#     }}
-# )
+    # CORS(
+    #     app,
+    #     resources={r"/api/*": {
+    #         "origins": [
+    #             "http://localhost:3000",
+    #             "http://127.0.0.1:3000",
+    #             "https://ryanmart-frontend.onrender.com",
+    #             "https://ryanmart.store"
+    #         ],
+    #         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    #         "allow_headers": ["Content-Type", "Authorization"],
+    #         "supports_credentials": True
+    #     }}
+    # )
 
 
     migrate.init_app(app, db)
