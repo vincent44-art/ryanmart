@@ -282,8 +282,8 @@ FRONTEND_BUILD_DIR = os.path.join(os.getcwd(), 'frontend', 'build')
 
 # Initialize extensions
 jwt = JWTManager()
-# cors = CORS()
-cors = CORS(supports_credentials=True)
+cors = CORS()
+# cors = CORS(supports_credentials=True)
 migrate = Migrate()
 socketio = SocketIO()
 
@@ -291,6 +291,25 @@ def create_app(config_class=Config):
     from backend.resources.user import UserListResource
     from backend.resources.salaries import SalaryPaymentsResource
     app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/')
+
+    # Testing
+    CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "https://ryanmart-frontend.onrender.com"
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    }
+)
+
+    
     app.config.from_object(config_class)
     app.config['DEBUG'] = False  # Always run in production mode for speed
      # Testing
@@ -300,8 +319,8 @@ def create_app(config_class=Config):
     logging.basicConfig(level=logging.DEBUG)
 
     # CORS setup
-    app.config['CORS_HEADERS'] = 'Content-Type'
-    app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+    # app.config['CORS_HEADERS'] = 'Content-Type'
+    # app.config['CORS_SUPPORTS_CREDENTIALS'] = True
     # app.config['CORS_ORIGINS'] = [
     #     "http://localhost:3000",
     #     "http://127.0.0.1:3000",
@@ -357,28 +376,27 @@ def create_app(config_class=Config):
 #     supports_credentials=True
 # )
 
-    # Testing
-    CORS(
-    app,
-    resources={r"/api/*": {
-        "origins": [
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "https://ryanmart-frontend.onrender.com",
-            "https://ryanmart.store"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
-    }}
-)
+#     CORS(
+#     app,
+#     resources={r"/api/*": {
+#         "origins": [
+#             "http://localhost:3000",
+#             "http://127.0.0.1:3000",
+#             "https://ryanmart-frontend.onrender.com",
+#             "https://ryanmart.store"
+#         ],
+#         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+#         "allow_headers": ["Content-Type", "Authorization"],
+#         "supports_credentials": True
+#     }}
+# )
 
 
     migrate.init_app(app, db)
     socketio.init_app(app, cors_allowed_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://job-tracking-system-frontend.onrender.com"
+        "https://ryanmart-frontend.onrender.com"
     ])
 
     # JWT error handlers
@@ -458,13 +476,6 @@ def create_app(config_class=Config):
     api.add_resource(StockTrackingUnmovedPDFResource, '/api/stock-tracking/pdf/unmoved')
     api.add_resource(StockTrackingCombinedPDFResource, '/api/stock-tracking/pdf/combined')
 
-    # Testing
-    @app.before_request
-    def handle_preflight():
-        if request.method == "OPTIONS":
-            response = jsonify({})
-            return response, 200
-
     # Health Check
     @app.route('/api/health')
     def health_check():
@@ -526,3 +537,4 @@ app = create_app()
 # Local Development
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+
