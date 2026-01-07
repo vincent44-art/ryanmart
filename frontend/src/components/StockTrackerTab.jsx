@@ -20,15 +20,17 @@ const StockTrackerTab = () => {
   const [showProfitLossModal, setShowProfitLossModal] = useState(false);
 
   const navigate = useNavigate();
-  
+
   const goToStockTrackingOverview = () => {
     navigate('/stock-tracking-records');
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleTrackStock = (stockName) => {
     navigate('/stock-tracking-records', { state: { filterStock: stockName } });
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleViewProfitLoss = (stock) => {
     setSelectedStock(stock);
     setShowProfitLossModal(true);
@@ -80,13 +82,13 @@ const StockTrackerTab = () => {
   // Initial load
   useEffect(() => {
     loadData();
-  }, []);
+  }, [navigate]);
 
   // Set up polling for real-time updates
   useEffect(() => {
     const interval = setInterval(loadData, 3000); // Poll every 3 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [loadData]);
 
   if (loading) {
     return (
@@ -113,6 +115,7 @@ const StockTrackerTab = () => {
   }
 
   const stockTrackingArr = Array.isArray(data.stockTracking) ? data.stockTracking : [];
+  // eslint-disable-next-line no-unused-vars
   const stockExpensesArr = Array.isArray(data.stockExpenses) ? data.stockExpenses : [];
   const salesArr = Array.isArray(data.salesData) ? data.salesData : [];
 
@@ -150,6 +153,7 @@ const StockTrackerTab = () => {
     }, {});
 
   // Convert to array and sort by date descending, take first 5
+  // eslint-disable-next-line no-unused-vars
   const groupedStocksArray = Object.values(groupedStocks)
     .sort((a, b) => new Date(b.dateOut) - new Date(a.dateOut))
     .slice(0, 5);

@@ -13,7 +13,7 @@ const ChangePassword = () => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const { user, logout, verifyAuth } = useAuth();
+  const { user, verifyAuth } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {

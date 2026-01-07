@@ -47,7 +47,7 @@ const OtherExpensesTab = ({ token }) => {
       }
     };
     loadExpenses();
-  }, [user]);
+  }, [user, authToken]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
