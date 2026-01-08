@@ -21,6 +21,7 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
 from datetime import timedelta
+from werkzeug.security import generate_password_hash
 
 from backend.config import Config
 from backend.extensions import db
@@ -49,6 +50,33 @@ socketio = SocketIO(cors_allowed_origins=[
     "https://ryanmart-frontend.onrender.com",
     "https://ryanmart.store"
 ])
+
+
+def ensure_database_initialized(app):
+    with app.app_context():
+        try:
+            # Create all tables if they do not exist
+            db.create_all()
+
+            # Seed a default CEO/admin user if missing
+            default_email = os.environ.get("DEFAULT_ADMIN_EMAIL", "ceo@ryanmart.com")
+            default_password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "ChangeMe123!")
+
+            existing = User.query.filter_by(email=default_email).first()
+            if not existing:
+                role_val = getattr(UserRole, "CEO", None) or getattr(UserRole, "ADMIN", None) or "CEO"
+                user = User(
+                    email=default_email,
+                    name="CEO",
+                    role=role_val,
+                    password_hash=generate_password_hash(default_password),
+                    is_active=True,
+                )
+                db.session.add(user)
+                db.session.commit()
+                app.logger.info(f"Seeded default admin user: {default_email}")
+        except Exception as e:
+            app.logger.error(f"Database initialization error: {e}")
 
 
 def create_app(config_class=Config):
@@ -275,6 +303,8 @@ def create_app(config_class=Config):
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
         return response
 
+    # Ensure DB schema exists and seed default admin if missing
+    ensure_database_initialized(app)
     return app
 
 
