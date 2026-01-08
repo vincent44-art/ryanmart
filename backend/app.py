@@ -46,7 +46,8 @@ socketio = SocketIO(cors_allowed_origins=[
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
-    "https://ryanmart-frontend.onrender.com"
+    "https://ryanmart-frontend.onrender.com",
+    "https://ryanmart.store"
 ])
 
 
@@ -87,7 +88,8 @@ def create_app(config_class=Config):
                 "http://127.0.0.1:3000",
                 "http://localhost:3001",
                 "http://127.0.0.1:3001",
-                "https://ryanmart-frontend.onrender.com"
+                "https://ryanmart-frontend.onrender.com",
+                "https://ryanmart.store"
             ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
@@ -99,7 +101,8 @@ def create_app(config_class=Config):
         "http://127.0.0.1:3000",
         "http://localhost:3001",
         "http://127.0.0.1:3001",
-        "https://ryanmart-frontend.onrender.com"
+        "https://ryanmart-frontend.onrender.com",
+        "https://ryanmart.store"
     ])
 
     # JWT error handlers
@@ -233,6 +236,22 @@ def create_app(config_class=Config):
     # Explicit preflight handler for any /api/* route
     @app.route('/api/<path:subpath>', methods=['OPTIONS'])
     def cors_preflight(subpath):
+        origin = request.headers.get('Origin', '')
+        allowed_origins = {
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001",
+            "https://ryanmart-frontend.onrender.com",
+            "https://ryanmart.store",
+        }
+        if origin in allowed_origins:
+            response = ('', 204)
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return response
         return ('', 204)
 
     # Force credentials-enabled CORS headers for API routes
@@ -245,6 +264,7 @@ def create_app(config_class=Config):
             "http://localhost:3001",
             "http://127.0.0.1:3001",
             "https://ryanmart-frontend.onrender.com",
+            "https://ryanmart.store",
         }
         # Only add CORS headers for API routes and allowed origins
         if request.path.startswith('/api') and origin in allowed_origins:
