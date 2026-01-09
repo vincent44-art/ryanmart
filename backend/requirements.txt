@@ -1,19 +1,24 @@
-# Clean Python dependencies for backend (PyPI only)
-# Prefer using project root requirements.txt for deployment; keep this aligned.
-alembic==1.14.1
-aniso8601==10.0.1
-
+# Clean Python dependencies for deployment on Render (PyPI only)
+# Backend web framework and extensions
 Flask==2.2.3
 Werkzeug==2.2.3
 Flask-SQLAlchemy==3.0.3
 SQLAlchemy==1.4.46
 Flask-Migrate==4.0.4
+alembic==1.14.1
 
+# REST API
 Flask-RESTful==0.3.9
-Flask-Cors==3.0.10
+aniso8601==10.0.1
+
+# Auth/JWT
 Flask-JWT-Extended==4.4.4
 itsdangerous==2.2.0
 
+# CORS
+Flask-Cors==3.0.10
+
+# SocketIO / Realtime
 Flask-SocketIO==5.3.6
 eventlet==0.39.1
 python-engineio==4.12.2
@@ -22,18 +27,26 @@ bidict==0.23.1
 simple-websocket==1.1.0
 
 greenlet==3.1.1
+
+# Config
 python-dotenv==1.0.0
+
+# Database drivers
 psycopg2-binary==2.9.9
 
+# PDF generation
 reportlab==4.0.7
+
+# HTTP
 requests==2.31.0
 
 # Deployment
 gunicorn==21.2.0
 
-# Optional crypto/bcrypt
+# Optional crypto/bcrypt (kept for compatibility if referenced)
 Flask-Bcrypt==1.0.1
 bcrypt==3.1.7
 
+# Template rendering
 Jinja2==3.1.6
 click==8.1.8
