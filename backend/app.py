@@ -13,6 +13,7 @@ except Exception:
     _EVENTLET_AVAILABLE = False
 
 import os
+import sys
 import logging
 from flask import Flask, jsonify, send_from_directory, request
 from flask_migrate import Migrate
@@ -23,16 +24,21 @@ from dotenv import load_dotenv
 from datetime import timedelta
 from werkzeug.security import generate_password_hash
 
-from backend.config import Config
-from backend.extensions import db
-from backend.models.user import User, UserRole
-from backend.utils.helpers import make_response_data
-from backend.utils.it_monitor import log_api_error
-from backend.resources import api_bp
-from backend.resources.dashboard import dashboard_bp
-from backend.resources.__init__ import CurrentStockResource
-from backend.resources.ceo_dashboard import CEODashboardResource
-from backend.resources.auth import LoginResource, RefreshResource, MeResource, ChangePasswordResource
+# Ensure backend package is importable
+BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
+if BACKEND_ROOT not in sys.path:
+    sys.path.insert(0, BACKEND_ROOT)
+
+from config import Config
+from extensions import db
+from models.user import User, UserRole
+from utils.helpers import make_response_data
+from utils.it_monitor import log_api_error
+from resources import api_bp
+from resources.dashboard import dashboard_bp
+from resources.__init__ import CurrentStockResource
+from resources.ceo_dashboard import CEODashboardResource
+from resources.auth import LoginResource, RefreshResource, MeResource, ChangePasswordResource
 from flask_restful import Api
 
 # Load environment variables
@@ -151,25 +157,25 @@ def create_app(config_class=Config):
 
     # Register Blueprints
     app.register_blueprint(api_bp, url_prefix='/api')
-    from backend.resources.assignments import assignments_bp
+    from resources.assignments import assignments_bp
     app.register_blueprint(assignments_bp)
     app.register_blueprint(dashboard_bp)
-    from backend.resources.drivers import drivers_bp
+    from resources.drivers import drivers_bp
     app.register_blueprint(drivers_bp)
-    from backend.resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
-    from backend.resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
-    from backend.resources.expenses import CarExpensesResource
-    from backend.resources.user import UserListResource
-    from backend.resources.profile_image import ProfileImageUploadResource
-    from backend.resources.it_events import ITEventsResource, ITEventResource, ITAcknowledgeAlertsResource
-    from backend.resources.it_alerts import ITAlertsResource, ITIncidentsResource
-    from backend.resources.sales import SaleListResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
-    from backend.resources.purchases import DailyPurchasesReportResource
-    from backend.resources.ai_assistance import AIAssistanceResource
-    from backend.resources.receipts import ReceiptResource
-    from backend.resources.seller_fruits import SellerFruitListResource, SellerFruitResource
-    from backend.resources.seller_fruits_bulk import SellerFruitBulkResource
-    from backend.resources.stock_tracking import (
+    from resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
+    from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
+    from resources.expenses import CarExpensesResource
+    from resources.user import UserListResource
+    from resources.profile_image import ProfileImageUploadResource
+    from resources.it_events import ITEventsResource, ITEventResource, ITAcknowledgeAlertsResource
+    from resources.it_alerts import ITAlertsResource, ITIncidentsResource
+    from resources.sales import SaleListResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
+    from resources.purchases import DailyPurchasesReportResource
+    from resources.ai_assistance import AIAssistanceResource
+    from resources.receipts import ReceiptResource
+    from resources.seller_fruits import SellerFruitListResource, SellerFruitResource
+    from resources.seller_fruits_bulk import SellerFruitBulkResource
+    from resources.stock_tracking import (
         StockTrackingAggregatedResource, StockTrackingListResource, 
         ClearStockTrackingResource, StockTrackingPDFResource, 
         StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource, 

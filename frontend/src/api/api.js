@@ -2,8 +2,12 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
 // Create axios instance with default configuration
+const RAW_BASE = process.env.REACT_APP_API_BASE_URL || '';
+// Ensure we don't end up with double /api/api; append /api if not present
+const baseURL = RAW_BASE.endsWith('/api') ? RAW_BASE : `${RAW_BASE}/api`;
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || '/api',
+  baseURL: baseURL || '/api',
   withCredentials: true,
   timeout: 10000,
   headers: {
