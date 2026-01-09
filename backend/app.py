@@ -13,6 +13,7 @@ except Exception:
     _EVENTLET_AVAILABLE = False
 
 import os
+import sys
 import logging
 from flask import Flask, jsonify, send_from_directory, request
 from flask_migrate import Migrate
@@ -22,6 +23,11 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from datetime import timedelta
 from werkzeug.security import generate_password_hash
+
+# Ensure backend package is importable
+BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
+if BACKEND_ROOT not in sys.path:
+    sys.path.insert(0, BACKEND_ROOT)
 
 from backend.config import Config
 from backend.extensions import db
