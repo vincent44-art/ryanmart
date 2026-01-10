@@ -6,10 +6,10 @@ from models.user import User, UserRole
 from models.inventory import Inventory
 from models.sales import Sale
 from models.purchases import Purchase
-from ..models.driver import DriverExpense
-from ..models.other_expense import OtherExpense
-from ..models.seller_fruit import SellerFruit
-from ..utils.helpers import make_response_data
+from models.driver import DriverExpense
+from models.other_expense import OtherExpense
+from models.seller_fruit import SellerFruit
+from utils.helpers import make_response_data
 
 class CEODashboardResource(Resource):
     @jwt_required()

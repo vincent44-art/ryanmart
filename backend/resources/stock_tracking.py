@@ -7,8 +7,8 @@ from models.driver import DriverExpense
 from models.stock_movement import StockMovement
 from models.inventory import Inventory
 from models.purchases import Purchase
-from ..utils.helpers import make_response_data
-from ..utils.decorators import role_required
+from utils.helpers import make_response_data
+from utils.decorators import role_required
 from datetime import datetime, timedelta
 from flask import send_file, make_response, request
 from reportlab.lib.pagesizes import letter

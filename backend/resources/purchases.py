@@ -5,8 +5,8 @@ from sqlalchemy import func
 from extensions import db
 from models.purchases import Purchase
 from models.user import UserRole
-from ..utils.helpers import make_response_data, get_current_user
-from ..utils.decorators import role_required
+from utils.helpers import make_response_data, get_current_user
+from utils.decorators import role_required
 from flask import send_file
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter

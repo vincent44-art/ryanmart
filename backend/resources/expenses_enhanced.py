@@ -4,9 +4,9 @@ from flask import request, send_file
 import io
 from extensions import db
 from models.other_expense import OtherExpense
-from ..models.driver import DriverExpense
-from ..utils.helpers import make_response_data, get_current_user
-from ..utils.pdf_generator import DriverExpensePDFGenerator
+from models.driver import DriverExpense
+from utils.helpers import make_response_data, get_current_user
+from utils.pdf_generator import DriverExpensePDFGenerator
 from datetime import datetime
 
 class OtherExpensesResource(Resource):

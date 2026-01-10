@@ -2,8 +2,8 @@ from flask_restful import Resource, reqparse
 from datetime import datetime
 from extensions import db
 from models.gradient import Gradient
-from ..utils.helpers import make_response_data, get_current_user
-from ..utils.decorators import role_required
+from utils.helpers import make_response_data, get_current_user
+from utils.decorators import role_required
 
 gradient_parser = reqparse.RequestParser()
 gradient_parser.add_argument('application_date', type=str, required=True)

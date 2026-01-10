@@ -1,8 +1,8 @@
 # Driver expense routes and blueprint
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..models.driver import DriverExpense
-from ..models.user import db
+from models.driver import DriverExpense
+from models.user import db
 
 drivers_bp = Blueprint('drivers', __name__, url_prefix='/api/drivers')
 

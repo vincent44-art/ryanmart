@@ -8,7 +8,7 @@ from models.sales import Sale
 from models.driver import DriverExpense
 from models.inventory import Inventory
 from models.stock_tracking import StockTracking
-from ..utils.helpers import make_response_data
+from utils.helpers import make_response_data
 
 class AIAssistanceResource(Resource):
     @jwt_required()

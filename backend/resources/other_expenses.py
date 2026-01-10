@@ -2,8 +2,8 @@ from flask_restful import Resource, reqparse
 from flask import request, send_file
 from extensions import db
 from models.other_expense import OtherExpense
-from ..utils.helpers import make_response_data, get_current_user
-from ..utils.decorators import role_required
+from utils.helpers import make_response_data, get_current_user
+from utils.decorators import role_required
 from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4

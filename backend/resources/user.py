@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
-from ..models.user import db, User, UserRole
-from ..utils.decorators import role_required
-from ..utils.helpers import make_response_data
+from models.user import db, User, UserRole
+from utils.decorators import role_required
+from utils.helpers import make_response_data
 
 parser = reqparse.RequestParser()
 parser.add_argument('email', type=str, required=True)

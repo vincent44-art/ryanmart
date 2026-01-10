@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
-from ..models.assignment import Assignment
-from ..models.sales import Sale
-from ..models.user import db
-from ..utils.helpers import make_response_data
+from models.assignment import Assignment
+from models.sales import Sale
+from models.user import db
+from utils.helpers import make_response_data
 
 assignments_bp = Blueprint('assignments_bp', __name__, url_prefix='/api/assignments')
 
