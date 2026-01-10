@@ -1,9 +1,10 @@
 from flask_restful import Resource, reqparse
 from flask import request, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..models.it_event import ITEvent, EventType, Severity
-from ..models.user import User
-from ..utils.helpers import make_response_data
+from models.it_event import ITEvent, EventType, Severity
+from models.user import User
+from utils.helpers import make_response_data
+from extensions import db
 from datetime import datetime, timedelta
 import json
 

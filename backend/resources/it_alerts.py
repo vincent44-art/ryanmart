@@ -1,8 +1,9 @@
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..models.it_alert import ITAlert, AlertSeverity
-from ..models.user import User
-from ..utils.helpers import make_response_data
+from models.it_alert import ITAlert, AlertSeverity
+from models.user import User
+from utils.helpers import make_response_data
+from extensions import db
 from datetime import datetime
 import logging
 
@@ -97,7 +98,6 @@ class ITIncidentsResource(Resource):
             suggested_actions=args['suggested_actions']
         )
 
-        from ..extensions import db
         db.session.add(alert)
         db.session.commit()
 

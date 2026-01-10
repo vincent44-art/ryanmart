@@ -16,7 +16,6 @@ class SalariesResource(Resource):
     @jwt_required()
     def delete(self):
         # Delete all salary records
-        from ..models.salary import Salary, db
         db.session.query(Salary).delete()
         db.session.commit()
         return make_response_data(message="All salary records deleted.", status_code=200)

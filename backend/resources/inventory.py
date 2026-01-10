@@ -3,8 +3,8 @@ from datetime import datetime
 from extensions import db
 from models.inventory import Inventory
 from models.stock_movement import StockMovement
-from ..utils.helpers import make_response_data, get_current_user
-from ..utils.decorators import role_required
+from utils.helpers import make_response_data, get_current_user
+from utils.decorators import role_required
 
 parser = reqparse.RequestParser()
 parser.add_argument('name', type=str, required=True)

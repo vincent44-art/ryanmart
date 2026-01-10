@@ -3,7 +3,7 @@ from flask import request
 from flask_jwt_extended import jwt_required
 from extensions import db
 from models.receipt import Receipt
-from ..utils.helpers import make_response_data
+from utils.helpers import make_response_data
 import json
 from datetime import datetime
 
