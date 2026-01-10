@@ -3,8 +3,8 @@ if __name__ == "__main__":
     import sys
     import os
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    from backend.app import app, db
-    from backend.models.user import User, UserRole
+    from app import app, db
+    from models.user import User, UserRole
 
     with app.app_context():
         # Create CEO user if not exists

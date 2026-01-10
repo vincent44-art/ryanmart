@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from datetime import datetime
-from backend.extensions import db
-from backend.models.gradient import Gradient
+from extensions import db
+from models.gradient import Gradient
 from ..utils.helpers import make_response_data, get_current_user
 from ..utils.decorators import role_required
 

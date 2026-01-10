@@ -1,7 +1,7 @@
-from backend.extensions import db
-from backend.models.user import User, UserRole
+from extensions import db
+from models.user import User, UserRole
 from werkzeug.security import generate_password_hash
-from backend.app import create_app
+from app import create_app
 
 app = create_app()
 app.app_context().push()

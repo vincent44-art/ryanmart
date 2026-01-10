@@ -7,8 +7,8 @@ class SalaryPaymentsResource(Resource):
         return make_response_data(data=[s.to_dict() for s in salaries], message="Salary payments fetched successfully.")
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
-from backend.extensions import db
-from backend.models.user import User
+from extensions import db
+from models.user import User
 from ..models.salary import Salary
 from ..utils.helpers import make_response_data, get_current_user
 from datetime import datetime

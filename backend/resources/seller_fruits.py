@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
-from backend.models.seller_fruit import SellerFruit
-from backend.models.user import User
-from backend.extensions import db
+from models.seller_fruit import SellerFruit
+from models.user import User
+from extensions import db
 from flask import request
 from datetime import datetime
 from flask_jwt_extended import get_jwt_identity, jwt_required

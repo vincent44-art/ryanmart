@@ -1,6 +1,6 @@
 from flask_restful import Resource
-from backend.models.seller_fruit import SellerFruit
-from backend.extensions import db
+from models.seller_fruit import SellerFruit
+from extensions import db
 from flask import request
 
 class SellerFruitBulkResource(Resource):

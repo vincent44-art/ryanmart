@@ -1,7 +1,7 @@
 import unittest
-from backend.app import create_app
-from backend.extensions import db
-from backend.models.seller_fruit import SellerFruit
+from app import create_app
+from extensions import db
+from models.seller_fruit import SellerFruit
 from datetime import datetime
 
 class SellerFruitsTestCase(unittest.TestCase):

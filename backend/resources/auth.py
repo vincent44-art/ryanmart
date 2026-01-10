@@ -10,7 +10,7 @@ from ..utils.it_monitor import log_login_success, log_login_failure
 
 from flask import make_response
 from datetime import timedelta
-from backend.extensions import db
+from extensions import db
 import re
 
 

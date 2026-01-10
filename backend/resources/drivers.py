@@ -10,7 +10,7 @@ drivers_bp = Blueprint('drivers', __name__, url_prefix='/api/drivers')
 @jwt_required()
 def get_driver_expenses(driver_email):
     user_id = get_jwt_identity()
-    from backend.models.user import User
+    from models.user import User
     current_user = User.query.get(user_id)
     if not current_user:
         return jsonify({"msg": "Unauthorized"}), 403

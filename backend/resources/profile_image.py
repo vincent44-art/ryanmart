@@ -3,9 +3,9 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 import os
 from werkzeug.utils import secure_filename
-from backend.extensions import db
-from backend.models.user import User
-from backend.utils.helpers import make_response_data, get_current_user
+from extensions import db
+from models.user import User
+from utils.helpers import make_response_data, get_current_user
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'instance', 'profile_images')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

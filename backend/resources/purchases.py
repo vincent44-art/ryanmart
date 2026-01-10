@@ -2,9 +2,9 @@ from flask import Blueprint, jsonify
 from flask_restful import Resource, reqparse
 from datetime import datetime
 from sqlalchemy import func
-from backend.extensions import db
-from backend.models.purchases import Purchase
-from backend.models.user import UserRole
+from extensions import db
+from models.purchases import Purchase
+from models.user import UserRole
 from ..utils.helpers import make_response_data, get_current_user
 from ..utils.decorators import role_required
 from flask import send_file
@@ -38,7 +38,7 @@ def get_ceo_messages():
 
 @purchases_bp.route("/purchases/<string:email>", methods=["GET"])
 def get_purchases_by_email(email):
-    from backend.models.user import User
+    from models.user import User
     user = User.query.filter_by(email=email).first()
     if not user:
         return jsonify([]), 200

@@ -14,13 +14,13 @@ from sqlalchemy.orm import sessionmaker
 # Add the backend directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
 
-from backend.extensions import db
-from backend.models.user import User, UserRole
-from backend.models.inventory import Inventory
-from backend.models.sales import Sale
-from backend.models.purchases import Purchase
-from backend.models.driver import DriverExpense
-from backend.models.other_expense import OtherExpense
+from extensions import db
+from models.user import User, UserRole
+from models.inventory import Inventory
+from models.sales import Sale
+from models.purchases import Purchase
+from models.driver import DriverExpense
+from models.other_expense import OtherExpense
 
 # Sample fruit types
 FRUIT_TYPES = ['Apple', 'Banana', 'Orange', 'Mango', 'Pineapple', 'Grapes', 'Watermelon']
@@ -133,7 +133,7 @@ def create_sample_data():
 
 if __name__ == "__main__":
     # Import app context
-    from backend.app import app
+    from app import app
     
     with app.app_context():
         create_sample_data()

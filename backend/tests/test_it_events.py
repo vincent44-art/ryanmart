@@ -1,8 +1,8 @@
 import pytest
-from backend.models.it_event import ITEvent, EventType, Severity
-from backend.models.it_alert import ITAlert, AlertSeverity
-from backend.models.user import User, UserRole
-from backend.extensions import db
+from models.it_event import ITEvent, EventType, Severity
+from models.it_alert import ITAlert, AlertSeverity
+from models.user import User, UserRole
+from extensions import db
 from datetime import datetime
 
 

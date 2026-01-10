@@ -1,11 +1,11 @@
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from sqlalchemy import func
-from backend.extensions import db
-from backend.models.user import User, UserRole
-from backend.models.inventory import Inventory
-from backend.models.sales import Sale
-from backend.models.purchases import Purchase
+from extensions import db
+from models.user import User, UserRole
+from models.inventory import Inventory
+from models.sales import Sale
+from models.purchases import Purchase
 from ..models.driver import DriverExpense
 from ..models.other_expense import OtherExpense
 from ..models.seller_fruit import SellerFruit

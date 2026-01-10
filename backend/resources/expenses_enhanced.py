@@ -2,8 +2,8 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 from flask import request, send_file
 import io
-from backend.extensions import db
-from backend.models.other_expense import OtherExpense
+from extensions import db
+from models.other_expense import OtherExpense
 from ..models.driver import DriverExpense
 from ..utils.helpers import make_response_data, get_current_user
 from ..utils.pdf_generator import DriverExpensePDFGenerator

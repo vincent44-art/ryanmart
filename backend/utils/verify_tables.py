@@ -33,7 +33,7 @@ import sys
 # Adjust PYTHONPATH to import models if needed
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from backend.extensions import db  # import db for metadata
+from extensions import db  # import db for metadata
 
 def parse_sql_column(col_tokens):
     """Parse a single column definition from token list and return dict of properties."""

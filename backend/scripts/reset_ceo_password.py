@@ -9,9 +9,9 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 # Now import the Flask app, db, and User model from the backend package
-from backend.app import app
-from backend.extensions import db
-from backend.models.user import User
+from app import app
+from extensions import db
+from models.user import User
 
 
 def reset_password(email: str, new_password: str) -> None:

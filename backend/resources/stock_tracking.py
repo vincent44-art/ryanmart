@@ -1,12 +1,12 @@
 from flask_restful import Resource, reqparse
-from backend.extensions import db
-from backend.models.stock_tracking import StockTracking
-from backend.models.sales import Sale
-from backend.models.other_expense import OtherExpense
-from backend.models.driver import DriverExpense
-from backend.models.stock_movement import StockMovement
-from backend.models.inventory import Inventory
-from backend.models.purchases import Purchase
+from extensions import db
+from models.stock_tracking import StockTracking
+from models.sales import Sale
+from models.other_expense import OtherExpense
+from models.driver import DriverExpense
+from models.stock_movement import StockMovement
+from models.inventory import Inventory
+from models.purchases import Purchase
 from ..utils.helpers import make_response_data
 from ..utils.decorators import role_required
 from datetime import datetime, timedelta
@@ -972,7 +972,7 @@ class StockTrackingAggregatedResource(Resource):
                     continue
 
             # Aggregate sales (from sales table and seller_fruits table)
-            from backend.models.seller_fruit import SellerFruit
+            from models.seller_fruit import SellerFruit
             sales_records = sales + SellerFruit.query.all()
             for sale in sales_records:
                 try:

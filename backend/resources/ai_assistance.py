@@ -1,13 +1,13 @@
 from flask_restful import Resource
 from flask import request
 from flask_jwt_extended import jwt_required
-from backend.extensions import db
-from backend.models.user import User, UserRole
-from backend.models.purchases import Purchase
-from backend.models.sales import Sale
-from backend.models.driver import DriverExpense
-from backend.models.inventory import Inventory
-from backend.models.stock_tracking import StockTracking
+from extensions import db
+from models.user import User, UserRole
+from models.purchases import Purchase
+from models.sales import Sale
+from models.driver import DriverExpense
+from models.inventory import Inventory
+from models.stock_tracking import StockTracking
 from ..utils.helpers import make_response_data
 
 class AIAssistanceResource(Resource):

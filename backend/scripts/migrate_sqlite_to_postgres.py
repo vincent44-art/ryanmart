@@ -27,8 +27,8 @@ from sqlalchemy import inspect as sa_inspect
 # Ensure we can import the Flask app and db
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from backend.app import create_app  # type: ignore
-from backend.extensions import db  # type: ignore
+from app import create_app  # type: ignore
+from extensions import db  # type: ignore
 
 
 def get_sqlite_path() -> str:

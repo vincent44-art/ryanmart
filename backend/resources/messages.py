@@ -1,8 +1,8 @@
 from flask_restful import Resource, reqparse
 from sqlalchemy import or_
-from backend.extensions import db
-from backend.models.message import Message
-from backend.models.user import UserRole
+from extensions import db
+from models.message import Message
+from models.user import UserRole
 from ..utils.helpers import make_response_data, get_current_user
 from ..utils.decorators import role_required
 

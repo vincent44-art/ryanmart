@@ -1,11 +1,11 @@
 import random
 from datetime import datetime, timedelta
-from backend.app import create_app, db
-from backend.models.sales import Sale
-from backend.models.purchases import Purchase
-from backend.models.user import User
-from backend.models.other_expense import OtherExpense
-from backend.models.driver import DriverExpense
+from app import create_app, db
+from models.sales import Sale
+from models.purchases import Purchase
+from models.user import User
+from models.other_expense import OtherExpense
+from models.driver import DriverExpense
 
 app = create_app()
 

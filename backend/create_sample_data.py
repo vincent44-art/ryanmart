@@ -9,14 +9,14 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from datetime import datetime, timedelta
-from backend.app import app, db
-from backend.models.user import User, UserRole
-from backend.models.sales import Sale
-from backend.models.purchases import Purchase
-from backend.models.inventory import Inventory
-from backend.models.driver import DriverExpense
-from backend.models.other_expense import OtherExpense
-from backend.models.gradient import Gradient
+from app import app, db
+from models.user import User, UserRole
+from models.sales import Sale
+from models.purchases import Purchase
+from models.inventory import Inventory
+from models.driver import DriverExpense
+from models.other_expense import OtherExpense
+from models.gradient import Gradient
 
 def create_sample_data():
     """Create comprehensive sample data for the dashboard."""

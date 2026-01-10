@@ -27,7 +27,7 @@ from .sales import SaleListResource, SaleResource, ClearSalesResource, SaleSumma
 
 class CurrentStockResource(Resource):
     def get(self):
-        from backend.models.inventory import Inventory
+        from models.inventory import Inventory
         # Query all inventory items
         items = Inventory.query.all()
         data = []

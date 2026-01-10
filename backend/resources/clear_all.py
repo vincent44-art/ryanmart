@@ -1,16 +1,16 @@
 from flask_restful import Resource
-from backend.extensions import db
-from backend.models.sales import Sale
-from backend.models.purchases import Purchase
-from backend.models.inventory import Inventory
-from backend.models.stock_movement import StockMovement
-from backend.models.salary import Salary
-from backend.models.other_expense import OtherExpense
-from backend.models.message import Message
-from backend.models.gradient import Gradient
-from backend.models.user import User
-from backend.utils.helpers import make_response_data
-from backend.utils.decorators import role_required
+from extensions import db
+from models.sales import Sale
+from models.purchases import Purchase
+from models.inventory import Inventory
+from models.stock_movement import StockMovement
+from models.salary import Salary
+from models.other_expense import OtherExpense
+from models.message import Message
+from models.gradient import Gradient
+from models.user import User
+from utils.helpers import make_response_data
+from utils.decorators import role_required
 
 class ClearAllDataResource(Resource):
     @role_required('ceo')

@@ -12,10 +12,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 from flask import send_file
 
-from backend.extensions import db
-from backend.models.sales import Sale
-from backend.utils.decorators import role_required
-from backend.utils.helpers import make_response_data
+from extensions import db
+from models.sales import Sale
+from utils.decorators import role_required
+from utils.helpers import make_response_data
 
 # Parser for POST/PUT requests
 parser = reqparse.RequestParser()
