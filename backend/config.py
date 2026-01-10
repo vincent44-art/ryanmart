@@ -9,8 +9,22 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
 
-    # Require DATABASE_URL from environment; remove sqlite fallback.
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    # Read DATABASE_URL from environment. If using a pure-Python driver like
+    # pg8000 we ensure SQLAlchemy uses the correct driver name. If DATABASE_URL
+    # is not set we fall back to a local sqlite file for easy local development.
+    _db_url = os.environ.get('DATABASE_URL')
+    if _db_url:
+        # Normalize common Heroku/Render-style URLs that start with postgres://
+        # SQLAlchemy expects postgresql:// and we want to use the pg8000 driver
+        # (pure-Python) to avoid binary wheel ABI issues on some platforms.
+        if _db_url.startswith('postgres://'):
+            _db_url = _db_url.replace('postgres://', 'postgresql+pg8000://', 1)
+        elif _db_url.startswith('postgresql://') and '+pg' not in _db_url:
+            _db_url = _db_url.replace('postgresql://', 'postgresql+pg8000://', 1)
+        SQLALCHEMY_DATABASE_URI = _db_url
+    else:
+        # Local development fallback
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-string'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
