@@ -93,6 +93,10 @@ def create_app(config_class=Config):
     app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/')
     app.config.from_object(config_class)
     app.config['DEBUG'] = False
+    # Avoid Werkzeug automatic redirects for trailing-slash mismatches.
+    # This prevents a request to '/auth/login' being redirected to
+    # '/auth/login/' (3xx) which would break CORS preflight OPTIONS.
+    app.url_map.strict_slashes = False
     
     # Enable full error logging for debugging
     logging.basicConfig(level=logging.DEBUG)
@@ -119,6 +123,10 @@ def create_app(config_class=Config):
     # variable is missing or contains '*' we log a warning; the latter is
     # considered permissive but still honored.
     configured = app.config.get('CORS_ORIGINS')
+    # Normalize configured origins: allow either a list or comma-separated string
+    if isinstance(configured, str):
+        configured = [s.strip() for s in configured.split(',') if s.strip()]
+
     if not configured:
         app.logger.warning('CORS_ORIGINS is not set. This will allow any origin. Set CORS_ORIGINS env var to restrict allowed origins.')
         allowed_origins = ['*']
@@ -127,7 +135,8 @@ def create_app(config_class=Config):
         if '*' in allowed_origins:
             app.logger.warning("CORS_ORIGINS contains '*', which is permissive. Consider specifying explicit origin(s) for production.")
 
-    CORS(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
+    # Apply CORS only to API routes to avoid interfering with static/react routes
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
     
     socketio.init_app(app, cors_allowed_origins=app.config.get('CORS_ORIGINS') or ['*'])
 
@@ -157,11 +166,54 @@ def create_app(config_class=Config):
     # Support requests that target /auth/* (some frontends call /auth/* without the /api prefix)
     @app.route('/auth', methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'])
     def auth_root():
+        # Handle preflight locally to avoid redirecting OPTIONS (browsers disallow
+        # redirects for preflight requests). For non-OPTIONS, redirect to API route.
+        if request.method == 'OPTIONS':
+            origin = request.headers.get('Origin', '')
+            allowed = app.config.get('CORS_ORIGINS') or []
+            # If configured as a string, normalize here too
+            if isinstance(allowed, str):
+                allowed = [s.strip() for s in allowed.split(',') if s.strip()]
+
+            resp = app.make_response(('', 204))
+            # If not configured or wildcard, allow any origin
+            if not allowed or '*' in allowed:
+                resp.headers['Access-Control-Allow-Origin'] = '*' if not allowed or '*' in allowed else origin
+            else:
+                if origin in allowed:
+                    resp.headers['Access-Control-Allow-Origin'] = origin
+                    resp.headers['Vary'] = 'Origin'
+
+            resp.headers['Access-Control-Allow-Credentials'] = 'true'
+            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return resp
         return app.redirect('/api/auth', code=307)
 
     @app.route('/auth/<path:subpath>', methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'])
     def auth_proxy(subpath):
-        # Forward to the API-prefixed auth routes preserving method
+        # Handle preflight locally to avoid redirecting OPTIONS
+        if request.method == 'OPTIONS':
+            origin = request.headers.get('Origin', '')
+            allowed = app.config.get('CORS_ORIGINS') or []
+            if isinstance(allowed, str):
+                allowed = [s.strip() for s in allowed.split(',') if s.strip()]
+
+            resp = app.make_response(('', 204))
+            if not allowed or '*' in allowed:
+                resp.headers['Access-Control-Allow-Origin'] = '*' if not allowed or '*' in allowed else origin
+            else:
+                if origin in allowed:
+                    resp.headers['Access-Control-Allow-Origin'] = origin
+                    resp.headers['Vary'] = 'Origin'
+
+            resp.headers['Access-Control-Allow-Credentials'] = 'true'
+            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return resp
+
+        # For non-OPTIONS, forward to the API-prefixed auth routes preserving method
+        # Use a 307 to preserve the HTTP method, but this will not be used for OPTIONS
         return app.redirect(f'/api/auth/{subpath}', code=307)
     from resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
@@ -269,7 +321,7 @@ def create_app(config_class=Config):
         return make_response_data(success=False, message="Forbidden.", errors=[str(error)], status_code=403)
 
     # Explicit preflight handler for any /api/* route
-    @app.route('/<path:subpath>', methods=['OPTIONS'])
+    @app.route('/api/<path:subpath>', methods=['OPTIONS'])
     def cors_preflight(subpath):
         origin = request.headers.get('Origin', '')
         allowed = app.config.get('CORS_ORIGINS') or []
