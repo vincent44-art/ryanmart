@@ -114,30 +114,22 @@ def create_app(config_class=Config):
 
     migrate.init_app(app, db)
     
-    # Initialize CORS for REST API
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": [
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "http://localhost:3001",
-                "http://127.0.0.1:3001",
-                "https://ryanmart-frontend.onrender.com",
-                "https://ryanmart.store"
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"]
-        }
-    }, supports_credentials=True)
+    # Initialize CORS using configured origins from Config (CORS_ORIGINS).
+    # Enforce only the origins provided via the environment variable. If the
+    # variable is missing or contains '*' we log a warning; the latter is
+    # considered permissive but still honored.
+    configured = app.config.get('CORS_ORIGINS')
+    if not configured:
+        app.logger.warning('CORS_ORIGINS is not set. This will allow any origin. Set CORS_ORIGINS env var to restrict allowed origins.')
+        allowed_origins = ['*']
+    else:
+        allowed_origins = configured
+        if '*' in allowed_origins:
+            app.logger.warning("CORS_ORIGINS contains '*', which is permissive. Consider specifying explicit origin(s) for production.")
+
+    CORS(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
     
-    socketio.init_app(app, cors_allowed_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "https://ryanmart-frontend.onrender.com",
-        "https://ryanmart.store"
-    ])
+    socketio.init_app(app, cors_allowed_origins=app.config.get('CORS_ORIGINS') or ['*'])
 
     # JWT error handlers
     @jwt.expired_token_loader
@@ -162,6 +154,15 @@ def create_app(config_class=Config):
     app.register_blueprint(dashboard_bp)
     from resources.drivers import drivers_bp
     app.register_blueprint(drivers_bp)
+    # Support requests that target /auth/* (some frontends call /auth/* without the /api prefix)
+    @app.route('/auth', methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'])
+    def auth_root():
+        return app.redirect('/api/auth', code=307)
+
+    @app.route('/auth/<path:subpath>', methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'])
+    def auth_proxy(subpath):
+        # Forward to the API-prefixed auth routes preserving method
+        return app.redirect(f'/api/auth/{subpath}', code=307)
     from resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
     from resources.expenses import CarExpensesResource
@@ -268,45 +269,61 @@ def create_app(config_class=Config):
         return make_response_data(success=False, message="Forbidden.", errors=[str(error)], status_code=403)
 
     # Explicit preflight handler for any /api/* route
-    @app.route('/api/<path:subpath>', methods=['OPTIONS'])
+    @app.route('/<path:subpath>', methods=['OPTIONS'])
     def cors_preflight(subpath):
         origin = request.headers.get('Origin', '')
-        allowed_origins = {
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://localhost:3001",
-            "http://127.0.0.1:3001",
-            "https://ryanmart-frontend.onrender.com",
-            "https://ryanmart.store",
-        }
-        if origin in allowed_origins:
-            response = ('', 204)
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            return response
+        allowed = app.config.get('CORS_ORIGINS') or []
+        # If no origins configured, treat as permissive (warning already logged above).
+        if not allowed:
+            resp = app.make_response(('', 204))
+            resp.headers['Access-Control-Allow-Origin'] = '*'
+            resp.headers['Access-Control-Allow-Credentials'] = 'true'
+            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return resp
+
+        # If '*' present explicitly, allow any origin
+        if '*' in allowed:
+            resp = app.make_response(('', 204))
+            resp.headers['Access-Control-Allow-Origin'] = '*'
+            resp.headers['Access-Control-Allow-Credentials'] = 'true'
+            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return resp
+
+        # Strict-check: only allow configured origins
+        if origin in allowed:
+            resp = app.make_response(('', 204))
+            resp.headers['Access-Control-Allow-Origin'] = origin
+            resp.headers['Access-Control-Allow-Credentials'] = 'true'
+            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            return resp
+
+        # Not allowed — return without CORS headers (browser will block)
         return ('', 204)
 
     # Force credentials-enabled CORS headers for API routes
     @app.after_request
     def add_cors_headers(response):
         origin = request.headers.get('Origin')
-        allowed_origins = {
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://localhost:3001",
-            "http://127.0.0.1:3001",
-            "https://ryanmart-frontend.onrender.com",
-            "https://ryanmart.store",
-        }
-        # Only add CORS headers for API routes and allowed origins
-        if request.path.startswith('/api') and origin in allowed_origins:
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Vary'] = 'Origin'
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        allowed = set(app.config.get('CORS_ORIGINS') or ['*'])
+        # Only add CORS headers for API routes
+        if request.path.startswith('/api'):
+            allowed = app.config.get('CORS_ORIGINS') or []
+            # If not configured, keep permissive behavior for compatibility
+            if not allowed or '*' in allowed:
+                response.headers['Access-Control-Allow-Origin'] = '*' if not allowed else '*'
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+                response.headers['Access-Control-Allow-Credentials'] = 'true'
+            else:
+                if origin in allowed:
+                    response.headers['Access-Control-Allow-Origin'] = origin
+                    response.headers['Vary'] = 'Origin'
+                    response.headers['Access-Control-Allow-Credentials'] = 'true'
+                    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+                    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
         return response
 
     # Ensure DB schema exists and seed default admin if missing
