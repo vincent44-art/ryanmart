@@ -16,31 +16,40 @@ import re
 
 class LoginResource(Resource):
     def post(self):
-        # Accept both JSON and form data
-        if request.is_json:
-            data = request.get_json()
-            email = data.get('email')
-            password = data.get('password')
-        else:
-            parser = reqparse.RequestParser()
-            parser.add_argument('email', type=str, required=True)
-            parser.add_argument('password', type=str, required=True)
-            args = parser.parse_args()
-            email = args['email']
-            password = args['password']
+        try:
+            # Accept both JSON and form data
+            if request.is_json:
+                data = request.get_json()
+                email = data.get('email')
+                password = data.get('password')
+            else:
+                parser = reqparse.RequestParser()
+                parser.add_argument('email', type=str, required=True)
+                parser.add_argument('password', type=str, required=True)
+                args = parser.parse_args()
+                email = args['email']
+                password = args['password']
 
-        user = User.query.filter_by(email=email).first()
-        if user and user.check_password(password):
-            access_token = create_access_token(identity=user.id, additional_claims={"role": user.role.value})
-            refresh_token = create_refresh_token(identity=user.id)
-            log_login_success(user)
-            return make_response_data(data={
-                'access_token': access_token,
-                'refresh_token': refresh_token,
-                'user': user.to_dict()
-            }, message="Login successful")
-        log_login_failure(email)
-        return make_response_data(success=False, message="Invalid credentials", status_code=401)
+            user = User.query.filter_by(email=email).first()
+            if user and user.check_password(password):
+                # Avoid AttributeError if role is None or not an Enum
+                role_val = getattr(user.role, 'value', None) if user.role is not None else None
+                access_token = create_access_token(identity=user.id, additional_claims={"role": role_val})
+                refresh_token = create_refresh_token(identity=user.id)
+                log_login_success(user)
+                return make_response_data(data={
+                    'access_token': access_token,
+                    'refresh_token': refresh_token,
+                    'user': user.to_dict()
+                }, message="Login successful")
+
+            log_login_failure(email)
+            return make_response_data(success=False, message="Invalid credentials", status_code=401)
+        except Exception as e:
+            # Log full exception server-side for diagnostics and return a safe error
+            current_app.logger.exception("Login error: %s", e)
+            # Avoid leaking internals; return generic message
+            return make_response_data(success=False, message="Internal server error", status_code=500)
 
 class MeResource(Resource):
     @jwt_required()
