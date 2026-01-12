@@ -34,7 +34,9 @@ const ChangePassword = () => {
     }
 
     try {
-      const response = await api.post('/auth/change-password', {
+      const base = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/$/, '');
+      const url = base ? `${base}/api/auth/change-password` : '/api/auth/change-password';
+      const response = await api.post(url, {
         current_password: currentPassword,
         new_password: newPassword,
         confirm_password: confirmPassword

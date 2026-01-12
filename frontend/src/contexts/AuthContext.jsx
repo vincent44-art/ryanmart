@@ -34,8 +34,10 @@ export const AuthProvider = ({ children }) => {
 
 const verifyAuth = async () => {
   try {
-    // Use leading slash so axios combines it correctly with baseURL
-    const response = await api.get('/auth/me');
+    // Call the canonical API path explicitly to avoid accidental redirects
+    const base = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/$/, '');
+    const url = base ? `${base}/api/auth/me` : '/api/auth/me';
+    const response = await api.get(url);
     setUser(response.data.data);
   } catch (error) {
     console.error("Auth check failed:", error.response?.data || error.message);
@@ -47,10 +49,12 @@ const verifyAuth = async () => {
 };
 
 
-const login = async (email, password) => {
+  const login = async (email, password) => {
   try {
-  // Use leading slash so axios combines it correctly with baseURL
-  const response = await api.post('/auth/login', { email, password });
+  // Call the canonical API path explicitly to avoid accidental redirects
+  const base = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/$/, '');
+  const url = base ? `${base}/api/auth/login` : '/api/auth/login';
+  const response = await api.post(url, { email, password });
     const resData = response?.data?.data || response?.data;
 
     if (!resData || !resData.access_token || !resData.user) {

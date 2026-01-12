@@ -70,7 +70,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await api.post('/auth/login', { email, password });
+  // Call the canonical API path explicitly so the request targets /api/auth/login
+  const base = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/$/, '');
+  const url = base ? `${base}/api/auth/login` : '/api/auth/login';
+  const response = await api.post(url, { email, password });
 
       if (response.data.success) {
         const user = response.data.data.user;

@@ -136,6 +136,8 @@ def create_app(config_class=Config):
             app.logger.warning("CORS_ORIGINS contains '*', which is permissive. Consider specifying explicit origin(s) for production.")
 
     # Apply CORS only to API routes to avoid interfering with static/react routes
+    # Persist the normalized list into app.config so handlers can reference it
+    app.config['CORS_ORIGINS'] = allowed_origins
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
     
     socketio.init_app(app, cors_allowed_origins=app.config.get('CORS_ORIGINS') or ['*'])
@@ -163,58 +165,9 @@ def create_app(config_class=Config):
     app.register_blueprint(dashboard_bp)
     from resources.drivers import drivers_bp
     app.register_blueprint(drivers_bp)
-    # Support requests that target /auth/* (some frontends call /auth/* without the /api prefix)
-    @app.route('/auth', methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'])
-    def auth_root():
-        # Handle preflight locally to avoid redirecting OPTIONS (browsers disallow
-        # redirects for preflight requests). For non-OPTIONS, redirect to API route.
-        if request.method == 'OPTIONS':
-            origin = request.headers.get('Origin', '')
-            allowed = app.config.get('CORS_ORIGINS') or []
-            # If configured as a string, normalize here too
-            if isinstance(allowed, str):
-                allowed = [s.strip() for s in allowed.split(',') if s.strip()]
-
-            resp = app.make_response(('', 204))
-            # If not configured or wildcard, allow any origin
-            if not allowed or '*' in allowed:
-                resp.headers['Access-Control-Allow-Origin'] = '*' if not allowed or '*' in allowed else origin
-            else:
-                if origin in allowed:
-                    resp.headers['Access-Control-Allow-Origin'] = origin
-                    resp.headers['Vary'] = 'Origin'
-
-            resp.headers['Access-Control-Allow-Credentials'] = 'true'
-            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            return resp
-        return app.redirect('/api/auth', code=307)
-
-    @app.route('/auth/<path:subpath>', methods=['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'])
-    def auth_proxy(subpath):
-        # Handle preflight locally to avoid redirecting OPTIONS
-        if request.method == 'OPTIONS':
-            origin = request.headers.get('Origin', '')
-            allowed = app.config.get('CORS_ORIGINS') or []
-            if isinstance(allowed, str):
-                allowed = [s.strip() for s in allowed.split(',') if s.strip()]
-
-            resp = app.make_response(('', 204))
-            if not allowed or '*' in allowed:
-                resp.headers['Access-Control-Allow-Origin'] = '*' if not allowed or '*' in allowed else origin
-            else:
-                if origin in allowed:
-                    resp.headers['Access-Control-Allow-Origin'] = origin
-                    resp.headers['Vary'] = 'Origin'
-
-            resp.headers['Access-Control-Allow-Credentials'] = 'true'
-            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            return resp
-
-        # For non-OPTIONS, forward to the API-prefixed auth routes preserving method
-        # Use a 307 to preserve the HTTP method, but this will not be used for OPTIONS
-        return app.redirect(f'/api/auth/{subpath}', code=307)
+    # NOTE: removed /auth and /auth/<path> redirect routes to avoid
+    # accidental 3xx responses during CORS preflight. Only the canonical
+    # /api/auth/* routes are served below (see api.add_resource entries).
     from resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
     from resources.expenses import CarExpensesResource
