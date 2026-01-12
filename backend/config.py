@@ -16,12 +16,32 @@ class Config:
     if _db_url:
         # Normalize common Heroku/Render-style URLs that start with postgres://
         # SQLAlchemy expects postgresql:// and we want to use the pg8000 driver
-        # (pure-Python) to avoid binary wheel ABI issues on some platforms.
-        if _db_url.startswith('postgres://'):
-            _db_url = _db_url.replace('postgres://', 'postgresql+pg8000://', 1)
-        elif _db_url.startswith('postgresql://') and '+pg' not in _db_url:
-            _db_url = _db_url.replace('postgresql://', 'postgresql+pg8000://', 1)
-        SQLALCHEMY_DATABASE_URI = _db_url
+        # (pure-Python). Also ensure external hosts use SSL by default if not
+        # already specified (Render Postgres requires SSL for external connections).
+        from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+
+        parsed = urlparse(_db_url)
+        scheme = parsed.scheme
+        netloc = parsed.netloc
+        path = parsed.path or ''
+        query = parsed.query or ''
+
+        # Replace scheme to use SQLAlchemy dialect + driver
+        if scheme in ('postgres', 'postgresql'):
+            scheme = 'postgresql+pg8000'
+
+        # If the host looks external (contains a dot) and sslmode not set, add sslmode=require
+        qs = parse_qs(query)
+        host = parsed.hostname or ''
+        if 'sslmode' not in qs:
+            # treat hosts without dots as internal (Render private hostnames are typically without dots)
+            if host and ('.' in host):
+                qs['sslmode'] = ['require']
+
+        new_query = urlencode(qs, doseq=True)
+
+        rebuilt = urlunparse((scheme, netloc, path, parsed.params, new_query, parsed.fragment))
+        SQLALCHEMY_DATABASE_URI = rebuilt
     else:
         # Local development fallback
         SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'

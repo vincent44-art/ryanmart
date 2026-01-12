@@ -15,7 +15,9 @@ except Exception:
 import os
 import sys
 import logging
+import time
 from flask import Flask, jsonify, send_from_directory, request, current_app
+from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -61,29 +63,64 @@ socketio = SocketIO(cors_allowed_origins=[
 
 def ensure_database_initialized(app):
     with app.app_context():
-        try:
-            # Create all tables if they do not exist
-            db.create_all()
+        max_retries = 8
+        delay = 1.0
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Try a lightweight connection check first
+                app.logger.debug(f"DB init attempt {attempt}/{max_retries}: testing connection...")
+                db.session.execute('SELECT 1')
 
-            # Seed a default CEO/admin user if missing
-            default_email = os.environ.get("DEFAULT_ADMIN_EMAIL", "ceo@ryanmart.com")
-            default_password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "ChangeMe123!")
+                # Create all tables if they do not exist
+                db.create_all()
 
-            existing = User.query.filter_by(email=default_email).first()
-            if not existing:
-                role_val = getattr(UserRole, "CEO", None) or getattr(UserRole, "ADMIN", None) or "CEO"
-                user = User(
-                    email=default_email,
-                    name="CEO",
-                    role=role_val,
-                    password_hash=generate_password_hash(default_password),
-                    is_active=True,
-                )
-                db.session.add(user)
-                db.session.commit()
-                app.logger.info(f"Seeded default admin user: {default_email}")
-        except Exception as e:
-            app.logger.error(f"Database initialization error: {e}")
+                # Seed a default CEO/admin user if missing
+                default_email = os.environ.get("DEFAULT_ADMIN_EMAIL", "ceo@ryanmart.com")
+                default_password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "ChangeMe123!")
+
+                existing = User.query.filter_by(email=default_email).first()
+                if not existing:
+                    role_val = getattr(UserRole, "CEO", None) or getattr(UserRole, "ADMIN", None) or "CEO"
+                    user = User(
+                        email=default_email,
+                        name="CEO",
+                        role=role_val,
+                        password_hash=generate_password_hash(default_password),
+                        is_active=True,
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                    app.logger.info(f"Seeded default admin user: {default_email}")
+
+                app.logger.info("Database initialization completed")
+                break
+            except OperationalError as oe:
+                app.logger.warning(f"Database OperationalError on attempt {attempt}: {oe}")
+                if attempt == max_retries:
+                    app.logger.exception("Max retries reached - database not available")
+                    break
+                time.sleep(delay)
+                delay = min(delay * 2, 30)
+            except Exception as e:
+                # Handle network/interface errors from pg8000 or other drivers
+                try:
+                    import pg8000
+                    pg_exc = pg8000.exceptions.InterfaceError
+                except Exception:
+                    pg_exc = None
+
+                if pg_exc and isinstance(e, pg_exc):
+                    app.logger.warning(f"pg8000 InterfaceError on attempt {attempt}: {e}")
+                    if attempt == max_retries:
+                        app.logger.exception("Max retries reached - pg8000 interface error")
+                        break
+                    time.sleep(delay)
+                    delay = min(delay * 2, 30)
+                    continue
+
+                # Unexpected exception: log and break
+                app.logger.exception(f"Database initialization error: {e}")
+                break
 
 
 def create_app(config_class=Config):
