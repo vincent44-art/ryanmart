@@ -15,7 +15,8 @@ except Exception:
 import os
 import sys
 import logging
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, send_from_directory, request, current_app
+from sqlalchemy import text
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_socketio import SocketIO
@@ -233,6 +234,17 @@ def create_app(config_class=Config):
     @app.route('/api/health')
     def health_check():
         return jsonify({'success': True, 'status': 'healthy', 'message': 'Service is running', 'version': '1.0.0'})
+
+    # Debug: quick DB connectivity test (remove in production if you prefer)
+    @app.route('/api/_debug/db')
+    def debug_db():
+        try:
+            # simple scalar query to verify DB connection
+            res = db.session.execute(text('SELECT 1')).scalar()
+            return jsonify({'ok': True, 'db_response': res})
+        except Exception as e:
+            current_app.logger.exception('DB connectivity test failed')
+            return jsonify({'ok': False, 'error': str(e)}), 500
 
     # CORS Test Route
     @app.route('/api/cors-test')
