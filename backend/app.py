@@ -21,7 +21,6 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -50,15 +49,7 @@ load_dotenv()
 # Path to your React build folder
 FRONTEND_BUILD_DIR = os.path.join(os.getcwd(), 'frontend', 'build')
 
-# Initialize SocketIO at module level BEFORE create_app() to avoid NameError
-socketio = SocketIO(cors_allowed_origins=[
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-    "https://ryanmart-frontend.onrender.com",
-    "https://ryanmart.store"
-])
+# Flask-SocketIO removed for this deployment; real-time features are disabled.
 
 
 def ensure_database_initialized(app):
@@ -178,7 +169,7 @@ def create_app(config_class=Config):
     app.config['CORS_ORIGINS'] = allowed_origins
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
     
-    socketio.init_app(app, cors_allowed_origins=app.config.get('CORS_ORIGINS') or ['*'])
+    # SocketIO intentionally not initialized in this deployment.
 
     # JWT error handlers
     @jwt.expired_token_loader
@@ -391,5 +382,6 @@ app = create_app()
 
 # Local Development
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+    # Run the Flask development server when executed directly.
+    app.run(host='0.0.0.0', port=5000, debug=False)
 
