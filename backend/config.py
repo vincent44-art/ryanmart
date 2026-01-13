@@ -15,8 +15,8 @@ class Config:
     _db_url = os.environ.get('DATABASE_URL')
     if _db_url:
         # Normalize common Heroku/Render-style URLs that start with postgres://
-        # SQLAlchemy expects postgresql:// and we want to use the pg8000 driver
-        # (pure-Python). Also ensure external hosts use SSL by default if not
+        # SQLAlchemy expects postgresql:// and we want to use the psycopg2-binary driver
+        # (precompiled C-extension). Also ensure external hosts use SSL by default if not
         # already specified (Render Postgres requires SSL for external connections).
         from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
@@ -28,7 +28,7 @@ class Config:
 
         # Replace scheme to use SQLAlchemy dialect + driver
         if scheme in ('postgres', 'postgresql'):
-            scheme = 'postgresql+pg8000'
+            scheme = 'postgresql+psycopg2'
 
         # If the host looks external (contains a dot) and sslmode not set, add sslmode=require
         qs = parse_qs(query)
