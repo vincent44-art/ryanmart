@@ -18,24 +18,18 @@ itsdangerous==2.2.0
 # CORS
 Flask-Cors==3.0.10
 
-# SocketIO / Realtime
-Flask-SocketIO==5.3.6
-eventlet==0.39.1
-python-engineio==4.12.2
-python-socketio==5.13.0
-bidict==0.23.1
-simple-websocket==1.1.0
+# SocketIO / Realtime (removed for this deployment — not required)
 
+# greenlet kept for SQLAlchemy compatibility
 greenlet==3.1.1
 
 # Config
 python-dotenv==1.0.0
 
 # Database drivers
-# Use psycopg2-binary to avoid C-extension ABI issues during builds on
-# managed platforms. psycopg2-binary works with SQLAlchemy via the
-# postgresql+psycopg2:// dialect.
-psycopg2-binary==2.9.9
+# Use modern psycopg (psycopg3) binary wheels which are compatible with
+# newer Python runtimes. SQLAlchemy dialect: postgresql+psycopg://
+psycopg[binary]==3.3.4
 
 # PDF generation
 reportlab==4.0.7
