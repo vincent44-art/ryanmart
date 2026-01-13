@@ -29,7 +29,8 @@ python-dotenv==1.0.0
 # Database drivers
 # Use modern psycopg (psycopg3) binary wheels which are compatible with
 # newer Python runtimes. SQLAlchemy dialect: postgresql+psycopg://
-psycopg[binary]==3.3.4
+# Pin to a PyPI-available release
+psycopg[binary]==3.3.2
 
 # PDF generation
 reportlab==4.0.7
