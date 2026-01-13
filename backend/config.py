@@ -26,10 +26,11 @@ class Config:
         path = parsed.path or ''
         query = parsed.query or ''
 
-        # Replace scheme to use SQLAlchemy dialect + driver.
-        # We're using psycopg (psycopg3) in requirements, so prefer the
-        # 'postgresql+psycopg' SQLAlchemy dialect to avoid importing psycopg2.
-        if scheme in ('postgres', 'postgresql'):
+        # Normalize any postgres scheme to use the psycopg3 SQLAlchemy dialect.
+        # Examples handled: 'postgres://', 'postgresql://', 'postgresql+psycopg2://'
+        # Resulting scheme will be 'postgresql+psycopg' so SQLAlchemy imports
+        # the `psycopg` (psycopg3) DBAPI rather than `psycopg2`.
+        if scheme and scheme.startswith('postgres'):
             scheme = 'postgresql+psycopg'
 
         # If the host looks external (contains a dot) and sslmode not set, add sslmode=require
