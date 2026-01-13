@@ -26,9 +26,11 @@ class Config:
         path = parsed.path or ''
         query = parsed.query or ''
 
-        # Replace scheme to use SQLAlchemy dialect + driver
+        # Replace scheme to use SQLAlchemy dialect + driver.
+        # We're using psycopg (psycopg3) in requirements, so prefer the
+        # 'postgresql+psycopg' SQLAlchemy dialect to avoid importing psycopg2.
         if scheme in ('postgres', 'postgresql'):
-            scheme = 'postgresql+psycopg2'
+            scheme = 'postgresql+psycopg'
 
         # If the host looks external (contains a dot) and sslmode not set, add sslmode=require
         qs = parse_qs(query)
