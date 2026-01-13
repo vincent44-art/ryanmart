@@ -1,9 +1,27 @@
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse, urlunparse, parse_qs, urlencode
+import sqlalchemy as _sa
 
 load_dotenv()
+
+
+def sanitize_url(dsn: str) -> str:
+    """Return a redacted DB URL safe for logs (password replaced)."""
+    if not dsn:
+        return dsn
+    parsed = urlparse(dsn)
+    netloc = parsed.netloc
+    if "@" in netloc:
+        userinfo, hostpart = netloc.split("@", 1)
+        if ":" in userinfo:
+            user, _ = userinfo.split(":", 1)
+            netloc = f"{user}:<redacted>@{hostpart}"
+        else:
+            netloc = f"{userinfo}@{hostpart}"
+    safe = parsed._replace(netloc=netloc)
+    return urlunparse(safe)
 
 
 class Config:
@@ -14,24 +32,16 @@ class Config:
     # is not set we fall back to a local sqlite file for easy local development.
     _db_url = os.environ.get('DATABASE_URL')
     if _db_url:
-        # Normalize common Heroku/Render-style URLs that start with postgres://
-        # SQLAlchemy expects postgresql:// and we want to use the psycopg2-binary driver
-        # (precompiled C-extension). Also ensure external hosts use SSL by default if not
-        # already specified (Render Postgres requires SSL for external connections).
-        from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
-
         parsed = urlparse(_db_url)
         scheme = parsed.scheme
         netloc = parsed.netloc
         path = parsed.path or ''
         query = parsed.query or ''
 
-        # Normalize any postgres-style scheme to use the psycopg3 SQLAlchemy dialect.
-        # Examples handled: 'postgres://', 'postgresql://', 'postgresql+psycopg2://'
-        # Resulting scheme will be 'postgresql+psycopg' so SQLAlchemy imports
-        # the `psycopg` (psycopg3) DBAPI instead of `psycopg2`.
+        # Normalize any postgres-style scheme to use the psycopg2 SQLAlchemy dialect.
+        # Handles: 'postgres://', 'postgresql://', 'postgresql+psycopg2://', etc.
         if scheme and scheme.startswith('postgres'):
-            scheme = 'postgresql+psycopg'
+            scheme = 'postgresql+psycopg2'
 
         # If the host looks external (contains a dot) and sslmode not set, add sslmode=require
         qs = parse_qs(query)
@@ -48,11 +58,10 @@ class Config:
     else:
         # Local development fallback
         SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-string'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
-    # JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
-    # JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
     # Configure CORS origins. In production set CORS_ORIGINS as a comma-separated
     # environment variable, e.g. CORS_ORIGINS=https://app.example.com,https://admin.example.com
@@ -86,3 +95,15 @@ class Config:
         }
     }
 
+
+# Print a sanitized database URI and SQLAlchemy/psycopg info at import time
+try:
+    _safe = sanitize_url(Config.SQLALCHEMY_DATABASE_URI)
+except Exception:
+    _safe = None
+print("[startup] SQLALCHEMY_DATABASE_URI:", _safe)
+try:
+    print("[startup] SQLAlchemy:", _sa.__version__)
+except Exception:
+    pass
+ 
