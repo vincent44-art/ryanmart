@@ -121,7 +121,9 @@ def create_app(config_class=Config):
     
     app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/')
     app.config.from_object(config_class)
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    # Use the normalized value from Config (don't override with raw env var)
+    # Config ensures the scheme/dialect and sslmode are set for production.
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.config.get("SQLALCHEMY_DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config['DEBUG'] = False
     # Avoid Werkzeug automatic redirects for trailing-slash mismatches.
