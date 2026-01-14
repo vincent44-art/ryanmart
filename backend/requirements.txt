@@ -1,5 +1,4 @@
-# Clean Python dependencies for deployment on Render (PyPI only)
-# Backend web framework and extensions
+# Backend web framework
 Flask==2.2.3
 Werkzeug==2.2.3
 Flask-SQLAlchemy==3.0.3
@@ -18,28 +17,25 @@ itsdangerous==2.2.0
 # CORS
 Flask-Cors==3.0.10
 
-# SocketIO / Realtime (removed for this deployment — not required)
-
-# greenlet kept for SQLAlchemy compatibility
+# greenlet for SQLAlchemy
 greenlet==3.1.1
 
 # Config
 python-dotenv==1.0.0
 
-# Database drivers
-# Use psycopg2-binary for stable PostgreSQL connectivity on Render
+# Database driver (psycopg2-binary for PostgreSQL)
 psycopg2-binary==2.9.9
 
 # PDF generation
 reportlab==4.0.7
 
-# HTTP
+# HTTP requests
 requests==2.31.0
 
-# Deployment
+# Deployment server
 gunicorn==21.2.0
 
-# Optional crypto/bcrypt (kept for compatibility if referenced)
+# Optional crypto/bcrypt
 Flask-Bcrypt==1.0.1
 bcrypt==3.1.7
 
