@@ -93,22 +93,7 @@ def ensure_database_initialized(app):
                 time.sleep(delay)
                 delay = min(delay * 2, 30)
             except Exception as e:
-                # Handle network/interface errors from pg8000 or other drivers
-                try:
-                    import pg8000
-                    pg_exc = pg8000.exceptions.InterfaceError
-                except Exception:
-                    pg_exc = None
-
-                if pg_exc and isinstance(e, pg_exc):
-                    app.logger.warning(f"pg8000 InterfaceError on attempt {attempt}: {e}")
-                    if attempt == max_retries:
-                        app.logger.exception("Max retries reached - pg8000 interface error")
-                        break
-                    time.sleep(delay)
-                    delay = min(delay * 2, 30)
-                    continue
-
+                # Handle network/interface errors from other drivers
                 # Unexpected exception: log and break
                 app.logger.exception(f"Database initialization error: {e}")
                 break

@@ -27,8 +27,7 @@ def sanitize_url(dsn: str) -> str:
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
 
-    # Read DATABASE_URL from environment. If using a pure-Python driver like
-    # pg8000 we ensure SQLAlchemy uses the correct driver name. If DATABASE_URL
+    # Read DATABASE_URL from environment. If DATABASE_URL
     # is not set we fall back to a local sqlite file for easy local development.
     _db_url = os.environ.get('DATABASE_URL')
     if _db_url:
@@ -60,6 +59,13 @@ class Config:
         SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+        "connect_args": {
+            "connect_timeout": 10
+        }
+    }
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-string'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
 
