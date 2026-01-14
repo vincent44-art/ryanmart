@@ -121,6 +121,8 @@ def create_app(config_class=Config):
     
     app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/')
     app.config.from_object(config_class)
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config['DEBUG'] = False
     # Avoid Werkzeug automatic redirects for trailing-slash mismatches.
     # This prevents a request to '/auth/login' being redirected to
