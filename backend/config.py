@@ -37,11 +37,11 @@ class Config:
         path = parsed.path or ''
         query = parsed.query or ''
 
-        # Normalize any postgres-style scheme to use the psycopg3 SQLAlchemy dialect.
+        # Normalize any postgres-style scheme to use the psycopg2 SQLAlchemy dialect.
         # Handles: 'postgres://', 'postgresql://', 'postgresql+psycopg2://', 'postgresql+psycopg://', etc.
-        # Using psycopg3 for Python 3.13 compatibility
+        # Using psycopg2 for SQLAlchemy 1.4.x compatibility
         if scheme and scheme.startswith('postgres'):
-            scheme = 'postgresql+psycopg'
+            scheme = 'postgresql+psycopg2'
 
         # If the host looks external (contains a dot) and sslmode not set, add sslmode=require
         qs = parse_qs(query)

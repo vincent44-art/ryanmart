@@ -23,8 +23,8 @@ greenlet==3.1.1
 # Config
 python-dotenv==1.0.0
 
-# Database driver (psycopg3 for PostgreSQL - compatible with Python 3.13)
-psycopg[binary]==3.2.3
+# Database driver (psycopg2 for PostgreSQL - compatible with SQLAlchemy 1.4.x)
+psycopg2-binary==2.9.10
 
 # PDF generation
 reportlab==4.0.7
