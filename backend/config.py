@@ -27,7 +27,11 @@ def sanitize_url(dsn: str) -> str:
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    # Get database URL and strip "DATABASE_URL=" prefix if present (some platforms add this)
+    _db_url = os.environ.get("DATABASE_URL", "")
+    if _db_url.startswith("DATABASE_URL="):
+        _db_url = _db_url[len("DATABASE_URL="):]
+    SQLALCHEMY_DATABASE_URI = _db_url
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
