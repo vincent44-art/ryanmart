@@ -23,8 +23,8 @@ greenlet==3.1.1
 # Config
 python-dotenv==1.0.0
 
-# Database driver (psycopg for PostgreSQL)
-psycopg==3.3.2
+# Database driver (psycopg2 for PostgreSQL - compatible with SQLAlchemy 1.4.x)
+psycopg2-binary==2.9.9
 
 # PDF generation
 reportlab==4.0.7
@@ -42,3 +42,18 @@ bcrypt==3.1.7
 # Template rendering
 Jinja2==3.1.6
 click==8.1.8
+
+# EVENTLET MONKEY PATCHING - MUST BE FIRST!
+try:
+    # Import eventlet if available, but do NOT call monkey_patch() here.
+    # Calling eventlet.monkey_patch() at import time can fail when the
+    # Flask CLI / Werkzeug have already created thread/request-local
+    # objects. Instead, we only detect availability and let Flask-SocketIO
+    # choose the async mode. If you need full monkey-patching for a
+    # deployment, do it as the very first action before any imports.
+    import eventlet
+    _EVENTLET_AVAILABLE = True
+except Exception:
+    eventlet = None
+    _EVENTLET_AVAILABLE = False
+
