@@ -242,7 +242,7 @@ import axios from 'axios';
 
 
 // Default to the deployed backend on Render if no env var is set.
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-backend.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-bacckend.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -27,37 +27,7 @@ def sanitize_url(dsn: str) -> str:
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
 
-    # Read DATABASE_URL from environment. If DATABASE_URL
-    # is not set we fall back to a local sqlite file for easy local development.
-    _db_url = os.environ.get('DATABASE_URL')
-    if _db_url:
-        parsed = urlparse(_db_url)
-        scheme = parsed.scheme
-        netloc = parsed.netloc
-        path = parsed.path or ''
-        query = parsed.query or ''
-
-        # Normalize any postgres-style scheme to use the psycopg2 SQLAlchemy dialect.
-        # Handles: 'postgres://', 'postgresql://', 'postgresql+psycopg2://', 'postgresql+psycopg://', etc.
-        # Using psycopg2 for SQLAlchemy 1.4.x compatibility
-        if scheme and scheme.startswith('postgres'):
-            scheme = 'postgresql+psycopg2'
-
-        # If the host looks external (contains a dot) and sslmode not set, add sslmode=require
-        qs = parse_qs(query)
-        host = parsed.hostname or ''
-        if 'sslmode' not in qs:
-            # treat hosts without dots as internal (Render private hostnames are typically without dots)
-            if host and ('.' in host):
-                qs['sslmode'] = ['require']
-
-        new_query = urlencode(qs, doseq=True)
-
-        rebuilt = urlunparse((scheme, netloc, path, parsed.params, new_query, parsed.fragment))
-        SQLALCHEMY_DATABASE_URI = rebuilt
-    else:
-        # Local development fallback
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {

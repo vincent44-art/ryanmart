@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
 const verifyAuth = async () => {
   try {
     // Call the canonical API path explicitly to avoid accidental redirects
-    const base = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/$/, '');
+    const base = (process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-bacckend.onrender.com').replace(/\/$/, '');
     const url = base ? `${base}/api/auth/me` : '/api/auth/me';
     const response = await api.get(url);
     setUser(response.data.data);
@@ -52,7 +52,7 @@ const verifyAuth = async () => {
   const login = async (email, password) => {
   try {
   // Call the canonical API path explicitly to avoid accidental redirects
-  const base = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/$/, '');
+  const base = (process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-bacckend.onrender.com').replace(/\/$/, '');
   const url = base ? `${base}/api/auth/login` : '/api/auth/login';
   const response = await api.post(url, { email, password });
     const resData = response?.data?.data || response?.data;
