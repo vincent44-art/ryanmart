@@ -37,18 +37,21 @@ class User(db.Model):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        # handle missing password_hash gracefully
+        if not self.password_hash:
+            return False
         return check_password_hash(self.password_hash, password)
 
     def to_dict(self):
         return {
             'id': self.id,
             'email': self.email,
-            'role': self.role.value,
+            'role': (self.role.value if self.role is not None else None),
             'name': self.name,
             'salary': self.salary,
             'is_paid': self.is_paid,
             'is_active': self.is_active,
             'is_first_login': self.is_first_login,
-            'created_at': self.created_at.isoformat(),
+            'created_at': (self.created_at.isoformat() if self.created_at is not None else None),
             'profile_image': self.profile_image
         }

@@ -1,5 +1,5 @@
 from flask_jwt_extended import get_jwt_identity
-from models.user import User
+from ..models.user import User
 
 def make_response_data(data=None, success=True, message="", errors=None, status_code=200):
     """Return plain dict + status_code (not Flask Response) to support Flask-RESTful."""

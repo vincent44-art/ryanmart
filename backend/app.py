@@ -60,7 +60,7 @@ def ensure_database_initialized(app):
             try:
                 # Try a lightweight connection check first
                 app.logger.debug(f"DB init attempt {attempt}/{max_retries}: testing connection...")
-                db.session.execute('SELECT 1')
+                db.session.execute(text('SELECT 1'))
 
                 # Create all tables if they do not exist
                 db.create_all()
