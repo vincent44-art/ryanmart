@@ -5,10 +5,10 @@ IT Monitoring utilities for automatic event logging and alerting.
 import uuid
 from datetime import datetime, timedelta
 from flask import request, current_app
-from ..models.it_event import ITEvent, EventType, Severity
-from ..models.it_alert import ITAlert, AlertSeverity
-from ..models.user import User
-from ..extensions import db
+from models.it_event import ITEvent, EventType, Severity
+from models.it_alert import ITAlert, AlertSeverity
+from models.user import User
+from extensions import db
 
 
 def log_event(event_type, severity=Severity.INFO, user_email=None, user_id=None,
