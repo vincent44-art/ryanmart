@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Trash2, Plus } from 'lucide-react';
 
 // Use relative API paths — backend determined by REACT_APP_API_BASE_URL env var
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-bacckend.onrender.com/api';
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-backend.onrender.com/api';
 const API_ENDPOINT = '/api/car-expenses';
 
 // ✅ Define API functions

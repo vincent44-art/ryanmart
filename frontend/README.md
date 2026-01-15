@@ -75,7 +75,7 @@ This frontend reads the backend base URL from the environment variable `REACT_AP
 
 For the DreamHost deployment in this project set `REACT_APP_API_BASE_URL` to the frontend-visible backend mount point, for example:
 
-REACT_APP_API_BASE_URL=https://ryanmart-bacckend.onrender.com
+REACT_APP_API_BASE_URL=https://ryanmart-backend.onrender.com
 
 Notes:
 - If your backend publicly serves API routes under `/backend/api`, you may instead set the env var to `https://ryanmart.store/backend/api` and then remove `/api` prefixes from call sites.

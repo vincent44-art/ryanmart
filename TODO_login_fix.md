@@ -1,23 +1,32 @@
-# Login Error Fix Plan
+# Login 404 Fix Plan
 
-## Issues Identified:
-1. SQLAlchemy 1.4+ compatibility - `db.session.execute('SELECT 1')` missing `text()` wrapper
-2. Relative import issues in `backend/resources/auth.py`
-3. Relative import issues in `backend/utils/it_monitor.py`
+## Problem
+- Frontend Static Site on Render returns 404 for `/login` route
+- SPA routing doesn't work because Render Static Sites don't process `_redirects`
 
-## Tasks:
+## Solution
+Serve React frontend through Flask backend (same origin)
 
-### Step 1: Fix SQLAlchemy text() wrapper in app.py
-- [ ] Change `db.session.execute('SELECT 1')` to `db.session.execute(text('SELECT 1'))`
+## Changes Required
 
-### Step 2: Fix relative imports in auth.py
-- [ ] Change `from models.user import User` to `from ..models.user import User`
-- [ ] Change `from utils.helpers import make_response_data, get_current_user` to `from ..utils.helpers import make_response_data, get_current_user`
-- [ ] Change `from utils.it_monitor import log_login_success, log_login_failure` to `from ..utils.it_monitor import log_login_success, log_login_failure`
+### 1. Frontend API Configuration
+**File:** `frontend/src/services/api.js`
+- Change API URL to use relative path (`/api`) since same origin
 
-### Step 3: Fix relative imports in it_monitor.py
-- [ ] Fix all relative imports to use `..` prefix
+### 2. Backend Configuration  
+**File:** `backend/app.py`
+- Already has SPA routing code at the end
+- Ensure correct path to frontend build folder
 
-### Step 4: Test the fixes
-- [ ] Run backend and verify login works
+### 3. Build & Deploy Steps
+- Rebuild frontend with updated API config
+- Deploy only backend to Render
+- Remove separate frontend Static Site
+
+## Execution Order
+1. [x] Update `frontend/src/services/api.js` - Use relative API path
+2. [ ] Rebuild frontend: `cd frontend && npm run build`
+3. [ ] Test locally
+4. [ ] Deploy backend to Render (keep existing config)
+5. [ ] Delete frontend Static Site from Render
 

@@ -4,9 +4,9 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 from flask import current_app, request
-from models.user import User
-from utils.helpers import make_response_data, get_current_user
-from utils.it_monitor import log_login_success, log_login_failure
+from ..models.user import User
+from ..utils.helpers import make_response_data, get_current_user
+from ..utils.it_monitor import log_login_success, log_login_failure
 
 from flask import make_response
 from datetime import timedelta

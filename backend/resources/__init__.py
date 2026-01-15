@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify
 from flask_restful import Api, Resource
 
 # Import all resource classes
-from .auth import LoginResource, MeResource
+# Auth routes are registered in app.py to avoid conflicts
+# from .auth import LoginResource, MeResource
 from .user import UserListResource, UserResource, UserSalaryResource, UserPaymentResource
 from .inventory import InventoryListResource, InventoryResource, ClearInventoryResource
 
@@ -47,8 +48,9 @@ api_bp = Blueprint('api', __name__)
 api = Api(api_bp)
 
 # ----------- AUTHENTICATION ROUTES -----------
-api.add_resource(LoginResource, '/auth/login')
-api.add_resource(MeResource, '/auth/me')
+# NOTE: Auth routes are registered in app.py to avoid duplicate registration
+# api.add_resource(LoginResource, '/auth/login')
+# api.add_resource(MeResource, '/auth/me')
 
 # ----------- USER MANAGEMENT -----------
 api.add_resource(UserListResource, '/users')
