@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
 const verifyAuth = async () => {
   try {
     // Use relative path so axios baseURL is respected
-    const response = await api.get('/auth/me');
+    const response = await api.get('/api/auth/me');
     setUser(response.data.data);
   } catch (error) {
     console.error("Auth check failed:", error.response?.data || error.message);
@@ -50,7 +50,7 @@ const verifyAuth = async () => {
   const login = async (email, password) => {
   try {
     // Use relative path so axios baseURL is respected (baseURL already includes /api)
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('/api/auth/login', { email, password });
     const resData = response?.data?.data || response?.data;
 
     if (!resData || !resData.access_token || !resData.user) {
@@ -100,7 +100,7 @@ const verifyAuth = async () => {
 
   const getAllUsers = async () => {
     try {
-    const { data } = await api.get('/users');
+    const { data } = await api.get('/api/users');
       return data.data;
     } catch (error) {
       console.error('Failed to get users:', error);
@@ -111,7 +111,7 @@ const verifyAuth = async () => {
 
   const addUser = async (userData) => {
     try {
-  const { data } = await api.post('/users', userData);
+  const { data } = await api.post('/api/users', userData);
       setUsers(prev => [...prev, data.data]);
       toast.success('User added successfully');
       return true;
@@ -125,7 +125,7 @@ const verifyAuth = async () => {
 
   const updateUser = async (userId, updates) => {
     try {
-  const { data } = await api.put(`/users/${userId}`, updates);
+  const { data } = await api.put(`/api/users/${userId}`, updates);
       setUsers(prev => prev.map(u => u.id === userId ? data.data : u));
 
       if (user?.id === userId) {
@@ -148,7 +148,7 @@ const verifyAuth = async () => {
         throw new Error("You can't delete yourself");
       }
 
-  await api.delete(`/users/${userId}`);
+  await api.delete(`/api/users/${userId}`);
       setUsers(prev => prev.filter(u => u.id !== userId));
       toast.success('User deleted successfully');
       return true;

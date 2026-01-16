@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Use relative path for same-origin API calls (frontend served by backend)
 // Fallback to Render backend URL if REACT_APP_API_BASE_URL is set
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

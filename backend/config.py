@@ -50,7 +50,7 @@ class Config:
     if _cors_env:
         CORS_ORIGINS = [o.strip() for o in _cors_env.split(',') if o.strip()]
     else:
-        CORS_ORIGINS = ["http://localhost:3000"]
+        CORS_ORIGINS = ["http://localhost:3000", "https://ryanmart-fronntend.onrender.com"]
 
     # IT Alert Rules
     ALERT_RULES = {
