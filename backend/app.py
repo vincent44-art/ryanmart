@@ -47,7 +47,7 @@ from flask_restful import Api
 load_dotenv()
 
 # Path to your React build folder
-FRONTEND_BUILD_DIR = os.path.join(os.getcwd(), 'frontend', 'build')
+FRONTEND_BUILD_DIR = os.path.join(BACKEND_ROOT, '..', 'frontend', 'build')
 
 # Flask-SocketIO removed for this deployment; real-time features are disabled.
 
