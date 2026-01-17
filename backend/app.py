@@ -280,12 +280,21 @@ def create_app(config_class=Config):
         return send_from_directory(os.path.join(os.getcwd(), 'logo'), filename)
 
     # Serve React frontend for all non-API routes
-    @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>')
+    @app.route('/', defaults={'path': ''}, methods=['GET', 'HEAD'])
+    @app.route('/<path:path>', methods=['GET', 'HEAD'])
     def serve_react(path):
+        app.logger.info(f"Serving React for path: {path}")
+        
+        # If path is empty, serve index.html
+        if not path:
+            return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
+        
+        # Check if the path is a file in the build directory
         full_path = os.path.join(FRONTEND_BUILD_DIR, path)
-        if path != "" and os.path.exists(full_path):
+        if os.path.isfile(full_path):
             return send_from_directory(FRONTEND_BUILD_DIR, path)
+        
+        # Otherwise, serve index.html for SPA routing (React Router)
         return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
 
     @app.errorhandler(500)
