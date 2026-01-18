@@ -104,7 +104,12 @@ def create_app(config_class=Config):
     jwt = JWTManager()
     migrate = Migrate()
     
-    app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/')
+    # Serve static assets from /static to avoid shadowing SPA routes like /login.
+    # Using '/' for static_url_path causes Flask's built-in static rule to
+    # capture top-level routes (e.g. '/login') and return 404 when a file
+    # with that name is not present in the build folder. Serve static files
+    # under '/static' and let `serve_react` handle all SPA routes.
+    app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/static')
     app.config.from_object(config_class)
     # Get database URL and strip "DATABASE_URL=" prefix if present (some platforms add this)
     database_url = os.environ.get("DATABASE_URL", "")
