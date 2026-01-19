@@ -1,11 +1,5 @@
 # EVENTLET MONKEY PATCHING - MUST BE FIRST!
 try:
-    # Import eventlet if available, but do NOT call monkey_patch() here.
-    # Calling eventlet.monkey_patch() at import time can fail when the
-    # Flask CLI / Werkzeug have already created thread/request-local
-    # objects. Instead, we only detect availability and let Flask-SocketIO
-    # choose the async mode. If you need full monkey-patching for a
-    # deployment, do it as the very first action before any imports.
     import eventlet
     _EVENTLET_AVAILABLE = True
 except Exception:
@@ -16,7 +10,7 @@ import os
 import sys
 import logging
 import time
-from flask import Flask, jsonify, send_from_directory, request, current_app
+from flask import Flask, jsonify, send_from_directory, request, current_app, make_response
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
 from flask_migrate import Migrate
@@ -49,8 +43,6 @@ load_dotenv()
 # Path to your React build folder
 FRONTEND_BUILD_DIR = os.path.join(BACKEND_ROOT, '..', 'frontend', 'build')
 
-# Flask-SocketIO removed for this deployment; real-time features are disabled.
-
 
 def ensure_database_initialized(app):
     with app.app_context():
@@ -58,14 +50,10 @@ def ensure_database_initialized(app):
         delay = 1.0
         for attempt in range(1, max_retries + 1):
             try:
-                # Try a lightweight connection check first
                 app.logger.debug(f"DB init attempt {attempt}/{max_retries}: testing connection...")
                 db.session.execute(text('SELECT 1'))
-
-                # Create all tables if they do not exist
                 db.create_all()
 
-                # Seed a default CEO/admin user if missing
                 default_email = os.environ.get("DEFAULT_ADMIN_EMAIL", "ceo@ryanmart.com")
                 default_password = os.environ.get("DEFAULT_ADMIN_PASSWORD", "ChangeMe123!")
 
@@ -93,34 +81,30 @@ def ensure_database_initialized(app):
                 time.sleep(delay)
                 delay = min(delay * 2, 30)
             except Exception as e:
-                # Handle network/interface errors from other drivers
-                # Unexpected exception: log and break
                 app.logger.exception(f"Database initialization error: {e}")
                 break
 
 
 def create_app(config_class=Config):
-    # Initialize extensions INSIDE create_app() to ensure app context
+    """Create and configure the Flask application."""
+    
+    # Initialize extensions
     jwt = JWTManager()
     migrate = Migrate()
     
-    # Serve static assets from /static to avoid shadowing SPA routes like /login.
-    # Using '/' for static_url_path causes Flask's built-in static rule to
-    # capture top-level routes (e.g. '/login') and return 404 when a file
-    # with that name is not present in the build folder. Serve static files
-    # under '/static' and let `serve_react` handle all SPA routes.
+    # Create Flask app with proper static configuration
     app = Flask(__name__, static_folder=FRONTEND_BUILD_DIR, static_url_path='/static')
     app.config.from_object(config_class)
-    # Get database URL and strip "DATABASE_URL=" prefix if present (some platforms add this)
+    
+    # Get database URL and strip "DATABASE_URL=" prefix if present
     database_url = os.environ.get("DATABASE_URL", "")
     if database_url.startswith("DATABASE_URL="):
         database_url = database_url[len("DATABASE_URL="):]
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config['DEBUG'] = False
-    # Avoid Werkzeug automatic redirects for trailing-slash mismatches.
-    # This prevents a request to '/auth/login' being redirected to
-    # '/auth/login/' (3xx) which would break CORS preflight OPTIONS.
+    
+    # Avoid Werkzeug automatic redirects for trailing-slash mismatches
     app.url_map.strict_slashes = False
     
     # Enable full error logging for debugging
@@ -143,45 +127,77 @@ def create_app(config_class=Config):
 
     migrate.init_app(app, db)
     
-    # Initialize CORS using configured origins from Config (CORS_ORIGINS).
-    # Enforce only the origins provided via the environment variable. If the
-    # variable is missing or contains '*' we log a warning; the latter is
-    # considered permissive but still honored.
-    configured = app.config.get('CORS_ORIGINS')
-    # Normalize configured origins: allow either a list or comma-separated string
-    if isinstance(configured, str):
-        configured = [s.strip() for s in configured.split(',') if s.strip()]
-
-    if not configured:
-        app.logger.warning('CORS_ORIGINS is not set. This will allow any origin. Set CORS_ORIGINS env var to restrict allowed origins.')
-        allowed_origins = ['*']
-    else:
-        allowed_origins = configured
-        if '*' in allowed_origins:
-            app.logger.warning("CORS_ORIGINS contains '*', which is permissive. Consider specifying explicit origin(s) for production.")
-
-    # Apply CORS only to API routes to avoid interfering with static/react routes
-    # Persist the normalized list into app.config so handlers can reference it
-    app.config['CORS_ORIGINS'] = allowed_origins
-    CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
+    # =====================================================================
+    # CORS CONFIGURATION - SINGLE SOURCE OF TRUTH
+    # =====================================================================
+    # Get allowed origins from config, with fallbacks for development
+    configured_origins = app.config.get('CORS_ORIGINS', [])
     
-    # SocketIO intentionally not initialized in this deployment.
+    # Production URLs - MUST match exactly what's deployed
+    PRODUCTION_FRONTEND = "https://ryanmart-fronntend.onrender.com"
+    PRODUCTION_BACKEND = "https://ryanmart-bacckend.onrender.com"
+    DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
+    
+    if configured_origins:
+        # Use configured origins
+        allowed_origins = configured_origins
+        app.logger.info(f"Using configured CORS origins: {allowed_origins}")
+    else:
+        # Default to production frontend for production, localhost for dev
+        if os.environ.get('FLASK_ENV') == 'production':
+            allowed_origins = [PRODUCTION_FRONTEND]
+            app.logger.info(f"Production mode - using frontend origin: {PRODUCTION_FRONTEND}")
+        else:
+            allowed_origins = DEVELOPMENT_LOCALHOST
+            app.logger.info(f"Development mode - using localhost origins: {allowed_origins}")
+    
+    # Store for reference
+    app.config['CORS_ORIGINS'] = allowed_origins
+    
+    # Initialize Flask-CORS with SIMPLE, CLEAN configuration
+    CORS(app, 
+         origins=allowed_origins,
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+         methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+         expose_headers=["Content-Length", "X-Requested-With"],
+         max_age=86400)  # 24 hours for preflight cache
+    
+    app.logger.info(f"CORS initialized with origins: {allowed_origins}")
+    # =====================================================================
 
-    # JWT error handlers
+    # JWT error handlers - ALL RETURN JSON
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
-        return jsonify({'success': False, 'message': 'The token has expired', 'error': 'token_expired'}), 401
+        return jsonify({
+            'success': False, 
+            'message': 'The token has expired', 
+            'error': 'token_expired',
+            'status_code': 401
+        }), 401
 
     @jwt.invalid_token_loader
     def invalid_token_callback(error):
-        return jsonify({'success': False, 'message': 'Invalid token', 'error': 'invalid_token'}), 401
+        return jsonify({
+            'success': False, 
+            'message': 'Invalid token', 
+            'error': 'invalid_token',
+            'status_code': 401
+        }), 401
 
     @jwt.unauthorized_loader
     def missing_token_callback(error):
-        return jsonify({'success': False, 'message': 'Missing access token', 'error': 'authorization_required'}), 401
+        return jsonify({
+            'success': False, 
+            'message': 'Missing access token', 
+            'error': 'authorization_required',
+            'status_code': 401
+        }), 401
 
-    # API setup
-    api = Api(app, catch_all_404s=True)
+    # =====================================================================
+    # API SETUP
+    # =====================================================================
+    api = Api(app, catch_all_404s=False)  # We handle 404s ourselves
 
     # Register Blueprints
     app.register_blueprint(api_bp, url_prefix='/api')
@@ -190,9 +206,8 @@ def create_app(config_class=Config):
     app.register_blueprint(dashboard_bp)
     from resources.drivers import drivers_bp
     app.register_blueprint(drivers_bp)
-    # NOTE: removed /auth and /auth/<path> redirect routes to avoid
-    # accidental 3xx responses during CORS preflight. Only the canonical
-    # /api/auth/* routes are served below (see api.add_resource entries).
+    
+    # Import and register resources
     from resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
     from resources.expenses import CarExpensesResource
@@ -215,6 +230,7 @@ def create_app(config_class=Config):
         StockTrackingCombinedPDFResource
     )
 
+    # Add all API resources with consistent /api prefix
     api.add_resource(LoginResource, '/api/auth/login')
     api.add_resource(RefreshResource, '/api/auth/refresh')
     api.add_resource(MeResource, '/api/auth/me')
@@ -224,9 +240,9 @@ def create_app(config_class=Config):
     api.add_resource(OtherExpenseResource, '/api/other_expenses/<int:expense_id>')
     api.add_resource(OtherExpensesPDFResource, '/api/other-expenses/pdf')
     api.add_resource(CEODashboardResource, '/api/ceo/dashboard')
-    api.add_resource(SalariesResource, '/salaries')
-    api.add_resource(SalaryResource, '/salaries/<int:salary_id>')
-    api.add_resource(SalaryPaymentToggleStatusResource, '/salary-payments/<int:payment_id>/toggle-status')
+    api.add_resource(SalariesResource, '/api/salaries')
+    api.add_resource(SalaryResource, '/api/salaries/<int:salary_id>')
+    api.add_resource(SalaryPaymentToggleStatusResource, '/api/salary-payments/<int:payment_id>/toggle-status')
     api.add_resource(CarExpensesResource, '/api/car-expenses', '/api/car-expenses/<int:expense_id>')
     api.add_resource(UserListResource, '/api/users')
     api.add_resource(ProfileImageUploadResource, '/api/profile-image')
@@ -260,40 +276,63 @@ def create_app(config_class=Config):
     api.add_resource(ClearInventoryResource, '/api/inventory/clear')
     api.add_resource(StockMovementListResource, '/api/stock-movements')
 
-    # Health Check
+    # =====================================================================
+    # HEALTH CHECK & DEBUG ROUTES
+    # =====================================================================
     @app.route('/api/health')
     def health_check():
-        return jsonify({'success': True, 'status': 'healthy', 'message': 'Service is running', 'version': '1.0.0'})
+        """Health check endpoint - always returns JSON."""
+        return jsonify({
+            'success': True, 
+            'status': 'healthy', 
+            'message': 'Service is running', 
+            'version': '1.0.0',
+            'cors_origins': allowed_origins
+        })
 
-    # Debug: quick DB connectivity test (remove in production if you prefer)
+    @app.route('/api/cors-test')
+    def cors_test():
+        """CORS test endpoint - returns request headers for debugging."""
+        return jsonify({
+            'success': True,
+            'message': 'CORS test successful',
+            'headers': dict(request.headers),
+            'origin': request.headers.get('Origin', 'No origin header')
+        })
+
     @app.route('/api/_debug/db')
     def debug_db():
+        """Debug DB connectivity - remove in production."""
         try:
-            # simple scalar query to verify DB connection
             res = db.session.execute(text('SELECT 1')).scalar()
             return jsonify({'ok': True, 'db_response': res})
         except Exception as e:
             current_app.logger.exception('DB connectivity test failed')
             return jsonify({'ok': False, 'error': str(e)}), 500
 
-    # CORS Test Route
-    @app.route('/api/cors-test')
-    def cors_test():
-        return jsonify({
-            'success': True,
-            'headers': dict(request.headers),
-            'message': 'CORS test route',
-        })
-
-    # Serve logo
+    # =====================================================================
+    # STATIC FILES & REACT SPA
+    # =====================================================================
     @app.route('/logo/<path:filename>')
     def serve_logo(filename):
         return send_from_directory(os.path.join(os.getcwd(), 'logo'), filename)
 
-    # Serve React frontend for all non-API routes
     @app.route('/', defaults={'path': ''}, methods=['GET', 'HEAD'])
     @app.route('/<path:path>', methods=['GET', 'HEAD'])
     def serve_react(path):
+        """
+        Serve React frontend for non-API routes only.
+        IMPORTANT: This must NOT catch /api/* routes.
+        """
+        # If this is an API route, we should NOT be here - let 404 handler deal with it
+        if path.startswith('api/') or path == 'api':
+            return jsonify({
+                'success': False,
+                'message': 'API endpoint not found',
+                'error': 'not_found',
+                'status_code': 404
+            }), 404
+        
         app.logger.info(f"Serving React for path: {path}")
         
         # If path is empty, serve index.html
@@ -308,88 +347,164 @@ def create_app(config_class=Config):
         # Otherwise, serve index.html for SPA routing (React Router)
         return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
 
-    @app.errorhandler(500)
-    def internal_error(error):
-        db.session.rollback()
-        log_api_error(request.path, "Internal server error", 500)
-        return make_response_data(success=False, message="An internal server error occurred.", errors=[str(error)], status_code=500)
+    # =====================================================================
+    # JSON ERROR HANDLERS - ALL API ERRORS RETURN JSON
+    # =====================================================================
+    
+    @app.errorhandler(400)
+    def bad_request(error):
+        """400 Bad Request - returns JSON."""
+        log_api_error(request.path, "Bad request", 400)
+        return jsonify({
+            'success': False,
+            'message': 'Bad request',
+            'error': str(error) if error else 'invalid_request',
+            'status_code': 400
+        }), 400
 
     @app.errorhandler(401)
     def unauthorized_error(error):
+        """401 Unauthorized - returns JSON."""
         log_api_error(request.path, "Unauthorized access", 401)
-        return make_response_data(success=False, message="Unauthorized.", errors=[str(error)], status_code=401)
+        return jsonify({
+            'success': False,
+            'message': 'Unauthorized. Please log in.',
+            'error': 'authorization_required',
+            'status_code': 401
+        }), 401
 
     @app.errorhandler(403)
     def forbidden_error(error):
+        """403 Forbidden - returns JSON."""
         log_api_error(request.path, "Forbidden access", 403)
-        return make_response_data(success=False, message="Forbidden.", errors=[str(error)], status_code=403)
+        return jsonify({
+            'success': False,
+            'message': 'Forbidden. You do not have permission.',
+            'error': 'forbidden',
+            'status_code': 403
+        }), 403
 
     @app.errorhandler(404)
     def not_found_error(error):
+        """404 Not Found - returns JSON for API routes, HTML for others."""
+        log_api_error(request.path, "Not found", 404)
+        
         # Check if it's an API route - return JSON
-        if request.path.startswith('/api'):
-            log_api_error(request.path, "Not found", 404)
-            return make_response_data(success=False, message="The requested resource was not found.", errors=["not_found"], status_code=404)
-        # For non-API routes, let the React SPA handle it (return HTML)
-        return app.send_static_file('index.html')
+        if request.path.startswith('/api') or request.path == '/api':
+            return jsonify({
+                'success': False,
+                'message': 'The requested API endpoint was not found.',
+                'error': 'not_found',
+                'status_code': 404,
+                'path': request.path
+            }), 404
+        
+        # For non-API routes, let the React SPA handle it
+        return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
 
-    # Explicit preflight handler for any /api/* route
-    @app.route('/api/<path:subpath>', methods=['OPTIONS'])
-    def cors_preflight(subpath):
-        origin = request.headers.get('Origin', '')
-        allowed = app.config.get('CORS_ORIGINS') or []
-        # If no origins configured, treat as permissive (warning already logged above).
-        if not allowed:
-            resp = app.make_response(('', 204))
-            resp.headers['Access-Control-Allow-Origin'] = '*'
-            resp.headers['Access-Control-Allow-Credentials'] = 'true'
-            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            return resp
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        """405 Method Not Allowed - returns JSON."""
+        log_api_error(request.path, "Method not allowed", 405)
+        return jsonify({
+            'success': False,
+            'message': 'The HTTP method is not allowed for this endpoint.',
+            'error': 'method_not_allowed',
+            'status_code': 405
+        }), 405
 
-        # If '*' present explicitly, allow any origin
-        if '*' in allowed:
-            resp = app.make_response(('', 204))
-            resp.headers['Access-Control-Allow-Origin'] = '*'
-            resp.headers['Access-Control-Allow-Credentials'] = 'true'
-            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            return resp
+    @app.errorhandler(500)
+    def internal_error(error):
+        """500 Internal Server Error - returns JSON."""
+        db.session.rollback()
+        log_api_error(request.path, "Internal server error", 500)
+        return jsonify({
+            'success': False,
+            'message': 'An internal server error occurred.',
+            'error': 'internal_server_error',
+            'status_code': 500
+        }), 500
 
-        # Strict-check: only allow configured origins
-        if origin in allowed:
-            resp = app.make_response(('', 204))
-            resp.headers['Access-Control-Allow-Origin'] = origin
-            resp.headers['Access-Control-Allow-Credentials'] = 'true'
-            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            return resp
+    @app.errorhandler(422)
+    def unprocessable_entity(error):
+        """422 Unprocessable Entity - returns JSON."""
+        log_api_error(request.path, "Unprocessable entity", 422)
+        return jsonify({
+            'success': False,
+            'message': 'The request could not be processed.',
+            'error': 'unprocessable_entity',
+            'status_code': 422
+        }), 422
 
-        # Not allowed — return without CORS headers (browser will block)
-        return ('', 204)
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        """413 Payload Too Large - returns JSON."""
+        log_api_error(request.path, "Payload too large", 413)
+        return jsonify({
+            'success': False,
+            'message': 'The request payload is too large.',
+            'error': 'payload_too_large',
+            'status_code': 413
+        }), 413
 
-    # Force credentials-enabled CORS headers for API routes
+    # =====================================================================
+    # FORCE CORS HEADERS ON ALL API RESPONSES
+    # =====================================================================
     @app.after_request
     def add_cors_headers(response):
-        origin = request.headers.get('Origin')
-        allowed = set(app.config.get('CORS_ORIGINS') or ['*'])
+        """
+        Ensure CORS headers are present on all API responses.
+        This is a safety net in case Flask-CORS misses any.
+        """
+        origin = request.headers.get('Origin', '')
+        
         # Only add CORS headers for API routes
-        if request.path.startswith('/api'):
-            allowed = app.config.get('CORS_ORIGINS') or []
-            # If not configured, keep permissive behavior for compatibility
-            if not allowed or '*' in allowed:
-                response.headers['Access-Control-Allow-Origin'] = '*' if not allowed else '*'
-                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-                response.headers['Access-Control-Allow-Credentials'] = 'true'
-            else:
-                if origin in allowed:
+        if request.path.startswith('/api') or request.path == '/api':
+            # Check if origin is allowed
+            if allowed_origins == ['*'] or origin in allowed_origins:
+                if allowed_origins == ['*']:
+                    response.headers['Access-Control-Allow-Origin'] = '*'
+                else:
                     response.headers['Access-Control-Allow-Origin'] = origin
                     response.headers['Vary'] = 'Origin'
-                    response.headers['Access-Control-Allow-Credentials'] = 'true'
-                    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-                    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+                
+                response.headers['Access-Control-Allow-Credentials'] = 'true'
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+        
+        # Ensure Content-Type is JSON for API responses
+        if request.path.startswith('/api') or request.path == '/api':
+            if response.content_type == 'application/json' or not response.content_type:
+                pass  # Already correct
+        
         return response
+
+    # =====================================================================
+    # PREFLIGHT OPTIONS HANDLER (fallback)
+    # =====================================================================
+    @app.route('/api/<path:subpath>', methods=['OPTIONS'])
+    def cors_preflight(subpath):
+        """
+        Handle OPTIONS preflight requests for /api/* routes.
+        Flask-CORS should handle this automatically, but this is a fallback.
+        """
+        origin = request.headers.get('Origin', '')
+        
+        if allowed_origins == ['*'] or origin in allowed_origins:
+            resp = make_response('', 204)
+            if allowed_origins == ['*']:
+                resp.headers['Access-Control-Allow-Origin'] = '*'
+            else:
+                resp.headers['Access-Control-Allow-Origin'] = origin
+                resp.headers['Vary'] = 'Origin'
+            
+            resp.headers['Access-Control-Allow-Credentials'] = 'true'
+            resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+            resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+            resp.headers['Access-Control-Max-Age'] = '86400'
+            return resp
+        
+        return make_response('', 204)
 
     # Ensure DB schema exists and seed default admin if missing
     ensure_database_initialized(app)
@@ -402,6 +517,5 @@ app = create_app()
 
 # Local Development
 if __name__ == '__main__':
-    # Run the Flask development server when executed directly.
     app.run(host='0.0.0.0', port=5000, debug=False)
 
