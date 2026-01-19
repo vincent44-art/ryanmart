@@ -84,7 +84,14 @@ def should_trigger_alert(rule_name, rule_config, event):
             # Check if export size >1GB and user is not admin
             export_size = event.payload.get('export_size_mb', 0) if event.payload else 0
             if export_size > 1024:  # 1GB = 1024MB
-                user = User.query.get(event.user_id)
+                # Convert string ID back to int for SQLAlchemy query.get()
+                event_user_id = event.user_id
+                if event_user_id is not None:
+                    try:
+                        event_user_id = int(event_user_id)
+                    except (TypeError, ValueError):
+                        pass
+                user = User.query.get(event_user_id)
                 return user and user.role.value not in ['admin', 'it']
 
     elif rule_name == 'api_error_burst':
@@ -222,6 +229,12 @@ def log_api_error(resource, error_message, status_code=None):
     if not (str(resource).startswith('/static') or str(resource).endswith('.png') or str(resource).endswith('.jpg') or str(resource).endswith('.jpeg') or str(resource).endswith('.ico')):
         try:
             user_id = get_jwt_identity()
+            # Convert string ID back to int for SQLAlchemy query.get()
+            if user_id is not None:
+                try:
+                    user_id = int(user_id)
+                except (TypeError, ValueError):
+                    pass
             user = User.query.get(user_id) if user_id else None
         except Exception:
             user_id = None

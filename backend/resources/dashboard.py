@@ -97,7 +97,14 @@ def performance_monthly():
 class DashboardResource(Resource):
     @jwt_required()
     def get(self):
-        user = User.query.get(get_jwt_identity())
+        user_id = get_jwt_identity()
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if user_id is not None:
+            try:
+                user_id = int(user_id)
+            except (TypeError, ValueError):
+                pass
+        user = User.query.get(user_id)
         if not user:
             return make_response_data(False, "User not found.", 404)
         

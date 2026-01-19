@@ -13,4 +13,10 @@ def make_response_data(data=None, success=True, message="", errors=None, status_
 
 def get_current_user():
     user_id = get_jwt_identity()
+    # Convert string ID back to int for SQLAlchemy query.get() which expects the PK type
+    if user_id is not None:
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            pass
     return User.query.get(user_id)

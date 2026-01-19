@@ -34,8 +34,10 @@ class LoginResource(Resource):
             if user and user.check_password(password):
                 # Avoid AttributeError if role is None or not an Enum
                 role_val = getattr(user.role, 'value', None) if user.role is not None else None
-                access_token = create_access_token(identity=user.id, additional_claims={"role": role_val})
-                refresh_token = create_refresh_token(identity=user.id)
+                # Convert user.id to string for JWT 'sub' claim (required by PyJWT >= 2.9.0)
+                user_id_str = str(user.id)
+                access_token = create_access_token(identity=user_id_str, additional_claims={"role": role_val})
+                refresh_token = create_refresh_token(identity=user_id_str)
                 log_login_success(user)
                 return make_response_data(data={
                     'access_token': access_token,

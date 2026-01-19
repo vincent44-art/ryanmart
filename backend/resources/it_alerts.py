@@ -13,6 +13,12 @@ class ITAlertsResource(Resource):
     def get(self):
         # Check role
         current_user_id = get_jwt_identity()
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
         user = User.query.get(current_user_id)
         logging.info(f"User: {user.email if user else 'None'}, Role: {user.role.value if user else 'None'}")
         if not user or user.role.value not in ['it', 'admin']:
@@ -75,6 +81,12 @@ class ITIncidentsResource(Resource):
     def post(self):
         # Check role
         current_user_id = get_jwt_identity()
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
         user = User.query.get(current_user_id)
         if not user or user.role.value not in ['it', 'admin']:
             return make_response_data(success=False, message="Access denied", status_code=403)

@@ -13,6 +13,12 @@ class ITEventsResource(Resource):
     def get(self):
         # Check if user has IT or Admin role
         current_user_id = get_jwt_identity()
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
         user = User.query.get(current_user_id)
         if not user or user.role.value not in ['it', 'admin']:
             return make_response_data(success=False, message="Access denied", status_code=403)
@@ -75,6 +81,12 @@ class ITEventResource(Resource):
     def get(self, event_id):
         # Check role
         current_user_id = get_jwt_identity()
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
         user = User.query.get(current_user_id)
         if not user or user.role.value not in ['it', 'admin']:
             return make_response_data(success=False, message="Access denied", status_code=403)
@@ -91,6 +103,12 @@ class ITAcknowledgeAlertsResource(Resource):
     def post(self):
         # Check role
         current_user_id = get_jwt_identity()
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
         user = User.query.get(current_user_id)
         if not user or user.role.value not in ['it', 'admin']:
             return make_response_data(success=False, message="Access denied", status_code=403)

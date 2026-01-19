@@ -37,8 +37,15 @@ drivers_bp = Blueprint('drivers', __name__, url_prefix='/api/drivers')
 @drivers_bp.route('/<driver_email>/expenses', methods=['GET'])
 @jwt_required()
 def get_driver_expenses(driver_email):
-    current_user = get_jwt_identity()
-    if current_user['email'] != driver_email and current_user['role'] != 'ceo':
+    current_user_id = get_jwt_identity()
+    # Convert string ID back to int for SQLAlchemy query.get()
+    if current_user_id is not None:
+        try:
+            current_user_id = int(current_user_id)
+        except (TypeError, ValueError):
+            pass
+    current_user = User.query.get(current_user_id)
+    if not current_user or (current_user.email != driver_email and current_user.role.value != 'ceo'):
         return jsonify({"msg": "Unauthorized"}), 403
 
     expenses = DriverExpense.query.filter_by(driver_email=driver_email).all()

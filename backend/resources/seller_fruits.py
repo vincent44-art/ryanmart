@@ -14,6 +14,13 @@ class SellerFruitListResource(Resource):
         if not current_user_id:
             return {"message": "Authentication required"}, 401
 
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
+
         # Get current user role
         user = User.query.get(current_user_id)
         if not user:
@@ -34,6 +41,12 @@ class SellerFruitListResource(Resource):
             return {"message": "Authentication required"}, 401
 
         # Delete all fruits for the current user
+        # Convert string ID back to int for SQLAlchemy query
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
         deleted_count = SellerFruit.query.filter_by(created_by=current_user_id).delete()
         db.session.commit()
         return {"message": f"Deleted {deleted_count} seller fruits successfully"}, 200
@@ -49,6 +62,13 @@ class SellerFruitListResource(Resource):
         current_user_id = get_jwt_identity()
         if not current_user_id:
             return {"message": "Authentication required"}, 401
+
+        # Convert string ID back to int for SQLAlchemy query
+        if current_user_id is not None:
+            try:
+                current_user_id = int(current_user_id)
+            except (TypeError, ValueError):
+                pass
 
         user = User.query.get(current_user_id)
         if not user:

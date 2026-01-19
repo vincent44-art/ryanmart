@@ -10,6 +10,12 @@ drivers_bp = Blueprint('drivers', __name__, url_prefix='/api/drivers')
 @jwt_required()
 def get_driver_expenses(driver_email):
     user_id = get_jwt_identity()
+    # Convert string ID back to int for SQLAlchemy query.get()
+    if user_id is not None:
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            pass
     from models.user import User
     current_user = User.query.get(user_id)
     if not current_user:
