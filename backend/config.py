@@ -1,4 +1,4 @@
-import os
+ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 from urllib.parse import quote_plus, urlparse, urlunparse, parse_qs, urlencode
@@ -50,7 +50,7 @@ class Config:
     if _cors_env:
         CORS_ORIGINS = [o.strip() for o in _cors_env.split(',') if o.strip()]
     else:
-        CORS_ORIGINS = ["http://localhost:3000", "https://ryanmart-fronntend.onrender.com"]
+        CORS_ORIGINS = ["http://localhost:3000", "http://localhost:5173", "https://ryanmart-fronntend.onrender.com"]
 
     # IT Alert Rules
     ALERT_RULES = {

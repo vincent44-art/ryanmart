@@ -6,7 +6,7 @@ export const deletePurchase = (id) =>
 
 export const fetchPurchases = (email = null) => {
   if (email) {
-    return api.get(`/purchases/${email}`);
+    return api.get(`/purchases/by-email/${email}`);
   } else {
     return api.get('/purchases');
   }

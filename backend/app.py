@@ -224,9 +224,9 @@ def create_app(config_class=Config):
     api.add_resource(OtherExpenseResource, '/api/other_expenses/<int:expense_id>')
     api.add_resource(OtherExpensesPDFResource, '/api/other-expenses/pdf')
     api.add_resource(CEODashboardResource, '/api/ceo/dashboard')
-    api.add_resource(SalariesResource, '/api/salaries')
-    api.add_resource(SalaryResource, '/api/salaries/<int:salary_id>')
-    api.add_resource(SalaryPaymentToggleStatusResource, '/api/salary-payments/<int:payment_id>/toggle-status')
+    api.add_resource(SalariesResource, '/salaries')
+    api.add_resource(SalaryResource, '/salaries/<int:salary_id>')
+    api.add_resource(SalaryPaymentToggleStatusResource, '/salary-payments/<int:payment_id>/toggle-status')
     api.add_resource(CarExpensesResource, '/api/car-expenses', '/api/car-expenses/<int:expense_id>')
     api.add_resource(UserListResource, '/api/users')
     api.add_resource(ProfileImageUploadResource, '/api/profile-image')
@@ -323,6 +323,15 @@ def create_app(config_class=Config):
     def forbidden_error(error):
         log_api_error(request.path, "Forbidden access", 403)
         return make_response_data(success=False, message="Forbidden.", errors=[str(error)], status_code=403)
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        # Check if it's an API route - return JSON
+        if request.path.startswith('/api'):
+            log_api_error(request.path, "Not found", 404)
+            return make_response_data(success=False, message="The requested resource was not found.", errors=["not_found"], status_code=404)
+        # For non-API routes, let the React SPA handle it (return HTML)
+        return app.send_static_file('index.html')
 
     # Explicit preflight handler for any /api/* route
     @app.route('/api/<path:subpath>', methods=['OPTIONS'])

@@ -1,47 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Trash2, Plus } from 'lucide-react';
-
-// Use relative API paths — backend determined by REACT_APP_API_BASE_URL env var
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-backend.onrender.com/api';
-const API_ENDPOINT = '/api/car-expenses';
+import api from '../services/api';
 
 // ✅ Define API functions
 const fetchCarExpenses = async () => {
   const token = localStorage.getItem('access_token');
-  const res = await fetch(API_ENDPOINT, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    }
+  const res = await api.get('/car-expenses', {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
   });
-  if (!res.ok) throw new Error('Failed to fetch car expenses');
-  return await res.json();
+  return res.data;
 };
 
 const createCarExpense = async (expense) => {
   const token = localStorage.getItem('access_token');
-  const res = await fetch(`${BASE_URL}/car-expenses`, {
-    method: 'POST',
+  const res = await api.post('/car-expenses', expense, {
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify(expense),
+    }
   });
-  if (!res.ok) throw new Error('Failed to create expense');
-  return await res.json();
+  return res.data;
 };
 
 const deleteCarExpense = async (id) => {
   const token = localStorage.getItem('access_token');
-  const res = await fetch(`${API_ENDPOINT}/${id}`, {
-    method: 'DELETE',
-    headers: {
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    }
+  const res = await api.delete(`/car-expenses/${id}`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
   });
-  if (!res.ok) throw new Error('Failed to delete expense');
-  return await res.json();
+  return res.data;
 };
 
 // ✅ Main component

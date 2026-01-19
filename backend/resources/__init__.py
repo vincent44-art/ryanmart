@@ -74,8 +74,8 @@ api.add_resource(CarExpensesResource, '/car-expenses', endpoint='car_expenses') 
 api.add_resource(CarExpensesResource, '/drivers/expenses', endpoint='driver_expenses')
 
 # ----------- SALARIES -----------
-api.add_resource(SalariesResource, '/api/salaries')
-api.add_resource(SalaryPaymentToggleStatusResource, '/api/salary-payments/<int:payment_id>/toggle-status')
+api.add_resource(SalariesResource, '/salaries')
+api.add_resource(SalaryPaymentToggleStatusResource, '/salary-payments/<int:payment_id>/toggle-status')
 
 
 
