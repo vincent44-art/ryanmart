@@ -36,7 +36,7 @@ def get_ceo_messages():
     return jsonify([]), 200
 
 
-@purchases_bp.route("/purchases/<string:email>", methods=["GET"])
+@purchases_bp.route("/purchases/by-email/<string:email>", methods=["GET"])
 def get_purchases_by_email(email):
     from models.user import User
     user = User.query.filter_by(email=email).first()

@@ -120,7 +120,7 @@ api.add_resource(SaleSummaryResource, '/sales/summary')
 
 # ----------- EXTRA ROUTES (from purchases.py) -----------
 # This ensures /api/purchases/<email> and /api/ceo/messages work
-api_bp.register_blueprint(purchases_bp, url_prefix='')
+api_bp.register_blueprint(purchases_bp, url_prefix='/api')
 
 # ----------- CATCH-ALL (MUST BE LAST) -----------
 # Move this to the very end of the file, after all resource registrations
