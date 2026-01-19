@@ -21,7 +21,7 @@ const getApiBaseUrl = () => {
   // Check if we're in production (React app built for production)
   if (process.env.NODE_ENV === 'production') {
     // Return exact production backend URL (matching the typo in frontend deployment)
-    return 'https://ryanmart-bacckend.onrender.com';
+    return 'https://ryanmart-backend.onrender.com';
   }
   
   // Development fallback

@@ -14,7 +14,7 @@ const SalesTab = () => {
   useEffect(() => {
     const loadSales = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/sales`, {
+        const res = await fetch(`${BASE_URL}/api/sales`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });

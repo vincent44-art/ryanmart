@@ -12,7 +12,7 @@ import api, { safeApiCall } from '../services/api';
  */
 const fetchCarExpenses = async () => {
   const result = await safeApiCall(() => 
-    api.get('/car-expenses', {
+    api.get('/api/car-expenses', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`
       }
@@ -35,7 +35,7 @@ const fetchCarExpenses = async () => {
 const createCarExpense = async (expenseData) => {
   const token = localStorage.getItem('access_token');
   const result = await safeApiCall(() =>
-    api.post('/car-expenses', expenseData, {
+    api.post('/api/car-expenses', expenseData, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': token ? `Bearer ${token}` : ''
@@ -57,7 +57,7 @@ const createCarExpense = async (expenseData) => {
 const deleteCarExpense = async (id) => {
   const token = localStorage.getItem('access_token');
   const result = await safeApiCall(() =>
-    api.delete(`/car-expenses/${id}`, {
+    api.delete(`/api/car-expenses/${id}`, {
       headers: token ? { 'Authorization': `Bearer ${token}` } : {}
     })
   );
