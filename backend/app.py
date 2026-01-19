@@ -266,7 +266,7 @@ def create_app(config_class=Config):
     api.add_resource(SellerFruitListResource, '/api/seller-fruits')
     api.add_resource(SellerFruitResource, '/api/seller-fruits/<int:fruit_id>')
     api.add_resource(SellerFruitBulkResource, '/api/seller-fruits/bulk')
-    api.add_resource(StockTrackingAggregatedResource, '/api/stock_tracking/aggregated')
+    api.add_resource(StockTrackingAggregatedResource, '/api/stock-tracking/aggregated')
     api.add_resource(StockTrackingListResource, '/api/stock-tracking')
     api.add_resource(ClearStockTrackingResource, '/api/stock-tracking/clear')
     api.add_resource(StockTrackingPDFResource, '/api/stock-tracking/pdf/<int:record_id>')

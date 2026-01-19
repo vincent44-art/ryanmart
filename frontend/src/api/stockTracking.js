@@ -15,6 +15,14 @@ export const fetchStockTracking = async (token) => {
       }
     });
 
+    // Check content type to avoid parsing HTML as JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Stock tracking fetch error: Expected JSON but got:', text.substring(0, 200));
+      throw new Error('Server returned non-JSON response. Check API endpoint.');
+    }
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to fetch stock tracking data');
@@ -59,6 +67,14 @@ export const addStockTracking = async (data, token) => {
       body: JSON.stringify(data)
     });
 
+    // Check content type to avoid parsing HTML as JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Stock tracking creation/update error: Expected JSON but got:', text.substring(0, 200));
+      throw new Error('Server returned non-JSON response. Check API endpoint.');
+    }
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to create/update stock tracking record');
@@ -79,6 +95,15 @@ export async function clearStockTracking(token) {
       ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     }
   });
+
+  // Check content type to avoid parsing HTML as JSON
+  const contentType = res.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const text = await res.text();
+    console.error('Clear stock tracking error: Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response. Check API endpoint.');
+  }
+
   if (!res.ok) throw new Error('Failed to clear stock tracking');
   return await res.json();
 }
@@ -96,6 +121,14 @@ export const fetchStockTrackingAggregated = async (token) => {
         'Content-Type': 'application/json'
       }
     });
+
+    // Check content type to avoid parsing HTML as JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Aggregated data fetch error: Expected JSON but got:', text.substring(0, 200));
+      throw new Error('Server returned non-JSON response. Check API endpoint.');
+    }
 
     if (!response.ok) {
       const error = await response.json();
@@ -122,6 +155,14 @@ export const fetchSales = async (token) => {
         'Content-Type': 'application/json'
       }
     });
+
+    // Check content type to avoid parsing HTML as JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Sales fetch error: Expected JSON but got:', text.substring(0, 200));
+      throw new Error('Server returned non-JSON response. Check API endpoint.');
+    }
 
     if (!response.ok) {
       const error = await response.json();
