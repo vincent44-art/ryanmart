@@ -42,7 +42,7 @@ from flask_restful import Api
 load_dotenv()
 
 # Path to your React build folder
-FRONTEND_BUILD_DIR = os.path.join(BACKEND_ROOT, '..', 'frontend', 'build')
+FRONTEND_BUILD_DIR = os.path.abspath(os.path.join(BACKEND_ROOT, '..', 'frontend', 'build'))
 
 
 def ensure_database_initialized(app):
