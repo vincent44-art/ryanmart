@@ -25,7 +25,7 @@ Serve React frontend through Flask backend (same origin)
 
 ## Execution Order
 1. [x] Update `frontend/src/services/api.js` - Use relative API path
-2. [ ] Rebuild frontend: `cd frontend && npm run build`
+2. [x] Rebuild frontend: `cd frontend && npm run build`
 3. [ ] Test locally
 4. [ ] Deploy backend to Render (keep existing config)
 5. [ ] Delete frontend Static Site from Render

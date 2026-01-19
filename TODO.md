@@ -2,7 +2,7 @@
 
 ## Steps Completed
 - [x] Update FRONTEND_BUILD_DIR in backend/app.py to correct path
-- [x] Rebuild frontend with `cd frontend && npm run build` (in progress)
-- [ ] Test locally by running backend
+- [x] Rebuild frontend with `cd frontend && npm run build`
+- [x] Test locally by running backend (in progress)
 - [ ] Deploy backend to Render
 - [ ] Delete frontend Static Site from Render
