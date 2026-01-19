@@ -41,9 +41,15 @@ def get_purchases_by_email(email):
     from models.user import User
     user = User.query.filter_by(email=email).first()
     if not user:
-        return jsonify([]), 200
+        return make_response_data(
+            data=[],
+            message="No user found with this email."
+        )
     purchases = Purchase.query.filter_by(purchaser_id=user.id).all()
-    return jsonify([p.to_dict() for p in purchases]), 200
+    return make_response_data(
+        data=[p.to_dict() for p in purchases],
+        message="Purchases fetched successfully."
+    )
 
 
 # --- Resource Classes ---

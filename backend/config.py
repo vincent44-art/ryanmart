@@ -47,8 +47,8 @@ class Config:
     # Configure CORS origins. In production set CORS_ORIGINS as a comma-separated
     # environment variable, e.g. CORS_ORIGINS=https://app.example.com,https://admin.example.com
     #
-    # IMPORTANT: The frontend is deployed at https://ryanmart-fronntend.onrender.com (note the typo)
-    # The backend is deployed at https://ryanmart-bacckend.onrender.com (note the typo)
+    # IMPORTANT: The frontend is deployed at https://ryanmart-frontend.onrender.com
+    # The backend is deployed at https://ryanmart-backend.onrender.com
     # These URLs must match EXACTLY for CORS to work.
     _cors_env = os.environ.get('CORS_ORIGINS')
     if _cors_env:
@@ -57,7 +57,7 @@ class Config:
         # Production and development fallback URLs
         # These MUST match the exact deployed URLs for CORS to work
         CORS_ORIGINS = [
-            "https://ryanmart-fronntend.onrender.com",  # Production frontend
+            "https://ryanmart-frontend.onrender.com",  # Production frontend
             "http://localhost:3000",  # React Create App default
             "http://localhost:5173",  # Vite default
         ]

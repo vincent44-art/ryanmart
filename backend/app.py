@@ -33,6 +33,7 @@ from utils.it_monitor import log_api_error
 from resources import api_bp
 from resources.dashboard import dashboard_bp
 from resources.__init__ import CurrentStockResource
+from resources.purchases import purchases_bp
 from resources.ceo_dashboard import CEODashboardResource
 from resources.auth import LoginResource, RefreshResource, MeResource, ChangePasswordResource
 from flask_restful import Api
@@ -134,8 +135,8 @@ def create_app(config_class=Config):
     configured_origins = app.config.get('CORS_ORIGINS', [])
     
     # Production URLs - MUST match exactly what's deployed
-    PRODUCTION_FRONTEND = "https://ryanmart-fronntend.onrender.com"
-    PRODUCTION_BACKEND = "https://ryanmart-bacckend.onrender.com"
+    PRODUCTION_FRONTEND = "https://ryanmart-frontend.onrender.com"
+    PRODUCTION_BACKEND = "https://ryanmart-backend.onrender.com"
     DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
     
     if configured_origins:
@@ -201,6 +202,7 @@ def create_app(config_class=Config):
 
     # Register Blueprints
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(purchases_bp, url_prefix='/api')
     from resources.assignments import assignments_bp
     app.register_blueprint(assignments_bp)
     app.register_blueprint(dashboard_bp)

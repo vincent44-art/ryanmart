@@ -4,8 +4,8 @@ import axios from 'axios';
 // API CONFIGURATION - CRITICAL: MATCH EXACT DEPLOYED BACKEND URL
 // =====================================================================
 // Production URLs (must match exactly what's deployed on Render):
-// - Frontend: https://ryanmart-fronntend.onrender.com
-// - Backend:  https://ryanmart-bacckend.onrender.com
+// - Frontend: https://ryanmart-frontend.onrender.com
+// - Backend:  https://ryanmart-backend.onrender.com
 //
 // Development URLs:
 // - Frontend: http://localhost:3000 or http://localhost:5173
@@ -20,7 +20,7 @@ const getApiBaseUrl = () => {
   
   // Check if we're in production (React app built for production)
   if (process.env.NODE_ENV === 'production') {
-    // Return exact production backend URL (matching the typo in frontend deployment)
+    // Return exact production backend URL
     return 'https://ryanmart-backend.onrender.com';
   }
   
