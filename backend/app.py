@@ -198,6 +198,8 @@ def create_app(config_class=Config):
     from resources.expenses import CarExpensesResource
     from resources.user import UserListResource
     from resources.profile_image import ProfileImageUploadResource
+    from resources.inventory import InventoryListResource, InventoryResource, ClearInventoryResource
+    from resources.stock import StockMovementListResource
     from resources.it_events import ITEventsResource, ITEventResource, ITAcknowledgeAlertsResource
     from resources.it_alerts import ITAlertsResource, ITIncidentsResource
     from resources.sales import SaleListResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
@@ -253,6 +255,10 @@ def create_app(config_class=Config):
     api.add_resource(StockTrackingGroupPDFResource, '/api/stock-tracking/pdf/group')
     api.add_resource(StockTrackingUnmovedPDFResource, '/api/stock-tracking/pdf/unmoved')
     api.add_resource(StockTrackingCombinedPDFResource, '/api/stock-tracking/pdf/combined')
+    api.add_resource(InventoryListResource, '/api/inventory')
+    api.add_resource(InventoryResource, '/api/inventory/<int:inv_id>')
+    api.add_resource(ClearInventoryResource, '/api/inventory/clear')
+    api.add_resource(StockMovementListResource, '/api/stock-movements')
 
     # Health Check
     @app.route('/api/health')
