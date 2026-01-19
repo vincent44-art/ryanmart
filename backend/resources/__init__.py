@@ -18,7 +18,6 @@ from .gradients import GradientListResource, ClearGradientsResource
 from .messages import MessageListResource, MessageResource, ClearMessagesResource
 from .dashboard import CEODashboardResource, SellerDashboardResource, PurchaserDashboardResource, StorekeeperDashboardResource
 from .clear_all import ClearAllDataResource
-from .stock_tracking import StockTrackingListResource, ClearStockTrackingResource, StockTrackingAggregatedResource
 from .profile_image import ProfileImageUploadResource
 from .seller_fruits import SellerFruitListResource, SellerFruitResource
 from .sales import SaleListResource, SaleResource, ClearSalesResource, SaleSummaryResource
@@ -106,18 +105,9 @@ api.add_resource(StorekeeperDashboardResource, '/storekeeper/dashboard')
 # ----------- CLEAR ALL DATA -----------
 api.add_resource(ClearAllDataResource, '/clear-all')
 
-# ----------- STOCK TRACKING -----------
-api.add_resource(StockTrackingListResource, '/stock-tracking')
-api.add_resource(ClearStockTrackingResource, '/stock-tracking/clear')
-api.add_resource(StockTrackingAggregatedResource, '/stock-tracking/aggregated')
-
-# ----------- SELLER FRUITS -----------
-api.add_resource(SellerFruitListResource, '/seller-fruits')
-api.add_resource(SellerFruitResource, '/seller-fruits/<int:fruit_id>')
-
 # ----------- SALES -----------
 api.add_resource(SaleListResource, '/sales')
-api.add_resource(SaleResource, '/api/sales/<int:sale_id>')
+api.add_resource(SaleResource, '/sales/<int:sale_id>')
 api.add_resource(ClearSalesResource, '/sales/clear')
 api.add_resource(SaleSummaryResource, '/sales/summary')
 

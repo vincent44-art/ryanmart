@@ -195,6 +195,24 @@ def create_app(config_class=Config):
             'status_code': 401
         }), 401
 
+    @jwt.needs_fresh_token_loader
+    def fresh_token_required_callback(error):
+        return jsonify({
+            'success': False,
+            'message': 'Fresh token required',
+            'error': 'fresh_token_required',
+            'status_code': 401
+        }), 401
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_data):
+        return jsonify({
+            'success': False,
+            'message': 'Token has been revoked',
+            'error': 'token_revoked',
+            'status_code': 401
+        }), 401
+
     # =====================================================================
     # API SETUP
     # =====================================================================
@@ -291,6 +309,41 @@ def create_app(config_class=Config):
             'version': '1.0.0',
             'cors_origins': allowed_origins
         })
+
+    @app.route('/api/_debug/routes')
+    def debug_routes():
+        """Debug endpoint - list all registered API routes."""
+        routes = []
+        for rule in app.url_map.iter_rules():
+            if rule.endpoint != 'static':
+                routes.append({
+                    'methods': sorted(list(rule.methods - {'OPTIONS', 'HEAD'})),
+                    'path': rule.rule,
+                    'endpoint': rule.endpoint
+                })
+        return jsonify({
+            'success': True,
+            'routes': routes,
+            'total': len(routes)
+        })
+
+    @app.route('/api/_debug/stock-tracking')
+    def debug_stock_tracking():
+        """Direct debug endpoint for stock tracking - bypasses Flask-RESTful."""
+        try:
+            from models.stock_tracking import StockTracking
+            records = StockTracking.query.order_by(StockTracking.date_in.desc()).limit(10).all()
+            data = [record.to_dict() for record in records]
+            return jsonify({
+                'success': True,
+                'data': data,
+                'message': 'Stock tracking debug - direct endpoint works!'
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'message': f'Error: {str(e)}'
+            }), 500
 
     @app.route('/api/cors-test')
     def cors_test():
