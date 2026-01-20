@@ -63,78 +63,78 @@ api.interceptors.request.use(
   },
   (error) => {
     console.error('[API] Request interceptor error:', error);
-    return Promise.reject(error);
-  }
-);
+    import axios from 'axios';
 
-// =====================================================================
-// RESPONSE INTERCEPTOR - SAFE JSON PARSING & ERROR HANDLING
-// =====================================================================
-api.interceptors.response.use(
-  // SUCCESS HANDLER
-  (response) => {
-    // Log response in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[API] Response ${response.status}: ${response.config.url}`);
-    }
-    
-    // Validate that response is actually JSON before trying to parse
-    const contentType = response.headers['content-type'] || '';
-    
-    if (contentType.includes('application/json')) {
-      // Axios already parsed JSON, just return the response
-      return response;
-    } else if (response.config.responseType === 'blob') {
-      // Handle blob responses (like PDF files)
-      return response;
-    } else {
-      // Unexpected content type - this shouldn't happen for API calls
-      console.warn('[API] Unexpected content-type:', contentType, 'URL:', response.config.url);
-      
-      // Try to parse as JSON anyway (some servers don't set content-type correctly)
-      try {
-        // If response.data is already an object (axios might have parsed it)
-        if (typeof response.data === 'object') {
-          return response;
-        }
-        // Try to parse string response as JSON
-        const parsed = JSON.parse(response.data);
-        return { ...response, data: parsed };
-      } catch {
-        // Return original response if parsing fails
-        return response;
-      }
-    }
-  },
-  
-  // ERROR HANDLER
-  async (error) => {
-    const originalRequest = error.config;
-    
-    // Log error details
-    console.error('[API] Error:', {
-      url: error.config?.url,
-      status: error.response?.status,
-      message: error.message,
-      code: error.code,
+    // Small, reliable axios wrapper for RyanMart frontend
+    // - Normalizes paths so components may call either '/car-expenses' or '/api/car-expenses'
+    // - Defaults API_BASE_URL to '', allowing same-origin calls when frontend served by backend
+    // - Honors REACT_APP_API_BASE_URL when provided (e.g., https://ryanmart-backend.onrender.com)
+
+    const getApiBaseUrl = () => {
+      const env = process.env.REACT_APP_API_BASE_URL;
+      if (env !== undefined) return env;
+      // Default to same-origin (no host) so relative calls work when frontend is served by backend
+      return '';
+    };
+
+    export const API_BASE_URL = getApiBaseUrl();
+
+    const api = axios.create({
+      baseURL: API_BASE_URL,
+      withCredentials: true,
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      timeout: 30000,
     });
-    
-    // Handle 401 Unauthorized - token expired or invalid
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      // Try to refresh token
+
+    api.interceptors.request.use((config) => {
+      const token = localStorage.getItem('access_token');
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    });
+
+    // Detect HTML responses for API calls and fail early
+    api.interceptors.response.use(
+      (res) => res,
+      (error) => {
+        if (error && error.response) {
+          const ct = error.response.headers['content-type'] || '';
+          if (!ct.includes('application/json') && ct.includes('text/html')) {
+            const e = new Error('Server returned HTML instead of JSON');
+            e.isHtmlResponse = true;
+            e.response = error.response;
+            return Promise.reject(e);
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    function normalizeUrl(url) {
+      if (!url) return url;
+      if (/^https?:\/\//i.test(url)) return url; // absolute URL
+      if (url.startsWith('/api/')) return url;
+      if (url === '/api') return url;
+      if (url.startsWith('/')) return `/api${url}`;
+      return `/api/${url}`;
+    }
+
+    export const get = (url, params = {}, config = {}) => api.get(normalizeUrl(url), { params, ...config });
+    export const post = (url, data = {}, config = {}) => api.post(normalizeUrl(url), data, config);
+    export const put = (url, data = {}, config = {}) => api.put(normalizeUrl(url), data, config);
+    export const patch = (url, data = {}, config = {}) => api.patch(normalizeUrl(url), data, config);
+    export const del = (url, config = {}) => api.delete(normalizeUrl(url), config);
+    export const head = (url, config = {}) => api.head(normalizeUrl(url), config);
+
+    export const safeApiCall = async (fn) => {
       try {
-        const refreshToken = localStorage.getItem('refresh_token');
-        if (refreshToken) {
-          const refreshResponse = await axios.post(
-            `${API_BASE_URL}/api/auth/refresh`,
-            { refresh_token: refreshToken },
-            { withCredentials: true }
-          );
-          
-          if (refreshResponse.data.success) {
-            const { access_token } = refreshResponse.data.data;
+        const res = await fn();
+        return { success: true, data: res.data, status: res.status };
+      } catch (err) {
+        return { success: false, error: err.message || 'API error', status: err.response?.status, isHtmlResponse: err.isHtmlResponse };
+      }
+    };
+
+    export default api;
             localStorage.setItem('access_token', access_token);
             
             // Retry original request with new token
