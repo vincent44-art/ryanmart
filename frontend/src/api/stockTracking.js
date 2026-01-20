@@ -1,19 +1,5 @@
-// BASE_URL will come from REACT_APP_API_BASE_URL env var via fetch relative path
-// No need to hardcode localhost anymore
-
-// Get API base URL for debugging - same logic as axios.js
-const getApiBaseUrl = () => {
-  const envUrl = process.env.REACT_APP_API_BASE_URL;
-  if (envUrl) {
-    return envUrl;
-  }
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://ryanmart-backend.onrender.com';
-  }
-  return 'http://localhost:5000';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+// Import API base URL from the centralized configuration
+import { API_BASE_URL } from '../services/api.js';
 
 /**
  * Check if the response is HTML (like a 404 page)
@@ -40,7 +26,7 @@ export const fetchStockTracking = async (token) => {
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -98,7 +84,7 @@ export const addStockTracking = async (data, token) => {
   }
 
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -132,7 +118,7 @@ export async function clearStockTracking(token) {
   const endpoint = '/api/stock-tracking/clear';
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
-  const res = await fetch(endpoint, {
+  const res = await fetch(fullUrl, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -162,7 +148,7 @@ export const fetchStockTrackingAggregated = async (token) => {
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -199,8 +185,11 @@ export const fetchSales = async (token) => {
     throw new Error('Authentication token is required');
   }
 
+  const endpoint = '/api/sales';
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
   try {
-    const response = await fetch('/api/sales', {
+    const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -227,3 +216,4 @@ export const fetchSales = async (token) => {
     throw error;
   }
 };
+
