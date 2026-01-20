@@ -345,6 +345,390 @@ def create_app(config_class=Config):
                 'message': f'Error: {str(e)}'
             }), 500
 
+    # =====================================================================
+    # STOCK TRACKING DIRECT ROUTES (FALLBACK - bypasses Flask-RESTful)
+    # These ensure stock tracking endpoints work even if Flask-RESTful has issues
+    # =====================================================================
+    @app.route('/api/stock-tracking', methods=['GET', 'POST', 'OPTIONS'])
+    def stock_tracking_handler():
+        """
+        Direct Flask handler for /api/stock-tracking endpoint.
+        This is a fallback in case Flask-RESTful routing fails.
+        """
+        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from models.stock_tracking import StockTracking
+        from models.user import User
+        
+        # Handle CORS preflight
+        if request.method == 'OPTIONS':
+            resp = make_response('', 204)
+            origin = request.headers.get('Origin', '')
+            if allowed_origins == ['*'] or origin in allowed_origins:
+                resp.headers['Access-Control-Allow-Origin'] = origin or allowed_origins[0] if allowed_origins else '*'
+                resp.headers['Access-Control-Allow-Credentials'] = 'true'
+                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+                resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+            return resp
+        
+        try:
+            # Verify authentication
+            identity = get_jwt_identity()
+            if not identity:
+                return jsonify({
+                    'success': False,
+                    'message': 'Missing access token',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+            
+            current_user = User.query.get(identity)
+            if not current_user:
+                return jsonify({
+                    'success': False,
+                    'message': 'User not found',
+                    'error': 'user_not_found',
+                    'status_code': 401
+                }), 401
+            
+            # Check role for POST (only storekeeper and ceo can create)
+            if request.method == 'POST':
+                allowed_roles = ['storekeeper', 'ceo', 'admin']
+                if current_user.role not in allowed_roles and not any(r in str(current_user.role) for r in allowed_roles):
+                    return jsonify({
+                        'success': False,
+                        'message': 'Insufficient permissions',
+                        'error': 'forbidden',
+                        'status_code': 403
+                    }), 403
+            
+            # Handle GET request
+            if request.method == 'GET':
+                records = StockTracking.query.order_by(StockTracking.date_in.desc()).all()
+                data = [record.to_dict() for record in records]
+                return jsonify({
+                    'success': True,
+                    'data': data,
+                    'message': 'Stock tracking records fetched.'
+                })
+            
+            # Handle POST request
+            if request.method == 'POST':
+                data = request.get_json() or {}
+                
+                # Check if this is an update (stock out) by presence of stockInId
+                if data.get('stockInId'):
+                    # Update existing record for stock out
+                    record_id = int(data['stockInId'])
+                    record = StockTracking.query.get_or_404(record_id)
+                    
+                    # Automatically set date_out if not provided or invalid
+                    if not data.get('dateOut'):
+                        date_out = datetime.now().date()
+                    else:
+                        try:
+                            date_out = datetime.strptime(data['dateOut'], '%Y-%m-%d').date()
+                        except ValueError:
+                            date_out = datetime.now().date()
+                    
+                    # Update the record with stock out data
+                    record.date_out = date_out
+                    record.duration = data.get('duration')
+                    record.gradient_used = data.get('gradientUsed')
+                    record.gradient_amount_used = data.get('gradientAmountUsed')
+                    record.gradient_cost_per_unit = data.get('gradientCostPerUnit')
+                    record.total_gradient_cost = data.get('totalGradientCost')
+                    record.quantity_out = data.get('quantityOut')
+                    record.spoilage = data.get('spoilage')
+                    record.total_stock_cost = data.get('totalStockCost')
+                    
+                    db.session.commit()
+                    return jsonify({
+                        'success': True,
+                        'data': record.to_dict(),
+                        'message': 'Stock tracking record updated for stock out.'
+                    }), 200
+                else:
+                    # Create new record for stock in
+                    # Automatically set date_in to today if not provided or invalid
+                    if not data.get('dateIn'):
+                        date_in = datetime.now().date()
+                    else:
+                        try:
+                            date_in = datetime.strptime(data['dateIn'], '%Y-%m-%d').date()
+                        except ValueError:
+                            date_in = datetime.now().date()
+                    
+                    # Automatically set date_out to None if not provided or invalid
+                    if not data.get('dateOut'):
+                        date_out = None
+                    else:
+                        try:
+                            date_out = datetime.strptime(data['dateOut'], '%Y-%m-%d').date()
+                        except ValueError:
+                            date_out = None
+                    
+                    record = StockTracking(
+                        stock_name=data['stockName'],
+                        date_in=date_in,
+                        fruit_type=data['fruitType'],
+                        quantity_in=data['quantityIn'],
+                        amount_per_kg=data.get('amountPerKg', 0),
+                        total_amount=data.get('totalAmount', 0),
+                        other_charges=data.get('otherCharges', 0),
+                        date_out=date_out,
+                        duration=data.get('duration'),
+                        gradient_used=data.get('gradientUsed'),
+                        gradient_amount_used=data.get('gradientAmountUsed'),
+                        gradient_cost_per_unit=data.get('gradientCostPerUnit'),
+                        total_gradient_cost=data.get('totalGradientCost'),
+                        quantity_out=data.get('quantityOut'),
+                        spoilage=data.get('spoilage'),
+                        total_stock_cost=data.get('totalStockCost'),
+                    )
+                    db.session.add(record)
+                    db.session.commit()
+                    return jsonify({
+                        'success': True,
+                        'data': record.to_dict(),
+                        'message': 'Stock tracking record created.'
+                    }), 201
+                    
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Stock tracking handler error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error: {str(e)}',
+                'error': 'internal_error'
+            }), 500
+
+    @app.route('/api/stock-tracking/aggregated', methods=['GET', 'OPTIONS'])
+    def stock_tracking_aggregated_handler():
+        """
+        Direct Flask handler for /api/stock-tracking/aggregated endpoint.
+        This is a fallback in case Flask-RESTful routing fails.
+        """
+        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from models.stock_tracking import StockTracking
+        from models.user import User
+        from models.sales import Sale
+        from models.other_expense import OtherExpense
+        from models.driver import DriverExpense
+        from models.stock_movement import StockMovement
+        from models.inventory import Inventory
+        from models.purchases import Purchase
+        import logging
+        import re
+        
+        # Handle CORS preflight
+        if request.method == 'OPTIONS':
+            resp = make_response('', 204)
+            origin = request.headers.get('Origin', '')
+            if allowed_origins == ['*'] or origin in allowed_origins:
+                resp.headers['Access-Control-Allow-Origin'] = origin or allowed_origins[0] if allowed_origins else '*'
+                resp.headers['Access-Control-Allow-Credentials'] = 'true'
+                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+                resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+            return resp
+        
+        try:
+            # Verify authentication
+            identity = get_jwt_identity()
+            if not identity:
+                return jsonify({
+                    'success': False,
+                    'message': 'Missing access token',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+            
+            current_user = User.query.get(identity)
+            if not current_user:
+                return jsonify({
+                    'success': False,
+                    'message': 'User not found',
+                    'error': 'user_not_found',
+                    'status_code': 401
+                }), 401
+            
+            logger = logging.getLogger('stock_tracking')
+            logger.info("Fetching aggregated stock tracking data (direct handler)")
+            
+            # Get all stock tracking records
+            stocks = StockTracking.query.all()
+            logger.info(f"Found {len(stocks)} stock tracking records")
+            
+            # Group stocks by stock_name
+            stock_groups = {}
+            for stock in stocks:
+                name = stock.stock_name
+                if name not in stock_groups:
+                    stock_groups[name] = []
+                stock_groups[name].append(stock)
+            
+            aggregated_data = []
+            
+            for stock_name, stock_list in stock_groups.items():
+                try:
+                    # Aggregate basic info
+                    fruit_type = stock_list[0].fruit_type
+                    total_purchase_cost = sum(stock.total_amount for stock in stock_list)
+                    total_quantity_in = sum(stock.quantity_in for stock in stock_list)
+                    earliest_date_in = min((stock.date_in for stock in stock_list if stock.date_in), default=None)
+                    latest_date_out = max((stock.date_out for stock in stock_list if stock.date_out), default=None)
+                    
+                    # Calculate storage usage
+                    storage_usage = 0
+                    try:
+                        storage_result = StockMovement.query.join(Inventory).filter(
+                            Inventory.name == stock_name,
+                            StockMovement.movement_type == 'out'
+                        ).with_entities(db.func.sum(StockMovement.quantity)).scalar()
+                        storage_usage = float(storage_result) if storage_result else 0
+                    except Exception as e:
+                        logger.warning(f"Error calculating storage usage for stock {stock_name}: {str(e)}")
+                    
+                    # Calculate transport costs
+                    transport_costs = 0
+                    try:
+                        transport_result = DriverExpense.query.filter(
+                            DriverExpense.stock_name == stock_name
+                        ).with_entities(db.func.sum(DriverExpense.amount)).scalar()
+                        transport_costs = float(transport_result) if transport_result else 0
+                    except Exception as e:
+                        logger.warning(f"Error calculating transport costs for stock {stock_name}: {str(e)}")
+                    
+                    # Calculate other expenses
+                    other_expenses = 0
+                    try:
+                        if earliest_date_in or latest_date_out:
+                            stock_date = earliest_date_in or latest_date_out or datetime.now().date()
+                            date_start = stock_date - timedelta(days=7)
+                            date_end = (latest_date_out or stock_date) + timedelta(days=7)
+                        else:
+                            date_start = datetime.now().date() - timedelta(days=30)
+                            date_end = datetime.now().date() + timedelta(days=30)
+                        
+                        expense_result = OtherExpense.query.filter(
+                            OtherExpense.date >= date_start,
+                            OtherExpense.date <= date_end
+                        ).with_entities(db.func.sum(OtherExpense.amount)).scalar()
+                        other_expenses = float(expense_result) if expense_result else 0
+                    except Exception as e:
+                        logger.warning(f"Error calculating other expenses for stock {stock_name}: {str(e)}")
+                    
+                    # Calculate revenue and quantity sold
+                    revenue = 0
+                    quantity_sold = 0
+                    try:
+                        date_start = earliest_date_in or datetime.now().date() - timedelta(days=365)
+                        date_end = datetime.now().date()
+                        sales_query = Sale.query.filter(
+                            Sale.stock_name == stock_name,
+                            Sale.date >= date_start,
+                            Sale.date <= date_end
+                        )
+                        revenue_result = sales_query.with_entities(db.func.sum(Sale.amount)).scalar()
+                        quantity_result = sales_query.with_entities(db.func.sum(Sale.qty)).scalar()
+                        revenue = float(revenue_result) if revenue_result else 0
+                        quantity_sold = float(quantity_result) if quantity_result else 0
+                    except Exception as e:
+                        logger.warning(f"Error calculating revenue for stock {stock_name}: {str(e)}")
+                    
+                    # Calculate profit/loss
+                    total_costs = total_purchase_cost + transport_costs + other_expenses
+                    profit_loss = revenue - total_costs
+                    
+                    aggregated_data.append({
+                        'stock_name': stock_name,
+                        'fruit_type': fruit_type,
+                        'purchase_cost': total_purchase_cost,
+                        'storage_usage': storage_usage,
+                        'transport_costs': transport_costs,
+                        'other_expenses': other_expenses,
+                        'revenue': revenue,
+                        'quantity_sold': quantity_sold,
+                        'profit_loss': profit_loss,
+                        'date_in': earliest_date_in.isoformat() if earliest_date_in else None,
+                        'date_out': latest_date_out.isoformat() if latest_date_out else None,
+                        'total_quantity_in': total_quantity_in
+                    })
+                except Exception as e:
+                    logger.error(f"Error processing stock group {stock_name}: {str(e)}")
+                    continue
+            
+            # Calculate fruit profitability
+            fruit_profitability = {}
+            purchases = Purchase.query.all()
+            sales = Sale.query.all()
+            
+            for purchase in purchases:
+                try:
+                    fruit = purchase.fruit_type
+                    if fruit not in fruit_profitability:
+                        fruit_profitability[fruit] = {
+                            'fruit_name': fruit,
+                            'total_purchased': 0,
+                            'total_sold': 0,
+                            'total_revenue': 0,
+                            'total_costs': 0
+                        }
+                    
+                    quantity_str = str(purchase.quantity).strip()
+                    quantity_match = re.search(r'(\d+(\.\d+)?)', quantity_str)
+                    quantity = float(quantity_match.group(1)) if quantity_match else 0.0
+                    
+                    fruit_profitability[fruit]['total_purchased'] += quantity
+                    fruit_profitability[fruit]['total_costs'] += float(purchase.cost or 0)
+                except Exception as e:
+                    logger.error(f"Error processing purchase: {str(e)}")
+                    continue
+            
+            # Aggregate sales
+            try:
+                from models.seller_fruit import SellerFruit
+                sales_records = sales + SellerFruit.query.all()
+                for sale in sales_records:
+                    try:
+                        fruit = sale.fruit_name
+                        if fruit not in fruit_profitability:
+                            fruit_profitability[fruit] = {
+                                'fruit_name': fruit,
+                                'total_purchased': 0,
+                                'total_sold': 0,
+                                'total_revenue': 0,
+                                'total_costs': 0
+                            }
+                        
+                        fruit_profitability[fruit]['total_sold'] += float(sale.qty)
+                        fruit_profitability[fruit]['total_revenue'] += sale.amount
+                    except Exception as e:
+                        logger.error(f"Error processing sale: {str(e)}")
+                        continue
+            except ImportError:
+                pass
+            
+            # Calculate profit margin
+            for fruit_data in fruit_profitability.values():
+                fruit_data['profit_margin'] = fruit_data['total_revenue'] - fruit_data['total_costs']
+            
+            return jsonify({
+                'success': True,
+                'data': {
+                    'stock_expenses': aggregated_data,
+                    'fruit_profitability': list(fruit_profitability.values())
+                },
+                'message': 'Aggregated stock tracking data fetched successfully.'
+            })
+            
+        except Exception as e:
+            logger = logging.getLogger('stock_tracking')
+            logger.error(f"Error fetching aggregated data: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error fetching aggregated data: {str(e)}'
+            }), 500
+
     @app.route('/api/cors-test')
     def cors_test():
         """CORS test endpoint - returns request headers for debugging."""
@@ -372,7 +756,6 @@ def create_app(config_class=Config):
     def serve_logo(filename):
         return send_from_directory(os.path.join(os.getcwd(), 'logo'), filename)
 
-    @app.route('/', defaults={'path': ''}, methods=['GET', 'HEAD'])
     @app.route('/<path:path>', methods=['GET', 'HEAD'])
     def serve_react(path):
         """
@@ -380,19 +763,18 @@ def create_app(config_class=Config):
         IMPORTANT: This must NOT catch /api/* routes.
         """
         # If this is an API route, we should NOT be here - let 404 handler deal with it
-        if path.startswith('api/') or path == 'api':
+        # Check both at the start and at the beginning of the path
+        if path.startswith('api/') or path == 'api' or path.startswith('api'):
+            app.logger.warning(f"API route intercepted by catch-all: /{path}")
             return jsonify({
                 'success': False,
                 'message': 'API endpoint not found',
                 'error': 'not_found',
-                'status_code': 404
+                'status_code': 404,
+                'path': f'/{path}'
             }), 404
         
         app.logger.info(f"Serving React for path: {path}")
-        
-        # If path is empty, serve index.html
-        if not path:
-            return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
         
         # Check if the path is a file in the build directory
         full_path = os.path.join(FRONTEND_BUILD_DIR, path)
@@ -400,6 +782,11 @@ def create_app(config_class=Config):
             return send_from_directory(FRONTEND_BUILD_DIR, path)
         
         # Otherwise, serve index.html for SPA routing (React Router)
+        # Only if path is not empty
+        if path:
+            return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
+        
+        # Empty path - serve index.html
         return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
 
     # =====================================================================

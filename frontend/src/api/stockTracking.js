@@ -1,13 +1,46 @@
 // BASE_URL will come from REACT_APP_API_BASE_URL env var via fetch relative path
 // No need to hardcode localhost anymore
 
+// Get API base URL for debugging - same logic as axios.js
+const getApiBaseUrl = () => {
+  const envUrl = process.env.REACT_APP_API_BASE_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://ryanmart-backend.onrender.com';
+  }
+  return 'http://localhost:5000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+/**
+ * Check if the response is HTML (like a 404 page)
+ */
+const isHtmlResponse = async (response) => {
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const text = await response.text();
+    // Check for HTML indicators
+    if (text.trim().startsWith('<!') || text.includes('<html')) {
+      return { isHtml: true, text };
+    }
+    return { isHtml: false, text };
+  }
+  return { isHtml: false };
+};
+
 export const fetchStockTracking = async (token) => {
   if (!token) {
     throw new Error('Authentication token is required');
   }
 
+  const endpoint = '/api/stock-tracking';
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
   try {
-    const response = await fetch('/api/stock-tracking', {
+    const response = await fetch(endpoint, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -15,22 +48,26 @@ export const fetchStockTracking = async (token) => {
       }
     });
 
-    // Check content type to avoid parsing HTML as JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error('Stock tracking fetch error: Expected JSON but got:', text.substring(0, 200));
-      throw new Error('Server returned non-JSON response. Check API endpoint.');
+    // Check if response is HTML (error page)
+    const htmlCheck = await isHtmlResponse(response);
+    if (htmlCheck.isHtml) {
+      console.error('Stock tracking fetch error: Server returned HTML (possibly 404).', 
+        'URL:', fullUrl, 'Endpoint:', endpoint);
+      throw new Error(`Server returned HTML page instead of JSON. The API endpoint "${endpoint}" may not be registered or backend is not running. URL: ${fullUrl}`);
     }
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch stock tracking data');
+      throw new Error(error.message || `Failed to fetch stock tracking data (status: ${response.status})`);
     }
 
     return await response.json();
   } catch (error) {
     console.error('Stock tracking fetch error:', error);
+    // Add more context to the error
+    if (error.message.includes('HTML')) {
+      throw new Error(`Stock tracking API error: ${error.message}`);
+    }
     throw error;
   }
 };
@@ -39,6 +76,9 @@ export const addStockTracking = async (data, token) => {
   if (!token) {
     throw new Error('Authentication token is required');
   }
+
+  const endpoint = '/api/stock-tracking';
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   // Validate required fields based on backend model
   // For stock out (update), stockInId is required; for stock in (create), stockName, dateIn, fruitType, quantityIn are required
@@ -58,7 +98,7 @@ export const addStockTracking = async (data, token) => {
   }
 
   try {
-    const response = await fetch('/api/stock-tracking', {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -71,8 +111,9 @@ export const addStockTracking = async (data, token) => {
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
-      console.error('Stock tracking creation/update error: Expected JSON but got:', text.substring(0, 200));
-      throw new Error('Server returned non-JSON response. Check API endpoint.');
+      console.error('Stock tracking creation/update error: Expected JSON but got:', 
+        text.substring(0, 200), 'URL:', fullUrl);
+      throw new Error(`Server returned non-JSON response. Check API endpoint. URL: ${fullUrl}`);
     }
 
     if (!response.ok) {
@@ -88,7 +129,10 @@ export const addStockTracking = async (data, token) => {
 };
 
 export async function clearStockTracking(token) {
-  const res = await fetch('/api/stock-tracking/clear', {
+  const endpoint = '/api/stock-tracking/clear';
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
+  const res = await fetch(endpoint, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -100,8 +144,9 @@ export async function clearStockTracking(token) {
   const contentType = res.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
     const text = await res.text();
-    console.error('Clear stock tracking error: Expected JSON but got:', text.substring(0, 200));
-    throw new Error('Server returned non-JSON response. Check API endpoint.');
+    console.error('Clear stock tracking error: Expected JSON but got:', 
+      text.substring(0, 200), 'URL:', fullUrl);
+    throw new Error(`Server returned non-JSON response. Check API endpoint. URL: ${fullUrl}`);
   }
 
   if (!res.ok) throw new Error('Failed to clear stock tracking');
@@ -113,8 +158,11 @@ export const fetchStockTrackingAggregated = async (token) => {
     throw new Error('Authentication token is required');
   }
 
+  const endpoint = '/api/stock-tracking/aggregated';
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
   try {
-    const response = await fetch('/api/stock-tracking/aggregated', {
+    const response = await fetch(endpoint, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -122,22 +170,26 @@ export const fetchStockTrackingAggregated = async (token) => {
       }
     });
 
-    // Check content type to avoid parsing HTML as JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error('Aggregated data fetch error: Expected JSON but got:', text.substring(0, 200));
-      throw new Error('Server returned non-JSON response. Check API endpoint.');
+    // Check if response is HTML (error page)
+    const htmlCheck = await isHtmlResponse(response);
+    if (htmlCheck.isHtml) {
+      console.error('Aggregated data fetch error: Server returned HTML (possibly 404).', 
+        'URL:', fullUrl, 'Endpoint:', endpoint);
+      throw new Error(`Server returned HTML page instead of JSON. The API endpoint "${endpoint}" may not be registered or backend is not running. URL: ${fullUrl}`);
     }
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch aggregated data');
+      throw new Error(error.message || `Failed to fetch aggregated data (status: ${response.status})`);
     }
 
     return await response.json();
   } catch (error) {
     console.error('Aggregated data fetch error:', error);
+    // Add more context to the error
+    if (error.message.includes('HTML')) {
+      throw new Error(`Aggregated data API error: ${error.message}`);
+    }
     throw error;
   }
 };

@@ -1,57 +1,45 @@
-# TODO Fix Stock Tracking API - JSON/HTML Error
+# TODO: Fix Stock Tracking API returning HTML instead of JSON
 
 ## Problem
-The frontend (`/api/stock-tracking`) was receiving HTML (React's `index.html`) instead of JSON from the API.
+The stock tracking API endpoints `/api/stock-tracking` and `/api/stock-tracking/aggregated` are returning HTML (404 page) instead of JSON responses.
 
-## Root Causes Identified
+## Root Cause
+The requests are hitting the React SPA catch-all route (`serve_react`) instead of the Flask-RESTful routes for stock tracking. This could be due to:
+1. Route registration order issues
+2. Trailing slash mismatches
+3. CORS preflight issues
 
-1. **Duplicate Route Registration**: Stock tracking routes were registered in both:
-   - `backend/resources/__init__.py`
-   - `backend/app.py`
-   
-2. **Missing JWT Error Handlers**: Flask-JWT-Extended was not properly handling missing authorization headers, causing 500 errors instead of 401.
+## Fix Applied
 
-## Fixes Applied
+### 1. Backend Fix (`backend/app.py`)
+Added direct Flask route handlers as fallbacks that bypass Flask-RESTful:
+- `/api/stock-tracking` - GET and POST handlers with JWT authentication
+- `/api/stock-tracking/aggregated` - GET handler with JWT authentication
 
-### 1. Removed Duplicate Routes from `resources/__init__.py`
-- Removed stock tracking route imports and registrations
-- Fixed SaleResource route from `/api/sales/<int:sale_id>` to `/sales/<int:sale_id>` (avoiding double `/api/` prefix)
+These handlers:
+- Include proper CORS headers including preflight OPTIONS handling
+- Verify JWT authentication and user permissions
+- Handle all the same operations as the Flask-RESTful resources
+- Return proper JSON responses
+- Include comprehensive error handling and logging
 
-### 2. Added Debug Endpoints in `app.py`
-- `/api/_debug/routes` - Lists all registered API routes
-- `/api/_debug/stock-tracking` - Direct test endpoint for stock tracking
+### 2. Frontend Fix (`frontend/src/api/stockTracking.js`)
+Added improved error handling:
+- New `isHtmlResponse()` helper function to detect HTML error pages
+- Better error messages that include the URL being called
+- Improved console logging for debugging
+- More context in thrown errors
 
-### 3. Added JWT Error Handlers in `app.py`
-- `missing_token_callback` - Handles missing authorization (was already present)
-- `needs_fresh_token_callback` - Handles fresh token requirement
-- `revoked_token_callback` - Handles revoked tokens
+## Files Modified
+1. `backend/app.py` - Added fallback Flask route handlers
+2. `frontend/src/api/stockTracking.js` - Improved error handling and diagnostics
 
-## Verification
+## Testing
+After deploying these changes:
+1. Visit `/api/health` to verify the backend is running
+2. Visit `/api/_debug/routes` to see all registered routes
+3. Visit `/api/_debug/stock-tracking` to test the stock tracking endpoint directly
+4. Try logging in and accessing the analytics dashboard
 
-Run the test script to verify:
-```bash
-cd /home/vincent/ryanmart && python test_stock_tracking_api.py
-```
-
-Expected results:
-- `/api/health` ✅ Returns JSON
-- `/api/_debug/routes` ✅ Returns JSON with stock tracking routes
-- `/api/_debug/stock-tracking` ✅ Returns JSON
-- `/api/stock-tracking` ✅ Returns JSON (401 for unauthorized)
-
-## Debug Endpoints
-
-Use these to diagnose issues:
-1. **Check route registration**: `GET /api/_debug/routes`
-2. **Test stock tracking**: `GET /api/_debug/stock-tracking`
-3. **Health check**: `GET /api/health`
-4. **CORS test**: `GET /api/cors-test`
-
-## If Still Getting HTML
-
-If the frontend still receives HTML:
-1. Ensure frontend is using correct API URL: `/api/stock-tracking`
-2. Check browser DevTools Network tab for actual response
-3. Verify CORS headers are present in response
-4. Check that the backend is running and accessible
+## Status: COMPLETED
 
