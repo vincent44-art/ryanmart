@@ -1008,6 +1008,7 @@ class StockTrackingAggregatedResource(Resource):
             )
 
         except Exception as e:
+            db.session.rollback()
             logger = logging.getLogger('stock_tracking')
             logger.error(f"Error fetching aggregated data: {str(e)}")
             return make_response_data(success=False, message=f"Error fetching aggregated data: {str(e)}", status_code=500)
