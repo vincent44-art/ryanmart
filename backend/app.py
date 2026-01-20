@@ -761,11 +761,21 @@ def create_app(config_class=Config):
         """
         Serve React frontend for non-API routes only.
         IMPORTANT: This must NOT catch /api/* routes.
+        
+        CRITICAL FIX: This catch-all MUST NOT intercept any API routes.
+        All /api/* requests should be handled by Flask-RESTful and return JSON.
         """
-        # If this is an API route, we should NOT be here - let 404 handler deal with it
-        # Check both at the start and at the beginning of the path
-        if path.startswith('api/') or path == 'api' or path.startswith('api'):
-            app.logger.warning(f"API route intercepted by catch-all: /{path}")
+        # =====================================================================
+        # API ROUTE DETECTION - MUST CATCH ALL API PATTERNS
+        # =====================================================================
+        # Check for any API route pattern - these must return JSON, not HTML
+        
+        # Normalize path - remove leading slash for consistent checking
+        normalized_path = path.lstrip('/')
+        
+        # Pattern 1: Direct /api prefix
+        if normalized_path.startswith('api/') or normalized_path == 'api':
+            app.logger.warning(f"API route intercepted by catch-all (normalized): /{path}")
             return jsonify({
                 'success': False,
                 'message': 'API endpoint not found',
@@ -774,6 +784,45 @@ def create_app(config_class=Config):
                 'path': f'/{path}'
             }), 404
         
+        # Pattern 2: Double slashes or encoded paths
+        if '/' + normalized_path + '/' in request.path or request.path.endswith('/' + normalized_path):
+            if normalized_path.startswith('api'):
+                app.logger.warning(f"API route intercepted (end check): /{path}")
+                return jsonify({
+                    'success': False,
+                    'message': 'API endpoint not found',
+                    'error': 'not_found',
+                    'status_code': 404,
+                    'path': f'/{path}'
+                }), 404
+        
+        # Pattern 3: Check for stock-tracking specifically (the problematic endpoint)
+        if 'stock-tracking' in path.lower():
+            app.logger.warning(f"Stock tracking route intercepted by catch-all: /{path}")
+            return jsonify({
+                'success': False,
+                'message': 'API endpoint not found',
+                'error': 'not_found',
+                'status_code': 404,
+                'path': f'/{path}'
+            }), 404
+        
+        # Pattern 4: Any path that looks like an API endpoint
+        api_indicators = ['/api/', '/auth/', '/stock', '/sales', '/purchases', '/expenses', '/inventory']
+        for indicator in api_indicators:
+            if indicator in request.path.lower():
+                app.logger.warning(f"API route intercepted (indicator check: {indicator}): /{path}")
+                return jsonify({
+                    'success': False,
+                    'message': 'API endpoint not found',
+                    'error': 'not_found',
+                    'status_code': 404,
+                    'path': f'/{path}'
+                }), 404
+        
+        # =====================================================================
+        # NON-API ROUTES - Serve React frontend
+        # =====================================================================
         app.logger.info(f"Serving React for path: {path}")
         
         # Check if the path is a file in the build directory
@@ -781,8 +830,12 @@ def create_app(config_class=Config):
         if os.path.isfile(full_path):
             return send_from_directory(FRONTEND_BUILD_DIR, path)
         
+        # Check if it's a static asset path
+        if path.startswith('static/') or path.startswith('logo/'):
+            return send_from_directory(FRONTEND_BUILD_DIR, path)
+        
         # Otherwise, serve index.html for SPA routing (React Router)
-        # Only if path is not empty
+        # Only if path is not empty and not an API call
         if path:
             return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
         
@@ -832,16 +885,41 @@ def create_app(config_class=Config):
         log_api_error(request.path, "Not found", 404)
         
         # Check if it's an API route - return JSON
-        if request.path.startswith('/api') or request.path == '/api':
+        # This check is CRITICAL - must catch all API patterns
+        path = request.path
+        
+        # List of API indicators to check
+        api_indicators = ['/api/', '/auth/', '/stock', '/tracking', '/sales', '/purchases', 
+                         '/expenses', '/inventory', '/dashboard', '/users', '/it/']
+        
+        is_api_route = (
+            path.startswith('/api') or 
+            path == '/api' or
+            path.startswith('/auth') or
+            any(indicator in path.lower() for indicator in api_indicators)
+        )
+        
+        if is_api_route:
+            app.logger.warning(f"API 404 error for path: {path}")
             return jsonify({
                 'success': False,
                 'message': 'The requested API endpoint was not found.',
                 'error': 'not_found',
                 'status_code': 404,
-                'path': request.path
+                'path': path
             }), 404
         
         # For non-API routes, let the React SPA handle it
+        # Check if frontend build exists
+        if not os.path.exists(FRONTEND_BUILD_DIR):
+            app.logger.error(f"Frontend build directory not found: {FRONTEND_BUILD_DIR}")
+            return jsonify({
+                'success': False,
+                'message': 'Frontend not built. API only mode.',
+                'error': 'frontend_not_available',
+                'status_code': 200  # Return 200 so frontend shows a message, not an error
+            }), 200
+        
         return send_from_directory(FRONTEND_BUILD_DIR, 'index.html')
 
     @app.errorhandler(405)
