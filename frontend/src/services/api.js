@@ -28,7 +28,7 @@ const getApiBaseUrl = () => {
   return 'http://localhost:5000';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
 
 console.log(`[API] Initializing with base URL: ${API_BASE_URL}`);
 console.log(`[API] Environment: ${process.env.NODE_ENV}`);
