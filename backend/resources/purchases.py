@@ -1,10 +1,11 @@
 from flask import Blueprint, jsonify
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from sqlalchemy import func
 from extensions import db
 from models.purchases import Purchase
-from models.user import UserRole
+from models.user import UserRole, User
 from utils.helpers import make_response_data, get_current_user
 from utils.decorators import role_required
 from flask import send_file
@@ -37,8 +38,32 @@ def get_ceo_messages():
 
 
 @purchases_bp.route("/purchases/by-email/<string:email>", methods=["GET"])
+@jwt_required()
 def get_purchases_by_email(email):
-    from models.user import User
+    """
+    Get purchases by purchaser email.
+    Requires JWT authentication.
+    """
+    # Get current user from JWT to verify access
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    
+    if not current_user:
+        return make_response_data(
+            success=False,
+            message="User not found.",
+            status_code=401
+        )
+    
+    # Verify the requested email matches the current user's email
+    # or if the user is a CEO/admin who can view all purchases
+    if email != current_user.email and current_user.role not in ['CEO', 'ADMIN', 'ceo', 'admin']:
+        return make_response_data(
+            success=False,
+            message="Not authorized to view these purchases.",
+            status_code=403
+        )
+    
     user = User.query.filter_by(email=email).first()
     if not user:
         return make_response_data(

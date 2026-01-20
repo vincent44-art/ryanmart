@@ -58,25 +58,63 @@ const PurchaserDashboard = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const [purchasesResponse, otherExpensesResponse] = await Promise.all([
           fetchPurchases(user.email),
           fetchOtherExpenses()
         ]);
+        
         // Ensure purchases is always an array (handle paginated response)
         let purchasesData = purchasesResponse?.data;
-        if (Array.isArray(purchasesData)) {
+        
+        // Check if the response is valid JSON (not HTML)
+        if (purchasesResponse && typeof purchasesResponse === 'object' && !Array.isArray(purchasesData) && purchasesData?.success !== undefined) {
+          // API returned a valid JSON response
+          if (Array.isArray(purchasesData?.data)) {
+            setPurchases(purchasesData.data);
+          } else if (purchasesData?.items && Array.isArray(purchasesData.items)) {
+            setPurchases(purchasesData.items);
+          } else {
+            setPurchases([]);
+          }
+        } else if (Array.isArray(purchasesData)) {
+          // Direct array response
           setPurchases(purchasesData);
-        } else if (purchasesData?.items && Array.isArray(purchasesData.items)) {
-          setPurchases(purchasesData.items);
-        } else if (Array.isArray(purchasesData?.data)) {
-          setPurchases(purchasesData.data);
         } else {
+          console.warn('Unexpected purchases response format:', purchasesResponse);
           setPurchases([]);
         }
-        setOtherExpenses(otherExpensesResponse?.data || []);
+        
+        // Handle other expenses response
+        if (otherExpensesResponse && typeof otherExpensesResponse === 'object') {
+          const expensesData = otherExpensesResponse?.data;
+          if (Array.isArray(expensesData)) {
+            setOtherExpenses(expensesData);
+          } else if (expensesData?.items && Array.isArray(expensesData.items)) {
+            setOtherExpenses(expensesData.items);
+          } else {
+            setOtherExpenses([]);
+          }
+        } else {
+          setOtherExpenses([]);
+        }
       } catch (err) {
-        setError('Failed to load data. Please try again later.');
+        // Handle JSON parsing errors (when API returns HTML)
+        if (err instanceof SyntaxError && err.message.includes('Unexpected token')) {
+          setError('Failed to load data. The server may be returning an error page. Please check your connection and try again.');
+        } else if (err.response?.status === 401) {
+          setError('Your session has expired. Please log in again.');
+          // Optionally trigger logout
+          if (logout) logout();
+        } else if (err.response?.status === 403) {
+          setError('You are not authorized to view this data.');
+        } else {
+          setError('Failed to load data. Please try again later.');
+        }
         console.error('Error loading data:', err);
+        // Reset data on error
+        setPurchases([]);
+        setOtherExpenses([]);
       } finally {
         setLoading(false);
       }
