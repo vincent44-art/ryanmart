@@ -941,8 +941,31 @@ class StockTrackingAggregatedResource(Resource):
 
             # Also calculate fruit profitability summary from purchases and sales
             fruit_profitability = {}
-            purchases = Purchase.query.all()
-            sales = Sale.query.all()
+
+            # Get purchases with error handling
+            try:
+                purchases = Purchase.query.all()
+            except Exception as e:
+                logger.error(f"Error fetching purchases: {str(e)}")
+                db.session.rollback()
+                purchases = []
+
+            # Get sales with error handling
+            try:
+                sales = Sale.query.all()
+            except Exception as e:
+                logger.error(f"Error fetching sales: {str(e)}")
+                db.session.rollback()
+                sales = []
+
+            # Get seller fruits with error handling
+            try:
+                from models.seller_fruit import SellerFruit
+                seller_fruits = SellerFruit.query.all()
+            except Exception as e:
+                logger.error(f"Error fetching seller fruits: {str(e)}")
+                db.session.rollback()
+                seller_fruits = []
 
             # Aggregate purchases
             for purchase in purchases:
@@ -972,8 +995,7 @@ class StockTrackingAggregatedResource(Resource):
                     continue
 
             # Aggregate sales (from sales table and seller_fruits table)
-            from models.seller_fruit import SellerFruit
-            sales_records = sales + SellerFruit.query.all()
+            sales_records = sales + seller_fruits
             for sale in sales_records:
                 try:
                     fruit = sale.fruit_name
