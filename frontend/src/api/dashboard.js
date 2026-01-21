@@ -95,7 +95,9 @@ const loadData = async () => {
           monthlyData: (d.monthlyData && d.monthlyData.length > 0) ? d.monthlyData : demoMonthlyData,
           weeklyData: (d.weeklyData && d.weeklyData.length > 0) ? d.weeklyData : demoWeeklyData,
           companyPerformance: d.companyPerformance || {},
-          sellerFruits: d.sellerFruits || []
+          sellerFruits: d.sellerFruits || [],
+          purchases: d.purchases || [],
+          salaries: d.salaries || []
         };
       }
       setData(transformed);

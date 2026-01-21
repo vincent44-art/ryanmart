@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { fetchSalaries, fetchUsers, deleteSalary } from './apiHelpers';
 import SalaryFormModal from './SalaryFormModal';
 
-const SalaryManagementTab = () => {
+const SalaryManagementTab = ({ data }) => {
   const [showSalaryModal, setShowSalaryModal] = useState(false);
-  const [salaries, setSalaries] = useState([]);
+  const [salaries, setSalaries] = useState(Array.isArray(data) ? data : []);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,27 +12,33 @@ const SalaryManagementTab = () => {
 
   // Fetch all data on component mount
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        const [salariesRes, usersRes] = await Promise.all([
-          fetchSalaries(token),
-          fetchUsers(token)
-        ]);
-        console.log('Loaded users:', usersRes.data);
-        console.log('Loaded salaries:', salariesRes.data);
-        const usersData = usersRes.data?.data || [];
-        setSalaries(salariesRes.data?.data || []);
-        setUsers(usersData);
-      } catch (err) {
-        console.error('Failed to load data:', err);
-        setError('Failed to load data. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
+    // If data is passed as prop, use it, otherwise fetch all salaries from DB
+    if (Array.isArray(data)) {
+      setSalaries(data);
+      setLoading(false);
+    } else {
+      const loadData = async () => {
+        try {
+          const token = localStorage.getItem('access_token');
+          const [salariesRes, usersRes] = await Promise.all([
+            fetchSalaries(token),
+            fetchUsers(token)
+          ]);
+          console.log('Loaded users:', usersRes.data);
+          console.log('Loaded salaries:', salariesRes.data);
+          const usersData = usersRes.data?.data || [];
+          setSalaries(salariesRes.data?.data || []);
+          setUsers(usersData);
+        } catch (err) {
+          console.error('Failed to load data:', err);
+          setError('Failed to load data. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadData();
+    }
+  }, [data]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-KE', {
