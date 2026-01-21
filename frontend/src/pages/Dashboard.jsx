@@ -28,6 +28,18 @@ const Dashboard = () => {
     }
   }, [data, user?.role]);
 
+  const handlePurchaseAdded = (newPurchase) => {
+    // Update the dashboard data to include the new purchase
+    const updatedData = {
+      ...data,
+      purchases: [...(data?.purchases || []), newPurchase]
+    };
+    // Since data is managed by the hook, we need to refetch to get updated data
+    // But for immediate UI update, we can temporarily update local state
+    // However, since the hook doesn't expose setData, we'll refetch
+    refetch();
+  };
+
   const renderTabContent = () => {
     if (loading) {
       return (
@@ -44,7 +56,7 @@ const Dashboard = () => {
         <div className="alert alert-danger">
           <i className="bi bi-exclamation-triangle me-2"></i>
           {error}
-          <button 
+          <button
             className="btn btn-sm btn-outline-danger ms-3"
             onClick={refetch} // Reload using hook's refetch
           >
@@ -58,7 +70,7 @@ const Dashboard = () => {
       case 'account':
         return <AccountTab />;
       case 'purchases':
-        return <PurchasesTab data={data?.purchases} />;
+        return <PurchasesTab data={data?.purchases} onPurchaseAdded={handlePurchaseAdded} />;
       case 'sales':
         return <SalesTab data={data?.sales} />;
       case 'stock-tracker':

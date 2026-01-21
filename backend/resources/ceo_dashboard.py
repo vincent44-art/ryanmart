@@ -9,6 +9,7 @@ from models.purchases import Purchase
 from models.driver import DriverExpense
 from models.other_expense import OtherExpense
 from models.seller_fruit import SellerFruit
+from models.salary import Salary
 from utils.helpers import make_response_data
 
 class CEODashboardResource(Resource):
@@ -142,6 +143,14 @@ class CEODashboardResource(Resource):
         seller_fruits = SellerFruit.query.all()
         seller_fruits_data = [fruit.to_dict() for fruit in seller_fruits]
 
+        # Fetch all purchases for CEO view
+        purchases = Purchase.query.order_by(Purchase.purchase_date.desc()).all()
+        purchases_data = [purchase.to_dict() for purchase in purchases]
+
+        # Fetch all salaries for CEO view
+        salaries = Salary.query.order_by(Salary.date.desc()).all()
+        salaries_data = [salary.to_dict() for salary in salaries]
+
         stats = {
             'totalUsers': total_users,
             'totalInventoryItems': total_inventory_items,
@@ -160,5 +169,7 @@ class CEODashboardResource(Resource):
             'monthlyData': monthly_data,
             'weeklyData': week_data,
             'companyPerformance': company_performance,
-            'sellerFruits': seller_fruits_data
+            'sellerFruits': seller_fruits_data,
+            'purchases': purchases_data,
+            'salaries': salaries_data
         }, message='CEO dashboard overview fetched.')

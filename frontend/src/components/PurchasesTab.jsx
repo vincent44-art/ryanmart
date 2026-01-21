@@ -57,7 +57,13 @@ const PurchasesTab = (props) => {
   };
 
   const handleAddPurchase = (newPurchase) => {
-    setPurchases([...purchases, newPurchase]);
+    // If onPurchaseAdded prop is provided (e.g., from CEO dashboard), use it to update parent state
+    if (props.onPurchaseAdded) {
+      props.onPurchaseAdded(newPurchase);
+    } else {
+      // Otherwise, update local state (for standalone usage)
+      setPurchases([...purchases, newPurchase]);
+    }
   };
 
   const downloadDailyReport = async (dateStr) => {
