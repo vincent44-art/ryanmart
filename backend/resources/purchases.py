@@ -37,44 +37,7 @@ def get_ceo_messages():
     return jsonify([]), 200
 
 
-@purchases_bp.route("/purchases/by-email/<string:email>", methods=["GET"])
-@jwt_required()
-def get_purchases_by_email(email):
-    """
-    Get purchases by purchaser email.
-    Requires JWT authentication.
-    """
-    # Get current user from JWT to verify access
-    current_user_id = get_jwt_identity()
-    current_user = User.query.get(current_user_id)
-    
-    if not current_user:
-        return make_response_data(
-            success=False,
-            message="User not found.",
-            status_code=401
-        )
-    
-    # Verify the requested email matches the current user's email
-    # or if the user is a CEO/admin who can view all purchases
-    if email != current_user.email and current_user.role not in ['CEO', 'ADMIN', 'ceo', 'admin']:
-        return make_response_data(
-            success=False,
-            message="Not authorized to view these purchases.",
-            status_code=403
-        )
-    
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return make_response_data(
-            data=[],
-            message="No user found with this email."
-        )
-    purchases = Purchase.query.filter_by(purchaser_id=user.id).all()
-    return make_response_data(
-        data=[p.to_dict() for p in purchases],
-        message="Purchases fetched successfully."
-    )
+
 
 
 # --- Resource Classes ---
@@ -194,6 +157,46 @@ class PurchaseSummaryResource(Resource):
             ]
         }
         return make_response_data(data=summary, message="Purchase summary fetched.")
+
+class PurchaseByEmailResource(Resource):
+    @jwt_required()
+    def get(self, email):
+        """
+        Get purchases by purchaser email.
+        Requires JWT authentication.
+        """
+        # Get current user from JWT to verify access
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+
+        if not current_user:
+            return make_response_data(
+                success=False,
+                message="User not found.",
+                status_code=401
+            )
+
+        # Verify the requested email matches the current user's email
+        # or if the user is a CEO/admin who can view all purchases
+        if email != current_user.email and current_user.role not in ['CEO', 'ADMIN', 'ceo', 'admin']:
+            return make_response_data(
+                success=False,
+                message="Not authorized to view these purchases.",
+                status_code=403
+            )
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return make_response_data(
+                data=[],
+                message="No user found with this email."
+            )
+        purchases = Purchase.query.filter_by(purchaser_id=user.id).all()
+        return make_response_data(
+            data=[p.to_dict() for p in purchases],
+            message="Purchases fetched successfully."
+        )
+
 
 class DailyPurchasesReportResource(Resource):
     @role_required('ceo')

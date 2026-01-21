@@ -8,7 +8,7 @@ from .inventory import InventoryListResource, InventoryResource, ClearInventoryR
 from .purchases import (
     purchases_bp,  # <-- Import blueprint with extra routes
     PurchaseListResource, PurchaseResource,
-    ClearPurchasesResource, PurchaseSummaryResource
+    ClearPurchasesResource, PurchaseSummaryResource, PurchaseByEmailResource
 )
 from .stock import StockMovementListResource, ClearStockMovementsResource
 from .expenses import OtherExpensesResource, CarExpensesResource
@@ -84,6 +84,7 @@ api.add_resource(SalaryPaymentToggleStatusResource, '/salary-payments/<int:payme
 # ----------- PURCHASES -----------
 api.add_resource(PurchaseListResource, '/purchases')
 api.add_resource(PurchaseResource, '/purchases/<int:purchase_id>')
+api.add_resource(PurchaseByEmailResource, '/purchases/by-email/<string:email>')
 api.add_resource(ClearPurchasesResource, '/purchases/clear')
 api.add_resource(PurchaseSummaryResource, '/purchases/summary')
 
