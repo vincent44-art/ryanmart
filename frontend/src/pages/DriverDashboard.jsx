@@ -26,19 +26,69 @@ const DriverDashboard = () => {
     stock_name: ''
   });
 
+  // Helper function to check if response is HTML
+  const isHtmlResponse = (text) => {
+    if (typeof text !== 'string') return false;
+    const trimmed = text.trim().toLowerCase();
+    return trimmed.startsWith('<!doctype') || 
+           trimmed.startsWith('<html') || 
+           trimmed.startsWith('<!html');
+  };
+
   useEffect(() => {
     const loadExpenses = async () => {
       try {
         setLoading(true);
-        const [carExpensesData, otherExpensesData] = await Promise.all([
-          fetchDriverExpenses(user.email),
-          fetchOtherExpenses()
-        ]);
-        setCarExpenses(carExpensesData);
-        setOtherExpenses(otherExpensesData?.data || []);
+        setError(null);
+        
+        // Fetch car expenses with raw response handling
+        const carExpensesData = await fetchDriverExpenses(user.email);
+        
+        // Check if response is HTML (server error page)
+        if (carExpensesData && typeof carExpensesData === 'string' && isHtmlResponse(carExpensesData)) {
+          console.error('Server returned HTML error page instead of JSON');
+          setError('Server error. Please check your connection and try again. If the problem persists, contact support.');
+          setCarExpenses([]);
+        } else {
+          // Handle normal JSON response - carExpensesData could be direct array or wrapped in response
+          if (Array.isArray(carExpensesData)) {
+            setCarExpenses(carExpensesData);
+          } else if (carExpensesData?.data && Array.isArray(carExpensesData.data)) {
+            setCarExpenses(carExpensesData.data);
+          } else {
+            setCarExpenses([]);
+          }
+        }
+        
+        // Fetch other expenses separately to avoid blocking
+        try {
+          const otherExpensesData = await fetchOtherExpenses();
+          if (otherExpensesData && typeof otherExpensesData === 'object') {
+            setOtherExpenses(otherExpensesData?.data || []);
+          } else {
+            setOtherExpenses([]);
+          }
+        } catch (expenseErr) {
+          console.warn('Failed to load other expenses:', expenseErr);
+          setOtherExpenses([]);
+        }
       } catch (err) {
-        setError('Failed to load expenses. Please try again later.');
+        // Handle JSON parsing errors (when API returns HTML)
+        if (err instanceof SyntaxError && err.message.includes('Unexpected token')) {
+          setError('Failed to load expenses. The server may be returning an error page. Please check your connection and try again.');
+        } else if (err.response?.status === 401) {
+          setError('Your session has expired. Please log in again.');
+          if (logout) logout();
+        } else if (err.response?.status === 403) {
+          setError('You are not authorized to view this data.');
+        } else if (err.response?.status >= 500) {
+          setError('Server error. Please try again later. If the problem persists, contact support.');
+        } else {
+          setError('Failed to load expenses. Please try again later.');
+        }
         console.error('Error loading expenses:', err);
+        setCarExpenses([]);
+        setOtherExpenses([]);
       } finally {
         setLoading(false);
       }

@@ -2,6 +2,17 @@
 import api from './api';
 
 /**
+ * Helper function to check if text is HTML
+ */
+const isHtmlResponse = (text) => {
+  if (typeof text !== 'string') return false;
+  const trimmed = text.trim().toLowerCase();
+  return trimmed.startsWith('<!doctype') || 
+         trimmed.startsWith('<html') || 
+         trimmed.startsWith('<!html');
+};
+
+/**
  * Fetch all expenses for a specific driver
  * @param {string} driverEmail - Email of the driver
  * @returns {Promise<Array>} - Array of expense objects
@@ -12,7 +23,11 @@ export const fetchDriverExpenses = async (driverEmail) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching driver expenses:', error);
-    throw new Error(error.response?.data?.message || 'Failed to fetch expenses');
+    // Check if response is HTML (server error page)
+    if (error.response?.data && typeof error.response.data === 'string' && isHtmlResponse(error.response.data)) {
+      throw new Error('Server returned an error page. Please try again later.');
+    }
+    throw new Error(error.response?.data?.message || error.response?.data?.error || 'Failed to fetch expenses');
   }
 };
 
