@@ -36,6 +36,15 @@ export const fetchPurchases = async (userEmail = null) => {
   }
 };
 
+// Helper function to check if text is HTML
+const isHtmlResponse = (text) => {
+  if (typeof text !== 'string') return false;
+  const trimmed = text.trim().toLowerCase();
+  return trimmed.startsWith('<!doctype') || 
+         trimmed.startsWith('<html') || 
+         trimmed.startsWith('<!html');
+};
+
 // Fetch sales data
 export const fetchSales = async (userEmail = null) => {
   try {
@@ -44,6 +53,10 @@ export const fetchSales = async (userEmail = null) => {
     return response;
   } catch (error) {
     console.error('Error fetching sales:', error);
+    // Check if response is HTML (server error page)
+    if (error.response?.data && typeof error.response.data === 'string' && isHtmlResponse(error.response.data)) {
+      throw new Error('Server returned an error page. Please try again later.');
+    }
     throw error;
   }
 };
