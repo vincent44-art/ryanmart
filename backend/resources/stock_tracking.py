@@ -16,6 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from sqlalchemy import cast, Float
 import io
 import logging
 
@@ -858,11 +859,12 @@ class StockTrackingAggregatedResource(Resource):
                         storage_result = StockMovement.query.join(Inventory).filter(
                             Inventory.name == stock_name,
                             StockMovement.movement_type == 'out'
-                        ).with_entities(db.func.sum(StockMovement.quantity)).scalar()
+                        ).with_entities(db.func.sum(cast(StockMovement.quantity, Float))).scalar()
                         storage_usage = float(storage_result) if storage_result else 0
                     except Exception as e:
                         logger.warning(f"Error calculating storage usage for stock {stock_name}: {str(e)}")
                         storage_usage = 0
+                        db.session.rollback()
 
                     # Calculate transport costs from driver expenses (sum for group)
                     transport_costs = 0
@@ -874,6 +876,7 @@ class StockTrackingAggregatedResource(Resource):
                     except Exception as e:
                         logger.warning(f"Error calculating transport costs for stock {stock_name}: {str(e)}")
                         transport_costs = 0
+                        db.session.rollback()
 
                     # Calculate other expenses (link by date range - 7 days before/after group dates)
                     other_expenses = 0
@@ -895,6 +898,7 @@ class StockTrackingAggregatedResource(Resource):
                     except Exception as e:
                         logger.warning(f"Error calculating other expenses for stock {stock_name}: {str(e)}")
                         other_expenses = 0
+                        db.session.rollback()
 
                     # Calculate revenue and quantity sold from sales (sum for stock_name from date_start to now)
                     revenue = 0
@@ -915,6 +919,7 @@ class StockTrackingAggregatedResource(Resource):
                         logger.warning(f"Error calculating revenue and quantity sold for stock {stock_name}: {str(e)}")
                         revenue = 0
                         quantity_sold = 0
+                        db.session.rollback()
 
                     # Calculate profit/loss
                     total_costs = total_purchase_cost + transport_costs + other_expenses
