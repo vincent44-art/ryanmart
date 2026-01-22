@@ -53,49 +53,70 @@ const PurchaserDashboard = () => {
     }
   }, [formData.quantity, formData.amountPerKg]);
 
+  // Helper function to check if response is HTML
+  const isHtmlResponse = (text) => {
+    if (typeof text !== 'string') return false;
+    const trimmed = text.trim().toLowerCase();
+    return trimmed.startsWith('<!doctype') || 
+           trimmed.startsWith('<html') || 
+           trimmed.startsWith('<!html');
+  };
+
   // Fetch purchases and other expenses on component mount
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const [purchasesResponse, otherExpensesResponse] = await Promise.all([
-          fetchPurchases(user.email),
-          fetchOtherExpenses()
-        ]);
         
-        // Ensure purchases is always an array (handle paginated response)
-        let purchasesData = purchasesResponse?.data;
+        // Fetch purchases with raw response handling
+        const purchasesResponse = await fetchPurchases(user.email);
         
-        // Check if the response is valid JSON (not HTML)
-        if (purchasesResponse && typeof purchasesResponse === 'object' && !Array.isArray(purchasesData) && purchasesData?.success !== undefined) {
-          // API returned a valid JSON response
-          if (Array.isArray(purchasesData?.data)) {
-            setPurchases(purchasesData.data);
-          } else if (purchasesData?.items && Array.isArray(purchasesData.items)) {
-            setPurchases(purchasesData.items);
+        // Check if response is HTML (server error page)
+        if (purchasesResponse && typeof purchasesResponse === 'string' && isHtmlResponse(purchasesResponse)) {
+          console.error('Server returned HTML error page instead of JSON');
+          setError('Server error. Please check your connection and try again. If the problem persists, contact support.');
+          setPurchases([]);
+        } else {
+          // Handle normal JSON response
+          let purchasesData = purchasesResponse?.data;
+          
+          // Check if the response is valid JSON (not HTML)
+          if (purchasesResponse && typeof purchasesResponse === 'object' && !Array.isArray(purchasesData) && purchasesData?.success !== undefined) {
+            // API returned a valid JSON response
+            if (Array.isArray(purchasesData?.data)) {
+              setPurchases(purchasesData.data);
+            } else if (purchasesData?.items && Array.isArray(purchasesData.items)) {
+              setPurchases(purchasesData.items);
+            } else {
+              setPurchases([]);
+            }
+          } else if (Array.isArray(purchasesData)) {
+            // Direct array response
+            setPurchases(purchasesData);
           } else {
+            console.warn('Unexpected purchases response format:', purchasesResponse);
             setPurchases([]);
           }
-        } else if (Array.isArray(purchasesData)) {
-          // Direct array response
-          setPurchases(purchasesData);
-        } else {
-          console.warn('Unexpected purchases response format:', purchasesResponse);
-          setPurchases([]);
         }
         
-        // Handle other expenses response
-        if (otherExpensesResponse && typeof otherExpensesResponse === 'object') {
-          const expensesData = otherExpensesResponse?.data;
-          if (Array.isArray(expensesData)) {
-            setOtherExpenses(expensesData);
-          } else if (expensesData?.items && Array.isArray(expensesData.items)) {
-            setOtherExpenses(expensesData.items);
+        // Fetch other expenses
+        try {
+          const otherExpensesResponse = await fetchOtherExpenses();
+          if (otherExpensesResponse && typeof otherExpensesResponse === 'object') {
+            const expensesData = otherExpensesResponse?.data;
+            if (Array.isArray(expensesData)) {
+              setOtherExpenses(expensesData);
+            } else if (expensesData?.items && Array.isArray(expensesData.items)) {
+              setOtherExpenses(expensesData.items);
+            } else {
+              setOtherExpenses([]);
+            }
           } else {
             setOtherExpenses([]);
           }
-        } else {
+        } catch (expenseErr) {
+          console.warn('Failed to load other expenses:', expenseErr);
           setOtherExpenses([]);
         }
       } catch (err) {
@@ -108,6 +129,8 @@ const PurchaserDashboard = () => {
           if (logout) logout();
         } else if (err.response?.status === 403) {
           setError('You are not authorized to view this data.');
+        } else if (err.response?.status >= 500) {
+          setError('Server error. Please try again later. If the problem persists, contact support.');
         } else {
           setError('Failed to load data. Please try again later.');
         }
