@@ -51,7 +51,13 @@ const fetchSellerAssignments = async (emailOrName) => {
       }
     }
   );
-  if (!res.ok) throw new Error('Failed to fetch assignments');
+  if (!res.ok) {
+    const text = await res.text();
+    if (isHtmlResponse(text)) {
+      throw new Error('Server error. Failed to fetch assignments.');
+    }
+    throw new Error('Failed to fetch assignments');
+  }
   return await res.json();
 };
 
@@ -59,8 +65,23 @@ const clearSellerSales = async (emailOrName) => {
   const res = await fetch(`/api/sales/clear?seller=${emailOrName}`, {
     method: 'DELETE',
   });
-  if (!res.ok) throw new Error('Failed to clear sales');
+  if (!res.ok) {
+    const text = await res.text();
+    if (isHtmlResponse(text)) {
+      throw new Error('Server error. Failed to clear sales.');
+    }
+    throw new Error('Failed to clear sales');
+  }
   return await res.json();
+};
+
+// Helper function to check if response is HTML
+const isHtmlResponse = (text) => {
+  if (typeof text !== 'string') return false;
+  const trimmed = text.trim().toLowerCase();
+  return trimmed.startsWith('<!doctype') || 
+         trimmed.startsWith('<html') || 
+         trimmed.startsWith('<!html');
 };
 
 const SellerDashboard = () => {
@@ -83,7 +104,14 @@ const SellerDashboard = () => {
       const res = await fetch('/api/other_expenses', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
+      // Check for HTML response before trying to parse JSON
+      const text = await res.text();
+      if (isHtmlResponse(text)) {
+        console.warn('Server returned HTML for other expenses');
+        setSellerExpenses([]);
+        return;
+      }
+      const data = JSON.parse(text);
       if (data.success && Array.isArray(data.data)) {
         // Show all expenses for this seller, sorted by most recent
         const sellerHistory = data.data
@@ -94,6 +122,7 @@ const SellerDashboard = () => {
         setSellerExpenses([]);
       }
     } catch (err) {
+      console.warn('Error fetching seller expenses:', err);
       setSellerExpenses([]);
     }
   }, [user]);
@@ -106,32 +135,49 @@ const SellerDashboard = () => {
 
         // Load stock tracking records and keep only those that are stocked out
         const token = localStorage.getItem('access_token');
-      if (token) {
-          const stockRes = await fetchStockTracking(token);
-          const outRecords = Array.isArray(stockRes.data) ? stockRes.data.filter(r => r.dateOut) : [];
-          setStockRecords(outRecords);
+        if (token) {
+          try {
+            const stockRes = await fetchStockTracking(token);
+            // Check for HTML response
+            if (stockRes && typeof stockRes === 'string' && isHtmlResponse(stockRes)) {
+              console.warn('Server returned HTML for stock tracking');
+              setStockRecords([]);
+            } else {
+              const outRecords = Array.isArray(stockRes?.data) ? stockRes.data.filter(r => r.dateOut) : [];
+              setStockRecords(outRecords);
+            }
+          } catch (stockErr) {
+            console.warn('Error fetching stock tracking:', stockErr);
+            setStockRecords([]);
+          }
 
           // Load seller sales directly for table display
-          // Fetch all sales and filter for this seller's email
-          const salesRes = await fetch(`${BASE_URL}/sales`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-          });
-          if (salesRes.ok) {
-            const body = await salesRes.json();
-            let allSales = [];
-            if (Array.isArray(body?.data?.sales)) {
-              allSales = body.data.sales;
-            } else if (Array.isArray(body?.data)) {
-              allSales = body.data;
-            } else if (Array.isArray(body?.sales)) {
-              allSales = body.sales;
+          try {
+            const salesRes = await fetch(`${BASE_URL}/sales`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+            });
+            const text = await salesRes.text();
+            if (isHtmlResponse(text)) {
+              console.warn('Server returned HTML for sales');
+              setSellerSales([]);
+            } else {
+              const body = JSON.parse(text);
+              let allSales = [];
+              if (Array.isArray(body?.data?.sales)) {
+                allSales = body.data.sales;
+              } else if (Array.isArray(body?.data)) {
+                allSales = body.data;
+              } else if (Array.isArray(body?.sales)) {
+                allSales = body.sales;
+              }
+              // Filter for this seller's email
+              const sellerEmail = user?.email;
+              const mySales = allSales.filter(sale => sale.seller_email === sellerEmail);
+              setSellerSales(mySales);
             }
-            // Filter for this seller's email
-            const sellerEmail = user?.email;
-            const mySales = allSales.filter(sale => sale.seller_email === sellerEmail);
-            setSellerSales(mySales);
-          } else {
+          } catch (salesErr) {
+            console.warn('Error fetching sales:', salesErr);
             setSellerSales([]);
           }
 
