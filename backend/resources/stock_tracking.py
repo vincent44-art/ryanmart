@@ -10,15 +10,39 @@ from models.purchases import Purchase
 from utils.helpers import make_response_data
 from utils.decorators import role_required
 from datetime import datetime, timedelta
-from flask import send_file, make_response, request
+from flask import send_file, make_response, request, jsonify
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from sqlalchemy import cast, Float
+from sqlalchemy import cast, Float, func
 import io
 import logging
+
+
+def safe_float(value, default=0.0):
+    """Safely convert a value to float, handling strings and None"""
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            # Extract numeric part from string
+            import re
+            match = re.search(r'(\d+(\.\d+)?)', value)
+            return float(match.group(1)) if match else default
+        except (ValueError, TypeError):
+            return default
+    return default
+
+
+def safe_sum_float(query_result, default=0.0):
+    """Safely sum query results that may contain string values"""
+    if query_result is None:
+        return default
+    return safe_float(query_result, default)
 
 parser = reqparse.RequestParser()
 parser.add_argument('stockInId', type=str)  # For stock out updates
@@ -854,13 +878,14 @@ class StockTrackingAggregatedResource(Resource):
                     latest_date_out = max((stock.date_out for stock in stock_list if stock.date_out), default=None)
 
                     # Calculate storage usage from stock movements (sum for all stocks in group)
+                    # Note: StockMovement.quantity is VARCHAR, so we sum in Python instead of SQL
                     storage_usage = 0
                     try:
-                        storage_result = StockMovement.query.join(Inventory).filter(
+                        stock_movements = StockMovement.query.join(Inventory).filter(
                             Inventory.name == stock_name,
                             StockMovement.movement_type == 'out'
-                        ).with_entities(db.func.sum(cast(StockMovement.quantity, Float))).scalar()
-                        storage_usage = float(storage_result) if storage_result else 0
+                        ).all()
+                        storage_usage = sum(safe_float(sm.quantity) for sm in stock_movements)
                     except Exception as e:
                         logger.warning(f"Error calculating storage usage for stock {stock_name}: {str(e)}")
                         storage_usage = 0

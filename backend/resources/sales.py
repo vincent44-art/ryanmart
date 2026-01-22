@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask import request
+from flask import request, jsonify, current_app
 import io
 from flask_jwt_extended import jwt_required, get_current_user
 from datetime import datetime
@@ -16,6 +16,9 @@ from extensions import db
 from models.sales import Sale
 from utils.decorators import role_required
 from utils.helpers import make_response_data
+import logging
+
+logger = logging.getLogger('sales')
 
 # Parser for POST/PUT requests
 parser = reqparse.RequestParser()
@@ -29,43 +32,48 @@ parser.add_argument('date', type=str, required=False)
 
 class SaleListResource(Resource):
     def get(self):
-        # Pagination parameters
-        page = request.args.get('page', default=1, type=int)
-        per_page = request.args.get('per_page', default=20, type=int)
+        try:
+            # Pagination parameters
+            page = request.args.get('page', default=1, type=int)
+            per_page = request.args.get('per_page', default=20, type=int)
 
-        # Query all sales (no authentication for debug)
-        query = Sale.query.options(joinedload(Sale.seller))
+            # Query all sales (no authentication for debug)
+            query = Sale.query.options(joinedload(Sale.seller))
 
-        # Total count
-        total = query.count()
+            # Total count
+            total = query.count()
 
-        # Paginate
-        sales = query.offset((page - 1) * per_page).limit(per_page).all()
+            # Paginate
+            sales = query.offset((page - 1) * per_page).limit(per_page).all()
 
-        # Serialize
-        sales_data = [{
-            'id': sale.id,
-            'stock_name': sale.stock_name,
-            'fruit_name': sale.fruit_name,
-            'qty': sale.qty,
-            'unit_price': sale.unit_price,
-            'amount': sale.amount,
-            'paid_amount': sale.paid_amount,
-            'remaining_amount': sale.remaining_amount,
-            'customer_name': sale.customer_name,
-            'date': sale.date.strftime('%Y-%m-%d'),
-            'seller_email': sale.seller.email if hasattr(sale, 'seller') and sale.seller else None
-        } for sale in sales]
+            # Serialize
+            sales_data = [{
+                'id': sale.id,
+                'stock_name': sale.stock_name,
+                'fruit_name': sale.fruit_name,
+                'qty': sale.qty,
+                'unit_price': sale.unit_price,
+                'amount': sale.amount,
+                'paid_amount': sale.paid_amount,
+                'remaining_amount': sale.remaining_amount,
+                'customer_name': sale.customer_name,
+                'date': sale.date.strftime('%Y-%m-%d'),
+                'seller_email': sale.seller.email if hasattr(sale, 'seller') and sale.seller else None
+            } for sale in sales]
 
-        return make_response_data(data={
-            'sales': sales_data,
-            'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total': total,
-                'pages': (total + per_page - 1) // per_page
-            }
-        }, success=True, message='Sales fetched successfully', status_code=200)
+            return make_response_data(data={
+                'sales': sales_data,
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total': total,
+                    'pages': (total + per_page - 1) // per_page
+                }
+            }, success=True, message='Sales fetched successfully', status_code=200)
+        except Exception as e:
+            logger.error(f"Error fetching sales: {str(e)}")
+            db.session.rollback()
+            return make_response_data(success=False, message=f"Error fetching sales: {str(e)}", status_code=500)
 
     @role_required('ceo', 'seller')
     def post(self):

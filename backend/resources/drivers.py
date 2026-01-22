@@ -1,43 +1,50 @@
 # Driver expense routes and blueprint
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.driver import DriverExpense
 from models.user import db
+import logging
 
 drivers_bp = Blueprint('drivers', __name__, url_prefix='/api/drivers')
+logger = logging.getLogger('drivers')
 
 @drivers_bp.route('/<driver_email>/expenses', methods=['GET'])
 @jwt_required()
 def get_driver_expenses(driver_email):
-    user_id = get_jwt_identity()
-    # Convert string ID back to int for SQLAlchemy query.get()
-    if user_id is not None:
-        try:
-            user_id = int(user_id)
-        except (TypeError, ValueError):
-            pass
-    from models.user import User
-    current_user = User.query.get(user_id)
-    if not current_user:
-        return jsonify({"msg": "Unauthorized"}), 403
-    if current_user.email != driver_email and current_user.role.value != 'ceo':
-        return jsonify({"msg": "Unauthorized"}), 403
-    expenses = DriverExpense.query.filter_by(driver_email=driver_email).all()
-    result = [
-        {
-            "id": e.id,
-            "driver_email": e.driver_email,
-            "amount": e.amount,
-            "category": e.category,
-            "type": e.type,
-            "description": e.description,
-            "date": e.date.isoformat() if e.date else None,
-            "car_name": e.car_name,
-            "car_number_plate": e.car_number_plate,
-            "stock_name": e.stock_name
-        } for e in expenses
-    ]
-    return jsonify(result), 200
+    try:
+        user_id = get_jwt_identity()
+        # Convert string ID back to int for SQLAlchemy query.get()
+        if user_id is not None:
+            try:
+                user_id = int(user_id)
+            except (TypeError, ValueError):
+                pass
+        from models.user import User
+        current_user = User.query.get(user_id)
+        if not current_user:
+            return jsonify({"success": False, "msg": "Unauthorized"}), 403
+        if current_user.email != driver_email and current_user.role.value != 'ceo':
+            return jsonify({"success": False, "msg": "Unauthorized"}), 403
+        expenses = DriverExpense.query.filter_by(driver_email=driver_email).all()
+        result = [
+            {
+                "id": e.id,
+                "driver_email": e.driver_email,
+                "amount": e.amount,
+                "category": e.category,
+                "type": e.type,
+                "description": e.description,
+                "date": e.date.isoformat() if e.date else None,
+                "car_name": e.car_name,
+                "car_number_plate": e.car_number_plate,
+                "stock_name": e.stock_name
+            } for e in expenses
+        ]
+        return jsonify(result), 200
+    except Exception as e:
+        logger.error(f"Error fetching driver expenses: {str(e)}")
+        db.session.rollback()
+        return jsonify({"success": False, "error": "Failed to fetch driver expenses", "message": str(e)}), 500
 
 @drivers_bp.route('/expenses', methods=['POST'])
 @jwt_required()

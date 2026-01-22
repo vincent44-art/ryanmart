@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
+import logging
 
 # Blueprint for non-Resource routes
 purchases_bp = Blueprint('purchases_bp', __name__)
@@ -45,33 +46,44 @@ class PurchaseListResource(Resource):
     @role_required('ceo', 'purchaser')
     def get(self):
         current_user = get_current_user()
+        logger = logging.getLogger('purchases')
 
         # Pagination parameters
         from flask import request
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=20, type=int)
 
-        # Both CEO and purchasers can see all purchases
-        pagination = Purchase.query.order_by(Purchase.purchase_date.desc()).paginate(page=page, per_page=per_page, error_out=False)
-        purchases = pagination.items
+        try:
+            # Both CEO and purchasers can see all purchases
+            pagination = Purchase.query.order_by(Purchase.purchase_date.desc()).paginate(page=page, per_page=per_page, error_out=False)
+            purchases = pagination.items
 
-        return make_response_data(
-            data={
-                "items": [p.to_dict() for p in purchases],
-                "meta": {
-                    "page": page,
-                    "per_page": per_page,
-                    "total": pagination.total,
-                    "pages": pagination.pages
-                }
-            },
-            message="Purchases fetched."
-        )
+            return make_response_data(
+                data={
+                    "items": [p.to_dict() for p in purchases],
+                    "meta": {
+                        "page": page,
+                        "per_page": per_page,
+                        "total": pagination.total,
+                        "pages": pagination.pages
+                    }
+                },
+                message="Purchases fetched."
+            )
+        except Exception as e:
+            logger.error(f"Error fetching purchases: {str(e)}")
+            db.session.rollback()
+            return make_response_data(
+                success=False,
+                message="Failed to fetch purchases. Please try again later.",
+                status_code=500
+            )
 
     @role_required('purchaser')
     def post(self):
         data = parser.parse_args()
         current_user = get_current_user()
+        logger = logging.getLogger('purchases')
 
         try:
             purchase_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
@@ -82,24 +94,33 @@ class PurchaseListResource(Resource):
                 status_code=400
             )
 
-        new_purchase = Purchase(
-            purchaser_id=current_user.id,
-            employee_name=data['employeeName'],
-            fruit_type=data['fruitType'],
-            quantity=data['quantity'],
-            unit=data['unit'],
-            buyer_name=data['buyerName'],
-            cost=data['amount'],
-            purchase_date=purchase_date,
-            amount_per_kg=data['amountPerKg']
-        )
-        db.session.add(new_purchase)
-        db.session.commit()
-        return make_response_data(
-            data=new_purchase.to_dict(),
-            message="Purchase recorded.",
-            status_code=201
-        )
+        try:
+            new_purchase = Purchase(
+                purchaser_id=current_user.id,
+                employee_name=data['employeeName'],
+                fruit_type=data['fruitType'],
+                quantity=data['quantity'],
+                unit=data['unit'],
+                buyer_name=data['buyerName'],
+                cost=data['amount'],
+                purchase_date=purchase_date,
+                amount_per_kg=data['amountPerKg']
+            )
+            db.session.add(new_purchase)
+            db.session.commit()
+            return make_response_data(
+                data=new_purchase.to_dict(),
+                message="Purchase recorded.",
+                status_code=201
+            )
+        except Exception as e:
+            logger.error(f"Error creating purchase: {str(e)}")
+            db.session.rollback()
+            return make_response_data(
+                success=False,
+                message="Failed to record purchase. Please try again later.",
+                status_code=500
+            )
 
 
 class PurchaseResource(Resource):
