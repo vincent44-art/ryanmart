@@ -53,10 +53,29 @@ export const fetchSales = async (userEmail = null) => {
     return response;
   } catch (error) {
     console.error('Error fetching sales:', error);
-    // Check if response is HTML (server error page)
-    if (error.response?.data && typeof error.response.data === 'string' && isHtmlResponse(error.response.data)) {
-      throw new Error('Server returned an error page. Please try again later.');
+    
+    // Check if we have response data that's HTML (server error page)
+    let errorData = error.response?.data;
+    
+    // Handle case where error.response.data might be an object already parsed
+    if (errorData && typeof errorData === 'object' && errorData._isReactError === true) {
+      // React error boundary wrapper - try to get the original response
+      errorData = error.response?.data?.props?.originalError?.response?.data;
     }
+    
+    // Check if response data is HTML (server error page)
+    if (errorData && typeof errorData === 'string' && isHtmlResponse(errorData)) {
+      console.error('Server returned HTML error page:', errorData.substring(0, 200));
+      // Return empty array instead of throwing, so the UI can continue
+      return [];
+    }
+    
+    // Also check for case where axios might have thrown during parsing
+    if (error.message && error.message.includes('Unexpected token ')) {
+      console.error('JSON parse error in fetchSales:', error.message);
+      return [];
+    }
+    
     throw error;
   }
 };
