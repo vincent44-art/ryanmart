@@ -15,6 +15,36 @@ import autoTable from 'jspdf-autotable';
 // Use relative paths for all API calls — backend determined by REACT_APP_API_BASE_URL env var
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
 
+// Helper function to check if response text is HTML (server error page)
+const isHtmlResponse = (text) => {
+  if (typeof text !== 'string') return false;
+  const trimmed = text.trim().toLowerCase();
+  return trimmed.startsWith('<!doctype') || 
+         trimmed.startsWith('<html') || 
+         trimmed.startsWith('<!html') ||
+         trimmed.includes('<!DOCTYPE html>') ||
+         trimmed.includes('<head>');
+};
+
+// Helper to safely parse JSON with HTML detection
+const safeJsonParse = async (response, endpoint) => {
+  const text = await response.text();
+  
+  // Check if response is HTML (server error page)
+  if (isHtmlResponse(text)) {
+    console.error(`Server returned HTML error page for ${endpoint}:`, text.substring(0, 200));
+    throw new Error(`Server error: Received HTML instead of JSON from ${endpoint}. The server may be experiencing issues or the endpoint is not found.`);
+  }
+  
+  // Try to parse JSON
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error(`Failed to parse JSON from ${endpoint}:`, text.substring(0, 200));
+    throw new Error(`Invalid JSON response from ${endpoint}: ${e.message}`);
+  }
+};
+
 // Helpers for matching sales to stock records and formatting
 const parseDate = (value) => {
   if (!value) return null;
@@ -73,15 +103,6 @@ const clearSellerSales = async (emailOrName) => {
     throw new Error('Failed to clear sales');
   }
   return await res.json();
-};
-
-// Helper function to check if response is HTML
-const isHtmlResponse = (text) => {
-  if (typeof text !== 'string') return false;
-  const trimmed = text.trim().toLowerCase();
-  return trimmed.startsWith('<!doctype') || 
-         trimmed.startsWith('<html') || 
-         trimmed.startsWith('<!html');
 };
 
 const SellerDashboard = () => {
