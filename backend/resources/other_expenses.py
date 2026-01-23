@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask import request, send_file
+from flask import request, send_file, jsonify
 from extensions import db
 from models.other_expense import OtherExpense
 from utils.helpers import make_response_data, get_current_user
@@ -131,7 +131,8 @@ class OtherExpensesResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def get(self):
         expenses = OtherExpense.query.order_by(OtherExpense.date.desc()).all()
-        return make_response_data(data=[e.to_dict() for e in expenses], message="Other expenses fetched successfully.")
+        response_data, status_code = make_response_data(data=[e.to_dict() for e in expenses], message="Other expenses fetched successfully.")
+        return jsonify(response_data), status_code
 
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def post(self):
@@ -140,7 +141,8 @@ class OtherExpensesResource(Resource):
         try:
             expense_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         except ValueError:
-            return make_response_data(success=False, message="Invalid date format for date. Use YYYY-MM-DD.", status_code=400)
+            response_data, status_code = make_response_data(success=False, message="Invalid date format for date. Use YYYY-MM-DD.", status_code=400)
+            return jsonify(response_data), status_code
         expense = OtherExpense(
             expense_type=data['expense_type'],
             description=data.get('description'),
@@ -150,17 +152,20 @@ class OtherExpensesResource(Resource):
         )
         db.session.add(expense)
         db.session.commit()
-        return make_response_data(data=expense.to_dict(), message="Other expense added successfully.", status_code=201)
+        response_data, status_code = make_response_data(data=expense.to_dict(), message="Other expense added successfully.", status_code=201)
+        return jsonify(response_data), status_code
 
 class OtherExpenseResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def delete(self, expense_id):
         expense = OtherExpense.query.get(expense_id)
         if not expense:
-            return make_response_data(success=False, message="Expense not found.", status_code=404)
+            response_data, status_code = make_response_data(success=False, message="Expense not found.", status_code=404)
+            return jsonify(response_data), status_code
         db.session.delete(expense)
         db.session.commit()
-        return make_response_data(success=True, message="Expense deleted successfully.")
+        response_data, status_code = make_response_data(success=True, message="Expense deleted successfully.")
+        return jsonify(response_data), status_code
 
 class OtherExpensesPDFResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')

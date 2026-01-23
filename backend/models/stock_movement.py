@@ -5,7 +5,7 @@ class StockMovement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     inventory_id = db.Column(db.Integer, db.ForeignKey('inventory.id'), nullable=False)
     movement_type = db.Column(db.String(10), nullable=False)  # 'in', 'out', 'sale', 'spoilage'
-    quantity = db.Column(db.String(50), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
     unit = db.Column(db.String(20))
     remaining_stock = db.Column(db.String(50))
     date = db.Column(db.Date, nullable=False)
