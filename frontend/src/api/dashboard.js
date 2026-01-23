@@ -114,6 +114,6 @@ const loadData = async () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  return { data: data || {}, error, loading, refetch: loadData }; // <-- Always returns object
+  return { data: data || {}, error, loading, refetch: loadData, setData }; // <-- Always returns object
 };
 

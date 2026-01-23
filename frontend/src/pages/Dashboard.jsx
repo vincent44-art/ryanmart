@@ -17,7 +17,7 @@ import AccountTab from '../components/AccountTab'; // Import AccountTab componen
 
 const Dashboard = () => {
   const { user, token, logout } = useAuth();
-  const { data, error, loading, refetch } = useDashboardData(); // Added refetch for refresh
+  const { data, error, loading, refetch, setData } = useDashboardData(); // Added refetch and setData for refresh
   const [activeTab, setActiveTab] = useState('purchases');
   const [showClearModal, setShowClearModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -29,15 +29,13 @@ const Dashboard = () => {
   }, [data, user?.role]);
 
   const handlePurchaseAdded = (newPurchase) => {
-    // Update the dashboard data to include the new purchase
-    const updatedData = {
-      ...data,
-      purchases: [...(data?.purchases || []), newPurchase]
-    };
-    // Since data is managed by the hook, we need to refetch to get updated data
-    // But for immediate UI update, we can temporarily update local state
-    // However, since the hook doesn't expose setData, we'll refetch
-    refetch();
+    // Update the dashboard data to include the new purchase immediately
+    setData(prevData => ({
+      ...prevData,
+      purchases: [...(prevData?.purchases || []), newPurchase]
+    }));
+    // Also trigger a refetch to ensure data is synced with server
+    setTimeout(() => refetch(), 100);
   };
 
   const renderTabContent = () => {
