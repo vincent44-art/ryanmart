@@ -37,11 +37,20 @@ const OtherExpenseForm = ({ onExpenseAdded }) => {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to add expense');
+      // Get raw response text for debugging
+      const text = await response.text();
+      console.log('Raw response:', text);
+
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error(`Invalid JSON response: ${text || 'empty response'}`);
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || result.error || `Server error (${response.status})`);
+      }
 
       if (result.success) {
         setFormData({
@@ -56,7 +65,8 @@ const OtherExpenseForm = ({ onExpenseAdded }) => {
         setError(result.message || 'Failed to add expense');
       }
     } catch (err) {
-      setError('Failed to add expense. Please try again.');
+      const errorMessage = err.message || 'Failed to add expense. Please try again.';
+      setError(errorMessage);
       console.error('Error adding expense:', err);
     } finally {
       setLoading(false);

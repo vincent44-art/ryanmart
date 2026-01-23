@@ -18,10 +18,28 @@ const SalesTab = () => {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
-  const body = await res.json();
-  // Extract sales from body.data.sales, fallback to []
-  setSales(Array.isArray(body?.data?.sales) ? body.data.sales : []);
-      } catch {
+
+        // Check if response is ok before parsing
+        if (!res.ok) {
+          console.error('Failed to load sales data:', res.status, res.statusText);
+          setSales([]);
+          return;
+        }
+
+        // Get response as text first to check if it's HTML
+        const text = await res.text();
+        if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<html')) {
+          console.error('Received HTML error page instead of JSON:', text.substring(0, 200));
+          setSales([]);
+          return;
+        }
+
+        // Parse as JSON
+        const body = JSON.parse(text);
+        // Extract sales from body.data.sales, fallback to []
+        setSales(Array.isArray(body?.data?.sales) ? body.data.sales : []);
+      } catch (error) {
+        console.error('Error loading sales data:', error);
         setSales([]);
       } finally {
         setLoading(false);

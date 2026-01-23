@@ -11,11 +11,21 @@ export const fetchOtherExpenses = async () => {
     }
   });
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch other expenses');
+  // Get raw response text for debugging
+  const text = await response.text();
+  console.log('fetchOtherExpenses - Raw response:', text);
+
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (parseErr) {
+    throw new Error(`Invalid JSON response: ${text || 'empty response'}`);
   }
 
-  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || result.error || `Server error (${response.status})`);
+  }
+
   if (!result.success) {
     throw new Error(result.message || 'Failed to fetch other expenses');
   }
@@ -34,11 +44,21 @@ export const addOtherExpense = async (expenseData) => {
     body: JSON.stringify(expenseData)
   });
 
-  if (!response.ok) {
-    throw new Error('Failed to add other expense');
+  // Get raw response text for debugging
+  const text = await response.text();
+  console.log('addOtherExpense - Raw response:', text);
+
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (parseErr) {
+    throw new Error(`Invalid JSON response: ${text || 'empty response'}`);
   }
 
-  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || result.error || `Server error (${response.status})`);
+  }
+
   if (!result.success) {
     throw new Error(result.message || 'Failed to add other expense');
   }
@@ -56,11 +76,32 @@ export const deleteOtherExpense = async (expenseId) => {
     }
   });
 
-  if (!response.ok) {
-    throw new Error('Failed to delete other expense');
+  // Get raw response text for debugging
+  const text = await response.text();
+  console.log('deleteOtherExpense - Raw response:', text);
+
+  // Handle empty response (204 No Content)
+  if (!text || text.trim() === '') {
+    if (response.ok) {
+      return { success: true, message: 'Expense deleted successfully' };
+    }
+    throw new Error(`Server error (${response.status})`);
   }
 
-  const result = await response.json();
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (parseErr) {
+    if (response.ok) {
+      return { success: true, message: 'Expense deleted successfully' };
+    }
+    throw new Error(`Invalid JSON response: ${text}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(result.message || result.error || `Server error (${response.status})`);
+  }
+
   if (!result.success) {
     throw new Error(result.message || 'Failed to delete other expense');
   }
