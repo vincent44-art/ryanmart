@@ -41,6 +41,20 @@ let refreshTokenRequest = null;
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
+    // Check if response is HTML (server error page) instead of JSON
+    const contentType = response.headers['content-type'] || '';
+    const responseData = response.data;
+    
+    if (contentType.includes('text/html') || 
+        (typeof responseData === 'string' && responseData.trim().startsWith('<!DOCTYPE'))) {
+      console.error('Server returned HTML error page instead of JSON');
+      return Promise.reject({
+        status: 500,
+        message: 'Server error - received HTML instead of JSON. Please check server logs.',
+        isHtmlError: true
+      });
+    }
+    
     // Store new access token if provided in response
     if (response.data?.access_token) {
       localStorage.setItem('access_token', response.data.access_token);

@@ -48,7 +48,7 @@ const isHtmlResponse = (text) => {
 // Fetch sales data
 export const fetchSales = async (userEmail = null) => {
   try {
-    const endpoint = userEmail ? `/sales/${userEmail}` : '/sales';
+    const endpoint = userEmail ? `/sales/email/${userEmail}` : '/sales';
     const response = await api.get(endpoint);
     return response;
   } catch (error) {

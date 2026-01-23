@@ -185,7 +185,15 @@ const SellerDashboard = () => {
           try {
             const salesData = await fetchSales(user?.email, token);
             console.log('Seller sales data:', salesData); // Debug log
-            setSellerFruits(salesData);
+            
+            // Handle the new response format from /api/sales/email/<email>
+            let sellerSalesData = [];
+            if (Array.isArray(salesData)) {
+              sellerSalesData = salesData;
+            } else if (salesData?.data && Array.isArray(salesData.data)) {
+              sellerSalesData = salesData.data;
+            }
+            setSellerFruits(sellerSalesData);
           } catch (error) {
             console.error('Error fetching seller sales:', error);
             setSellerFruits([]);
