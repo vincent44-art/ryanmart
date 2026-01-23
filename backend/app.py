@@ -237,7 +237,7 @@ def create_app(config_class=Config):
     from resources.stock import StockMovementListResource
     from resources.it_events import ITEventsResource, ITEventResource, ITAcknowledgeAlertsResource
     from resources.it_alerts import ITAlertsResource, ITIncidentsResource
-    from resources.sales import SaleListResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
+    from resources.sales import SaleListResource, SaleByEmailResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
     from resources.purchases import DailyPurchasesReportResource
     from resources.ai_assistance import AIAssistanceResource
     from resources.receipts import ReceiptResource
@@ -272,6 +272,7 @@ def create_app(config_class=Config):
     api.add_resource(ITAlertsResource, '/api/it/alerts')
     api.add_resource(ITIncidentsResource, '/api/it/incidents')
     api.add_resource(SaleListResource, '/api/sales')
+    api.add_resource(SaleByEmailResource, '/api/sales/email/<string:email>')
     api.add_resource(SaleResource, '/api/sales/<int:sale_id>')
     api.add_resource(SaleSummaryResource, '/api/sales/summary')
     api.add_resource(ClearSalesResource, '/api/sales/clear')

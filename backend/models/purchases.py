@@ -15,9 +15,21 @@ class Purchase(db.Model):
     amount_per_kg = db.Column(db.Float, nullable=False, default=0)
 
     def to_dict(self):
+        # Use a separate query to get purchaser email to avoid relationship issues
+        purchaser_email = None
+        try:
+            from models.user import User
+            user = User.query.get(self.purchaser_id)
+            if user:
+                purchaser_email = user.email
+        except Exception:
+            # If there's an import error or query error, set email to None
+            purchaser_email = None
+        
         return {
             'id': self.id,
             'purchaser_id': self.purchaser_id,
+            'purchaserEmail': purchaser_email,
             'employeeName': self.employee_name,
             'fruitType': self.fruit_type,
             'quantity': self.quantity,

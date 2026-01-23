@@ -30,6 +30,7 @@ parser.add_argument('paid_amount', type=float, required=False, default=0.0)
 parser.add_argument('customer_name', type=str, required=False)
 parser.add_argument('date', type=str, required=False)
 
+
 class SaleListResource(Resource):
     def get(self):
         try:
@@ -109,6 +110,56 @@ class SaleListResource(Resource):
         }
 
         return make_response_data(True, 201, 'Sale created successfully', sale_data)
+
+
+class SaleByEmailResource(Resource):
+    """Fetch sales by seller email address."""
+    @jwt_required()
+    def get(self, email):
+        try:
+            # Find user by email
+            from models.user import User
+            user = User.query.filter_by(email=email).first()
+            
+            if not user:
+                return make_response_data(
+                    success=False, 
+                    message=f'User with email {email} not found', 
+                    status_code=404
+                )
+            
+            # Get all sales for this seller
+            sales = Sale.query.filter_by(seller_id=user.id).order_by(Sale.date.desc()).all()
+            
+            sales_data = [{
+                'id': sale.id,
+                'stock_name': sale.stock_name,
+                'fruit_name': sale.fruit_name,
+                'qty': sale.qty,
+                'unit_price': sale.unit_price,
+                'amount': sale.amount,
+                'paid_amount': sale.paid_amount,
+                'remaining_amount': sale.remaining_amount,
+                'customer_name': sale.customer_name,
+                'date': sale.date.strftime('%Y-%m-%d'),
+                'seller_email': email,
+                'created_at': sale.created_at.strftime('%Y-%m-%d %H:%M:%S') if sale.created_at else None
+            } for sale in sales]
+            
+            return make_response_data(
+                data=sales_data,
+                success=True, 
+                message=f'Sales fetched for {email}', 
+                status_code=200
+            )
+        except Exception as e:
+            logger.error(f"Error fetching sales for email {email}: {str(e)}")
+            db.session.rollback()
+            return make_response_data(
+                success=False, 
+                message=f"Error fetching sales: {str(e)}", 
+                status_code=500
+            )
 
 
 class SaleResource(Resource):
@@ -210,23 +261,6 @@ class ClearSalesResource(Resource):
 
         return make_response_data(True, 200, f'{num_deleted} sales cleared successfully', {'deleted_count': num_deleted})
 
-        # Both CEO and sellers can see all sales
-        pagination = Sale.query.order_by(Sale.date.desc()).paginate(page=page, per_page=per_page, error_out=False)
-        sales = pagination.items
-
-        return make_response_data(
-            data={
-                "items": [s.to_dict() for s in sales],
-                "meta": {
-                    "page": page,
-                    "per_page": per_page,
-                    "total": pagination.total,
-                    "pages": pagination.pages
-                }
-            },
-            message="Sales fetched."
-        )
-
     @role_required('seller')
     def post(self):
         data = parser.parse_args()
@@ -265,69 +299,6 @@ class ClearSalesResource(Resource):
             message="Sale recorded.",
             status_code=201
         )
-
-
-class SaleResource(Resource):
-    @role_required('ceo')
-    def put(self, sale_id):
-        sale = Sale.query.get_or_404(sale_id)
-        data = parser.parse_args()
-
-        sale.stock_name = data['stock_name']
-        sale.fruit_name = data['fruit_name']
-        sale.qty = data['qty']
-        sale.unit_price = data['unit_price']
-        sale.paid_amount = data.get('paid_amount', sale.paid_amount)
-        sale.amount = data['qty'] * data['unit_price']
-        sale.remaining_amount = sale.amount - sale.paid_amount
-        if 'customer_name' in data:
-            sale.customer_name = data['customer_name']
-        if data.get('date'):
-            sale.date = datetime.strptime(
-                data['date'], '%Y-%m-%d'
-            ).date()
-
-        db.session.commit()
-        return make_response_data(
-            data=sale.to_dict(),
-            message="Sale record updated."
-        )
-
-    @role_required('ceo')
-    def delete(self, sale_id):
-        sale = Sale.query.get_or_404(sale_id)
-        db.session.delete(sale)
-        db.session.commit()
-        return make_response_data(message="Sale record deleted.")
-
-
-class ClearSalesResource(Resource):
-    @role_required('ceo')
-    def delete(self):
-        num_deleted = Sale.query.delete()
-        db.session.commit()
-        return make_response_data(
-            message=f"Successfully cleared {num_deleted} sale records."
-        )
-
-
-class SaleSummaryResource(Resource):
-    @role_required('ceo')
-    def get(self):
-        total_amount = db.session.query(func.sum(Sale.amount)).scalar() or 0
-        amount_by_fruit = db.session.query(
-            Sale.fruit_name,
-            func.sum(Sale.amount)
-        ).group_by(Sale.fruit_name).all()
-
-        summary = {
-            'total_amount': total_amount,
-            'amount_by_fruit': [
-                {'fruit_name': fruit, 'total_amount': amount}
-                for fruit, amount in amount_by_fruit
-            ]
-        }
-        return make_response_data(data=summary, message="Sale summary fetched.")
 
 
 class CustomerDebtResource(Resource):
@@ -494,3 +465,4 @@ class CustomerDebtReportResource(Resource):
             download_name=f"debt_report_{customer_email.replace('@', '_')}.pdf",
             mimetype='application/pdf'
         )
+

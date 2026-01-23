@@ -143,9 +143,19 @@ class CEODashboardResource(Resource):
         seller_fruits = SellerFruit.query.all()
         seller_fruits_data = [fruit.to_dict() for fruit in seller_fruits]
 
-        # Fetch all purchases for CEO view
-        purchases = Purchase.query.order_by(Purchase.purchase_date.desc()).all()
-        purchases_data = [purchase.to_dict() for purchase in purchases]
+        # Fetch all purchases for CEO view with purchaser email joined
+        purchases_query = db.session.query(
+            Purchase,
+            User.email.label('purchaser_email')
+        ).outerjoin(
+            User, Purchase.purchaser_id == User.id
+        ).order_by(Purchase.purchase_date.desc())
+        
+        purchases_data = []
+        for purchase, purchaser_email in purchases_query.all():
+            purchase_dict = purchase.to_dict()
+            purchase_dict['purchaserEmail'] = purchaser_email
+            purchases_data.append(purchase_dict)
 
         # Fetch all salaries for CEO view
         salaries = Salary.query.order_by(Salary.date.desc()).all()
