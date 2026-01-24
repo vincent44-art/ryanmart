@@ -13,7 +13,10 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 // Use relative paths for all API calls — backend determined by REACT_APP_API_BASE_URL env var
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
+// IMPORTANT: Ensure BASE_URL includes /api suffix since backend routes are prefixed with /api
+const BASE_URL = process.env.REACT_APP_API_BASE_URL 
+  ? `${process.env.REACT_APP_API_BASE_URL}/api` 
+  : '/api';
 
 // Helper function to check if response text is HTML (server error page)
 const isHtmlResponse = (text) => {
