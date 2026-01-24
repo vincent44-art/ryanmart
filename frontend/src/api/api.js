@@ -16,17 +16,6 @@ const api = axios.create({
   }
 });
 
-// Helper function to check if text is HTML
-const isHtmlResponse = (text) => {
-  if (typeof text !== 'string') return false;
-  const trimmed = text.trim().toLowerCase();
-  return trimmed.startsWith('<!doctype') || 
-         trimmed.startsWith('<html') || 
-         trimmed.startsWith('<!html') ||
-         trimmed.includes('<!DOCTYPE html>') ||
-         trimmed.includes('<head>');
-};
-
 // Add a request interceptor to attach the access token and cache-buster
 api.interceptors.request.use(
   (config) => {
@@ -57,13 +46,12 @@ api.interceptors.response.use(
     const responseData = response.data;
     
     if (contentType.includes('text/html') || 
-        (typeof responseData === 'string' && isHtmlResponse(responseData))) {
+        (typeof responseData === 'string' && responseData.trim().startsWith('<!DOCTYPE'))) {
       console.error('Server returned HTML error page instead of JSON');
       return Promise.reject({
         status: 500,
         message: 'Server error - received HTML instead of JSON. Please check server logs.',
-        isHtmlError: true,
-        data: responseData
+        isHtmlError: true
       });
     }
     
@@ -75,28 +63,6 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
-    // Handle JSON parse errors (when server returns HTML instead of JSON)
-    if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
-      console.error('JSON parse error - server likely returned HTML:', error.message);
-      toast.error('Server error - please try again later');
-      return Promise.reject({
-        status: 500,
-        message: 'Server returned invalid response (HTML instead of JSON)',
-        isHtmlError: true
-      });
-    }
-
-    // Handle custom HTML error responses
-    if (error.response?.data && typeof error.response.data === 'string' && isHtmlResponse(error.response.data)) {
-      console.error('Server returned HTML error page:', error.response.data.substring(0, 200));
-      toast.error('Server error - please try again later');
-      return Promise.reject({
-        status: error.response.status || 500,
-        message: 'Server error - received HTML instead of JSON',
-        isHtmlError: true
-      });
-    }
 
     // Handle token refresh (401 status)
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -174,4 +140,82 @@ api.interceptors.response.use(
 );
 
 export default api;
+//         localStorage.removeItem('access_token');
+//         window.location.href = '/login?session_expired=true';
+//         return Promise.reject(refreshError);
+//       } finally {
+//         refreshTokenRequest = null;
+//       }
+//     }
 
+//     // Handle specific error statuses
+//     if (error.response) {
+//       const { status, data } = error.response;
+//       let errorMessage = data?.message || 'An error occurred';
+      
+//       switch (status) {
+//         case 400:
+//           errorMessage = data?.errors?.join('\n') || 'Bad request';
+//           break;
+//         case 403:
+//           errorMessage = 'You are not authorized to perform this action';
+//           break;
+//         case 404:
+//           errorMessage = 'Resource not found';
+//           break;
+//         case 500:
+//           errorMessage = 'Server error occurred';
+//           break;
+//         default:
+//           errorMessage = data?.message || 'An unexpected error occurred';
+//           break;
+//       }
+      
+//       // Show error toast (optional)
+//       if (!originalRequest?.skipErrorToast) {
+//         toast.error(errorMessage);
+//       }
+      
+//       return Promise.reject({
+//         status,
+//         message: errorMessage,
+//         errors: data?.errors,
+//         data: data
+//       });
+//     } else if (error.request) {
+//       // The request was made but no response was received
+//       toast.error('Network error - please check your connection');
+//       return Promise.reject({
+//         status: 0,
+//         message: 'No response from server'
+//       });
+//     } else {
+//       // Something happened in setting up the request
+//       console.error('Request setup error:', error.message);
+//       return Promise.reject({
+//         status: -1,
+//         message: error.message
+//       });
+//     }
+//   }
+// );
+
+
+// // Request interceptor to attach access token
+// // api.interceptors.request.use(
+// //   (config) => {
+// //     const token = localStorage.getItem('access_token');
+// //     if (token) {
+// //       config.headers['Authorization'] = `Bearer ${token}`;
+// //     }
+// //     return config;
+// //   },
+// //   (error) => Promise.reject(error)
+// // );
+
+// // Temporary simplified response handling (for debugging)
+// // api.interceptors.response.use(
+// //   (response) => response.data,
+// //   (error) => Promise.reject(error)
+// // );
+// export default api;
