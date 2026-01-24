@@ -2,18 +2,18 @@
 import api from './api';
 
 export const deletePurchase = (id) =>
-  api.delete(`/purchases/${id}`);
+  api.delete(`/api/purchases/${id}`);
 
 export const fetchPurchases = (email = null) => {
   if (email) {
-    return api.get(`/purchases/by-email/${email}`);
+    return api.get(`/api/purchases/by-email/${email}`);
   } else {
-    return api.get('/purchases');
+    return api.get('/api/purchases');
   }
 };
 
 export const addPurchase = (data) =>
-  api.post('/purchases', data);
+  api.post('/api/purchases', data);
 
 export const clearPurchases = (email) =>
-  api.delete(`/purchases/${email}`);
+  api.delete(`/api/purchases/${email}`);
