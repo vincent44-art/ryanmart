@@ -1,15 +1,16 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-// Create axios instance with default configuration
+// Get the base URL from environment or use default
 const RAW_BASE = process.env.REACT_APP_API_BASE_URL || '';
-// Ensure we don't end up with double /api/api; append /api if not present
-const baseURL = RAW_BASE.endsWith('/api') ? RAW_BASE : `${RAW_BASE}/api`;
+// Use the full backend URL directly - do NOT append /api here
+// The backend routes are already prefixed with /api
+const baseURL = RAW_BASE || '/api';
 
 const api = axios.create({
-  baseURL: baseURL || '/api',
+  baseURL: baseURL,
   withCredentials: true,
-  timeout: 10000,
+  timeout: 30000,  // 30 second timeout to match backend configuration
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -48,10 +49,12 @@ api.interceptors.response.use(
     if (contentType.includes('text/html') || 
         (typeof responseData === 'string' && responseData.trim().startsWith('<!DOCTYPE'))) {
       console.error('Server returned HTML error page instead of JSON');
+      console.error('Response preview:', responseData.substring(0, 500));
       return Promise.reject({
         status: 500,
-        message: 'Server error - received HTML instead of JSON. Please check server logs.',
-        isHtmlError: true
+        message: 'Server error - received HTML instead of JSON. The server may be returning a CORS error or 404 page.',
+        isHtmlError: true,
+        isNetworkError: false
       });
     }
     

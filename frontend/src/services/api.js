@@ -4,7 +4,7 @@ import axios from 'axios';
 // API CONFIGURATION - CRITICAL: MATCH EXACT DEPLOYED BACKEND URL
 // =====================================================================
 // Production URLs (must match exactly what's deployed on Render):
-// - Frontend: https://ryanmart-frontend.onrender.com
+// - Frontend: https://ryanmart-fronntend.onrender.com
 // - Backend:  https://ryanmart-backend.onrender.com
 //
 // Development URLs:
@@ -21,7 +21,7 @@ const getApiBaseUrl = () => {
   // Check if we're in production (React app built for production)
   if (process.env.NODE_ENV === 'production') {
     // Return exact production backend URL
-    return 'https://ryanmart-backend.onrender.com';
+    return 'https://ryanmart-bacckend.onrender.com';
   }
   
   // Development fallback
@@ -63,6 +63,34 @@ api.interceptors.request.use(
   },
   (error) => {
     console.error('[API] Request interceptor error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// =====================================================================
+// RESPONSE INTERCEPTOR - HANDLE HTML ERRORS
+// =====================================================================
+api.interceptors.response.use(
+  (response) => {
+    // Check if response is HTML (server error page) instead of JSON
+    const contentType = response.headers['content-type'] || '';
+    const responseData = response.data;
+    
+    if (contentType.includes('text/html') || 
+        (typeof responseData === 'string' && responseData.trim().startsWith('<!DOCTYPE'))) {
+      console.error('[API] Server returned HTML error page instead of JSON');
+      console.error('[API] Response preview:', responseData.substring(0, 500));
+      return Promise.reject({
+        status: 500,
+        message: 'Server error - received HTML instead of JSON. This may indicate a CORS issue or the server is not responding correctly.',
+        isHtmlError: true,
+        isNetworkError: false
+      });
+    }
+    return response;
+  },
+  (error) => {
+    console.error('[API] Response error:', error);
     return Promise.reject(error);
   }
 );
