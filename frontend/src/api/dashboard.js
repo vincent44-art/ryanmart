@@ -15,10 +15,10 @@ const loadData = async () => {
     let endpoint;
 
     switch (user.role) {
-      case 'ceo': endpoint = '/ceo/dashboard'; break;
-      case 'seller': endpoint = '/seller/dashboard'; break;
-      case 'purchaser': endpoint = '/purchaser/dashboard'; break;
-      case 'storekeeper': endpoint = '/storekeeper/dashboard'; break;
+      case 'ceo': endpoint = '/api/ceo/dashboard'; break;
+      case 'seller': endpoint = '/api/seller/dashboard'; break;
+      case 'purchaser': endpoint = '/api/purchaser/dashboard'; break;
+      case 'storekeeper': endpoint = '/api/storekeeper/dashboard'; break;
       default:
         setError('Unauthorized role');
         setLoading(false);
