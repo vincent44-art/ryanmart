@@ -141,7 +141,7 @@ class SaleByEmailResource(Resource):
                 'paid_amount': sale.paid_amount,
                 'remaining_amount': sale.remaining_amount,
                 'customer_name': sale.customer_name,
-                'date': sale.date.strftime('%Y-%m-%d'),
+                'date': sale.date.strftime('%Y-%m-%d') if sale.date else None,
                 'seller_email': email,
                 'created_at': sale.created_at.strftime('%Y-%m-%d %H:%M:%S') if sale.created_at else None
             } for sale in sales]

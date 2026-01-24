@@ -37,9 +37,19 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
+        "pool_size": 5,
+        "max_overflow": 10,
         "connect_args": {
-            "connect_timeout": 10
+            "connect_timeout": 10,
+            "options": "-c statement_timeout=30000"  # 30 second query timeout
         }
+    }
+    
+    # Session settings for better timeout handling
+    SQLALCHEMY_SESSION_OPTIONS = {
+        "autocommit": False,
+        "autoflush": True,
+        "expire_on_commit": False
     }
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-string'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)

@@ -17,6 +17,7 @@ class Sale(db.Model):
     remaining_amount = db.Column(db.Float, nullable=False, default=0.0)
     customer_name = db.Column(db.String(100), nullable=True)
     date = db.Column(db.Date, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     seller = db.relationship('User', back_populates='sales', lazy=True)
