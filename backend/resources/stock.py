@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 from datetime import datetime
+from flask_jwt_extended import jwt_required
 from extensions import db
 from models.stock_movement import StockMovement
 from utils.helpers import make_response_data, get_current_user
@@ -15,6 +16,7 @@ stock_parser.add_argument('date', type=str, required=True)
 stock_parser.add_argument('notes', type=str)
 
 class StockMovementListResource(Resource):
+    @jwt_required()
     def get(self):
         movements = StockMovement.query.order_by(StockMovement.date.desc()).all()
         return make_response_data(data=[m.to_dict() for m in movements], message="Stock movements fetched.")

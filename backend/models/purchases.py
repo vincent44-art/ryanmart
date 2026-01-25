@@ -6,7 +6,7 @@ class Purchase(db.Model):
     purchaser_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     employee_name = db.Column(db.String(100), nullable=False)
     fruit_type = db.Column(db.String(50), nullable=False)
-    quantity = db.Column(db.String(50), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
     unit = db.Column(db.String(20), nullable=False)
     buyer_name = db.Column(db.String(100), nullable=False)
     cost = db.Column(db.Float, nullable=False)

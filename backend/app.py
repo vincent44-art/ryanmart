@@ -136,7 +136,7 @@ def create_app(config_class=Config):
     
     # Production URLs - MUST match exactly what's deployed
     PRODUCTION_FRONTEND = "https://ryanmart-fronntend.onrender.com"
-    PRODUCTION_BACKEND = "https://ryanmart-backend.onrender.com"
+    PRODUCTION_BACKEND = "https://ryanmart-bacckend.onrender.com"
     DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
     
     if configured_origins:
@@ -295,7 +295,6 @@ def create_app(config_class=Config):
     api.add_resource(InventoryListResource, '/api/inventory')
     api.add_resource(InventoryResource, '/api/inventory/<int:inv_id>')
     api.add_resource(ClearInventoryResource, '/api/inventory/clear')
-    api.add_resource(StockMovementListResource, '/api/stock-movements')
 
     # =====================================================================
     # HEALTH CHECK & DEBUG ROUTES

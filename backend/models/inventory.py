@@ -5,7 +5,7 @@ from extensions import db
 class Inventory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    quantity = db.Column(db.String(50), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
     fruit_type = db.Column(db.String(50), nullable=False)
     unit = db.Column(db.String(20))
     location = db.Column(db.String(100))
@@ -16,7 +16,7 @@ class Inventory(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
-    stock_movements = db.relationship('StockMovement', backref='inventory_item', lazy=True, cascade="all, delete-orphan")
+    stock_movements = db.relationship('StockMovement', back_populates='inventory_item', lazy=True, cascade="all, delete-orphan")
 
     def to_dict(self):
         return {

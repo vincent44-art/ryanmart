@@ -56,10 +56,16 @@ class LoginResource(Resource):
 class MeResource(Resource):
     @jwt_required()
     def get(self):
-        user = get_current_user()
-        if user:
-            return make_response_data(data=user.to_dict(), message="Current user data fetched.")
-        return make_response_data(success=False, message="User not found.", status_code=404)
+        try:
+            user = get_current_user()
+            if user:
+                return make_response_data(data=user.to_dict(), message="Current user data fetched.")
+            return make_response_data(success=False, message="User not found.", status_code=404)
+        except Exception as e:
+            # Log the error for debugging
+            from flask import current_app
+            current_app.logger.error(f"MeResource error: {str(e)}")
+            return make_response_data(success=False, message="Failed to fetch user data", status_code=500)
 
 
 class RefreshResource(Resource):
