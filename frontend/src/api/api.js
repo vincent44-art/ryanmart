@@ -3,9 +3,8 @@ import { toast } from 'react-hot-toast';
 
 // Get the base URL from environment or use default
 const RAW_BASE = process.env.REACT_APP_API_BASE_URL || '';
-// Use the full backend URL directly - do NOT append /api here
-// The backend routes are already prefixed with /api
-const baseURL = RAW_BASE || '/api';
+// Use the full backend URL with /api prefix for production, or /api for local
+const baseURL = RAW_BASE ? RAW_BASE + '/api' : 'https://ryanmart-bacckend.onrender.com/api';
 
 const api = axios.create({
   baseURL: baseURL,
