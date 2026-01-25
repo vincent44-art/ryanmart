@@ -19,7 +19,7 @@ const isHtmlResponse = (text) => {
  */
 export const fetchDriverExpenses = async (driverEmail) => {
   try {
-    const response = await api.get(`/api/drivers/${driverEmail}/expenses`);
+    const response = await api.get(`/drivers/${driverEmail}/expenses`);
     return response.data;
   } catch (error) {
     console.error('Error fetching driver expenses:', error);
@@ -43,7 +43,7 @@ export const fetchDriverExpenses = async (driverEmail) => {
  */
 export const addDriverExpense = async (expenseData) => {
   try {
-    const response = await api.post('/api/drivers/expenses', expenseData);
+    const response = await api.post('/drivers/expenses', expenseData);
     return response.data;
   } catch (error) {
     console.error('Error adding driver expense:', error);
@@ -59,7 +59,7 @@ export const addDriverExpense = async (expenseData) => {
  */
 export const updateDriverExpense = async (expenseId, updates) => {
   try {
-    const response = await api.patch(`/api/drivers/expenses/${expenseId}`, updates);
+    const response = await api.patch(`/drivers/expenses/${expenseId}`, updates);
     return response.data;
   } catch (error) {
     console.error('Error updating driver expense:', error);
@@ -74,7 +74,7 @@ export const updateDriverExpense = async (expenseId, updates) => {
  */
 export const deleteDriverExpense = async (expenseId) => {
   try {
-    const response = await api.delete(`/api/drivers/expenses/${expenseId}`);
+    const response = await api.delete(`/drivers/expenses/${expenseId}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting driver expense:', error);
@@ -89,7 +89,7 @@ export const deleteDriverExpense = async (expenseId) => {
  */
 export const fetchDriverProfile = async (driverEmail) => {
   try {
-    const response = await api.get(`/api/drivers/${driverEmail}/profile`);
+    const response = await api.get(`/drivers/${driverEmail}/profile`);
     return response.data;
   } catch (error) {
     console.error('Error fetching driver profile:', error);
@@ -105,7 +105,7 @@ export const fetchDriverProfile = async (driverEmail) => {
  */
 export const updateDriverProfile = async (driverEmail, updates) => {
   try {
-    const response = await api.patch(`/api/drivers/${driverEmail}/profile`, updates);
+    const response = await api.patch(`/drivers/${driverEmail}/profile`, updates);
     return response.data;
   } catch (error) {
     console.error('Error updating driver profile:', error);
