@@ -1,9 +1,9 @@
 // Use relative paths — the proxy/backend will be set via REACT_APP_API_BASE_URL env var
-const API_BASE_URL = '/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
 export const fetchOtherExpenses = async () => {
   const token = localStorage.getItem('access_token');
-  const response = await fetch(`${API_BASE_URL}/other_expenses`, {
+  const response = await fetch(`${API_BASE_URL}/api/other_expenses`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -35,7 +35,7 @@ export const fetchOtherExpenses = async () => {
 
 export const addOtherExpense = async (expenseData) => {
   const token = localStorage.getItem('access_token');
-  const response = await fetch(`${API_BASE_URL}/other_expenses`, {
+  const response = await fetch(`${API_BASE_URL}/api/other_expenses`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -68,7 +68,7 @@ export const addOtherExpense = async (expenseData) => {
 
 export const deleteOtherExpense = async (expenseId) => {
   const token = localStorage.getItem('access_token');
-  const response = await fetch(`${API_BASE_URL}/other_expenses/${expenseId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/other_expenses/${expenseId}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,

@@ -63,7 +63,7 @@ export const addStockTracking = async (data, token) => {
     throw new Error('Authentication token is required');
   }
 
-  const endpoint = '/stock-tracking';
+  const endpoint = '/api/stock-tracking';
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   // Validate required fields based on backend model
@@ -115,7 +115,7 @@ export const addStockTracking = async (data, token) => {
 };
 
 export async function clearStockTracking(token) {
-  const endpoint = '/stock-tracking/clear';
+  const endpoint = '/api/stock-tracking/clear';
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   const res = await fetch(fullUrl, {
@@ -144,7 +144,7 @@ export const fetchStockTrackingAggregated = async (token) => {
     throw new Error('Authentication token is required');
   }
 
-  const endpoint = '/stock-tracking/aggregated';
+  const endpoint = '/api/stock-tracking/aggregated';
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   try {
@@ -185,7 +185,7 @@ export const fetchSales = async (token) => {
     throw new Error('Authentication token is required');
   }
 
-  const endpoint = '/sales';
+  const endpoint = '/api/sales';
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   try {
