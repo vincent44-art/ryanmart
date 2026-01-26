@@ -186,38 +186,50 @@ class PurchaseByEmailResource(Resource):
         Get purchases by purchaser email.
         Requires JWT authentication.
         """
-        # Get current user from JWT to verify access
-        current_user_id = get_jwt_identity()
-        current_user = User.query.get(current_user_id)
+        logger = logging.getLogger('purchases')
+        
+        try:
+            # Get current user from JWT to verify access
+            current_user_id = get_jwt_identity()
+            current_user = User.query.get(current_user_id)
 
-        if not current_user:
+            if not current_user:
+                return make_response_data(
+                    success=False,
+                    message="User not found.",
+                    status_code=401
+                )
+
+            # Verify the requested email matches the current user's email
+            # or if the user is a CEO/admin who can view all purchases
+            user_role = str(current_user.role).upper() if current_user.role else ''
+            if email != current_user.email and user_role not in ['CEO', 'ADMIN']:
+                return make_response_data(
+                    success=False,
+                    message="Not authorized to view these purchases.",
+                    status_code=403
+                )
+
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return make_response_data(
+                    data=[],
+                    message="No user found with this email."
+                )
+            
+            purchases = Purchase.query.filter_by(purchaser_id=user.id).all()
+            return make_response_data(
+                data=[p.to_dict() for p in purchases],
+                message="Purchases fetched successfully."
+            )
+        except Exception as e:
+            logger.error(f"Error fetching purchases by email: {str(e)}")
+            db.session.rollback()
             return make_response_data(
                 success=False,
-                message="User not found.",
-                status_code=401
+                message="Failed to fetch purchases. Please try again later.",
+                status_code=500
             )
-
-        # Verify the requested email matches the current user's email
-        # or if the user is a CEO/admin who can view all purchases
-        user_role = str(current_user.role).upper() if current_user.role else ''
-        if email != current_user.email and user_role not in ['CEO', 'ADMIN']:
-            return make_response_data(
-                success=False,
-                message="Not authorized to view these purchases.",
-                status_code=403
-            )
-
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            return make_response_data(
-                data=[],
-                message="No user found with this email."
-            )
-        purchases = Purchase.query.filter_by(purchaser_id=user.id).all()
-        return make_response_data(
-            data=[p.to_dict() for p in purchases],
-            message="Purchases fetched successfully."
-        )
 
 
 class DailyPurchasesReportResource(Resource):

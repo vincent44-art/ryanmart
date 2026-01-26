@@ -1,6 +1,8 @@
 from datetime import datetime
 from .user import db
-from .user import User  # Direct import at top level is safe
+
+# Import User model - using lazy import to avoid circular import
+# User will be imported inside methods where needed
 
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -16,7 +18,9 @@ class Purchase(db.Model):
     amount_per_kg = db.Column(db.Float, nullable=False, default=0)
 
     def to_dict(self):
-        # Get purchaser email using the imported User model
+        # Get purchaser email using lazy import to avoid circular import
+        from .user import User
+        
         purchaser_email = None
         try:
             # Use db.session to query to avoid detached instance issues
@@ -41,3 +45,4 @@ class Purchase(db.Model):
             'date': self.purchase_date.isoformat() if self.purchase_date else None,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
+

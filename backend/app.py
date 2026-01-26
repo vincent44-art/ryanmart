@@ -124,7 +124,12 @@ def create_app(config_class=Config):
         identity = jwt_data.get("sub")
         if not identity:
             return None
-        return User.query.get(identity)
+        try:
+            user = User.query.get(identity)
+            return user
+        except Exception as e:
+            app.logger.error(f"Error in user_lookup_callback: {str(e)}")
+            return None
 
     migrate.init_app(app, db)
     
