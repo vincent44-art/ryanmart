@@ -1,8 +1,9 @@
 from datetime import datetime
-from .user import db
+from extensions import db
+from models.user import User
 
-# Import User model - using lazy import to avoid circular import
-# User will be imported inside methods where needed
+# Import User model at module level - this is safe after db is initialized
+
 
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -18,12 +19,13 @@ class Purchase(db.Model):
     amount_per_kg = db.Column(db.Float, nullable=False, default=0)
 
     def to_dict(self):
-        # Get purchaser email using lazy import to avoid circular import
-        from .user import User
-        
+        """
+        Convert purchase to dictionary for JSON serialization.
+        Uses lazy loading to get purchaser email.
+        """
         purchaser_email = None
         try:
-            # Use db.session to query to avoid detached instance issues
+            # Use db.session.get() which properly handles session
             user = db.session.get(User, self.purchaser_id)
             if user:
                 purchaser_email = user.email
