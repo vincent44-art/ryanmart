@@ -38,17 +38,28 @@ api.interceptors.request.use(
 // Current refresh token request to prevent multiple refresh attempts
 let refreshTokenRequest = null;
 
+// Helper function to detect HTML responses
+const looksLikeHtml = (data) => {
+  if (typeof data !== 'string') return false;
+  const trimmed = data.trim();
+  return trimmed.startsWith('<!DOCTYPE') ||
+         trimmed.startsWith('<!doctype') ||
+         trimmed.startsWith('<html') ||
+         trimmed.startsWith('<!html');
+};
+
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    // Check if response is HTML (server error page) instead of JSON
+    // Check content-type header for HTML before axios parses body
     const contentType = response.headers['content-type'] || '';
     const responseData = response.data;
     
-    if (contentType.includes('text/html') || 
-        (typeof responseData === 'string' && responseData.trim().startsWith('<!DOCTYPE'))) {
+    // If content-type is HTML or data looks like HTML, reject BEFORE JSON parsing
+    if (contentType.includes('text/html') ||
+        (typeof responseData === 'string' && looksLikeHtml(responseData))) {
       console.error('Server returned HTML error page instead of JSON');
-      console.error('Response preview:', responseData.substring(0, 500));
+      console.error('Response preview:', typeof responseData === 'string' ? responseData.substring(0, 500) : responseData);
       return Promise.reject({
         status: 500,
         message: 'Server error - received HTML instead of JSON. The server may be returning a CORS error or 404 page.',
@@ -65,6 +76,30 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+
+    // Handle JSON parsing errors (axios tried to parse HTML as JSON)
+    if (error instanceof SyntaxError && error.message.includes('Unexpected token') ||
+        error.message?.includes('JSON.parse')) {
+      console.error('JSON parsing error - likely received HTML instead of JSON:', error.message);
+      toast.error('Server error: Received invalid response from server');
+      return Promise.reject({
+        status: 500,
+        message: 'Server error: Invalid JSON response. The server may be returning an HTML error page.',
+        isJsonParseError: true,
+        isNetworkError: false
+      });
+    }
+
+    // Handle network errors (CORS, server down, etc.)
+    if (!error.response && (error.code === 'ERR_NETWORK' || error.message.includes('Network Error'))) {
+      console.error('Network error:', error.message);
+      toast.error('Network error: Cannot connect to server. Please check your connection.');
+      return Promise.reject({
+        status: 0,
+        message: 'Network error: Cannot connect to server.',
+        isNetworkError: true
+      });
+    }
 
     // Handle token refresh (401 status)
     if (error.response?.status === 401 && !originalRequest._retry) {
