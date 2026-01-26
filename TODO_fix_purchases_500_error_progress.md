@@ -1,16 +1,15 @@
-# Purchase API 500 Error Fix - Progress Tracker
+# Fix Purchases 500 Error Progress
 
-## Tasks Completed
-- [ ] Task 1: Update `backend/models/purchases.py` with proper model definition
-- [ ] Task 2: Update `backend/resources/purchases.py` to import from models.purchases
-- [ ] Task 3: Test the fix
+## Tasks
+- [x] Update backend route from path parameter to query parameter in app.py
+- [x] Update PurchaseByEmailResource to get email from request.args instead of path parameter
+- [x] Update frontend API call to send email as query parameter
+- [ ] Test the changes to ensure 500 error is resolved
 
-## Status: In Progress
-
-## Current Issue
-The Purchase model is defined in the wrong file with problematic relative imports causing 500 errors.
-
-## Fix Implementation
-1. Move Purchase model to `backend/models/purchases.py`
-2. Update imports in `backend/resources/purchases.py`
-
+## Current Status
+- Identified that backend expects req.query.email but uses req.params.email
+- Email with special characters (@, .) may cause parsing issues
+- Plan approved by user
+- Backend route updated to /api/purchases/by-email (no path parameter)
+- PurchaseByEmailResource updated to get email from request.args.get('email')
+- Frontend API updated to send email as query parameter with URL encoding

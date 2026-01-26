@@ -52,8 +52,8 @@ def test_purchase_routes():
             print("   ❌ Returns HTML instead of JSON!")
 
         # Test 3: Purchase by email endpoint (requires auth - should return 401)
-        print("\n3. Testing /api/purchases/by-email/test@example.com (no auth - should return 401)...")
-        resp = client.get('/api/purchases/by-email/test@example.com')
+        print("\n3. Testing /api/purchases/by-email?email=test@example.com (no auth - should return 401)...")
+        resp = client.get('/api/purchases/by-email?email=test%40example.com')
         print(f"   Status: {resp.status_code}")
         print(f"   Content-Type: {resp.content_type}")
         if resp.content_type == 'application/json':

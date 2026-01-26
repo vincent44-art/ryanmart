@@ -84,7 +84,7 @@ api.add_resource(SalaryPaymentToggleStatusResource, '/salary-payments/<int:payme
 # ----------- PURCHASES -----------
 api.add_resource(PurchaseListResource, '/purchases')
 api.add_resource(PurchaseResource, '/purchases/<int:purchase_id>')
-api.add_resource(PurchaseByEmailResource, '/purchases/by-email/<string:email>')
+api.add_resource(PurchaseByEmailResource, '/purchases/by-email')
 api.add_resource(ClearPurchasesResource, '/purchases/clear')
 api.add_resource(PurchaseSummaryResource, '/purchases/summary')
 

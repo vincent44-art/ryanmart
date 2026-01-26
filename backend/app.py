@@ -285,7 +285,7 @@ def create_app(config_class=Config):
     api.add_resource(DailySalesReportResource, '/api/sales/report/<string:date_str>')
     api.add_resource(CustomerDebtReportResource, '/api/sales/debts/<string:customer_email>/report')
     api.add_resource(DailyPurchasesReportResource, '/api/purchases/report/<string:date_str>')
-    api.add_resource(PurchaseByEmailResource, '/api/purchases/by-email/<string:email>')
+    api.add_resource(PurchaseByEmailResource, '/api/purchases/by-email')
     api.add_resource(AIAssistanceResource, '/api/ai-assistance')
     api.add_resource(ReceiptResource, '/api/receipts', '/api/receipts/<string:receipt_num>')
     api.add_resource(SellerFruitListResource, '/api/seller-fruits')
