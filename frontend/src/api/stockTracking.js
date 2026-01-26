@@ -1,5 +1,16 @@
-// Import API base URL from the centralized configuration
-import { API_BASE_URL } from '../services/api.js';
+// API base URL - use environment variable or default to backend URL
+const getApiBaseUrl = () => {
+  const envUrl = process.env.REACT_APP_API_BASE_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://ryanmart-bacckend.onrender.com';
+  }
+  return 'http://localhost:5000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Check if the response is HTML (like a 404 page)

@@ -1,15 +1,15 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-// Get the base URL from environment or use default
+// Get the base URL from environment
 const RAW_BASE = process.env.REACT_APP_API_BASE_URL || '';
-// Use the full backend URL with /api prefix for production, or /api for local
-const baseURL = RAW_BASE ? RAW_BASE + '/api' : 'https://ryanmart-bacckend.onrender.com/api';
+// Use the backend URL as-is - DO NOT add /api here since API routes are already prefixed with /api in the endpoints
+const baseURL = RAW_BASE || 'https://ryanmart-bacckend.onrender.com';
 
 const api = axios.create({
   baseURL: baseURL,
   withCredentials: true,
-  timeout: 30000,  // 30 second timeout to match backend configuration
+  timeout: 30000,  // 30 second timeout
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -106,7 +106,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         refreshTokenRequest = refreshTokenRequest ||
-          api.post('/auth/refresh', {
+          api.post('/api/auth/refresh', {
             refresh_token: localStorage.getItem('refresh_token')
           }, {
             skipAuthRefresh: true,
@@ -177,82 +177,4 @@ api.interceptors.response.use(
 );
 
 export default api;
-//         localStorage.removeItem('access_token');
-//         window.location.href = '/login?session_expired=true';
-//         return Promise.reject(refreshError);
-//       } finally {
-//         refreshTokenRequest = null;
-//       }
-//     }
 
-//     // Handle specific error statuses
-//     if (error.response) {
-//       const { status, data } = error.response;
-//       let errorMessage = data?.message || 'An error occurred';
-      
-//       switch (status) {
-//         case 400:
-//           errorMessage = data?.errors?.join('\n') || 'Bad request';
-//           break;
-//         case 403:
-//           errorMessage = 'You are not authorized to perform this action';
-//           break;
-//         case 404:
-//           errorMessage = 'Resource not found';
-//           break;
-//         case 500:
-//           errorMessage = 'Server error occurred';
-//           break;
-//         default:
-//           errorMessage = data?.message || 'An unexpected error occurred';
-//           break;
-//       }
-      
-//       // Show error toast (optional)
-//       if (!originalRequest?.skipErrorToast) {
-//         toast.error(errorMessage);
-//       }
-      
-//       return Promise.reject({
-//         status,
-//         message: errorMessage,
-//         errors: data?.errors,
-//         data: data
-//       });
-//     } else if (error.request) {
-//       // The request was made but no response was received
-//       toast.error('Network error - please check your connection');
-//       return Promise.reject({
-//         status: 0,
-//         message: 'No response from server'
-//       });
-//     } else {
-//       // Something happened in setting up the request
-//       console.error('Request setup error:', error.message);
-//       return Promise.reject({
-//         status: -1,
-//         message: error.message
-//       });
-//     }
-//   }
-// );
-
-
-// // Request interceptor to attach access token
-// // api.interceptors.request.use(
-// //   (config) => {
-// //     const token = localStorage.getItem('access_token');
-// //     if (token) {
-// //       config.headers['Authorization'] = `Bearer ${token}`;
-// //     }
-// //     return config;
-// //   },
-// //   (error) => Promise.reject(error)
-// // );
-
-// // Temporary simplified response handling (for debugging)
-// // api.interceptors.response.use(
-// //   (response) => response.data,
-// //   (error) => Promise.reject(error)
-// // );
-// export default api;

@@ -12,11 +12,9 @@ import { fetchSales } from '../components/apiHelpers';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-// Use relative paths for all API calls — backend determined by REACT_APP_API_BASE_URL env var
-// IMPORTANT: Ensure BASE_URL includes /api suffix since backend routes are prefixed with /api
-const BASE_URL = process.env.REACT_APP_API_BASE_URL 
-  ? `${process.env.REACT_APP_API_BASE_URL}/api` 
-  : '/api';
+// API base URL - use environment variable or default to backend URL
+// NOTE: The base URL should NOT include /api since API endpoints are already defined with /api prefix
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-bacckend.onrender.com';
 
 // Helper function to check if response text is HTML (server error page)
 const isHtmlResponse = (text) => {
@@ -177,7 +175,7 @@ const SellerDashboard = () => {
 
           // Load seller sales directly for table display
           try {
-            const salesRes = await fetch(`${BASE_URL}/sales`, {
+            const salesRes = await fetch(`${API_BASE_URL}/api/sales`, {
               method: 'GET',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
             });

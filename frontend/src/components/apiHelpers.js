@@ -48,7 +48,8 @@ const isHtmlResponse = (text) => {
 // Fetch sales data
 export const fetchSales = async (userEmail = null) => {
   try {
-    const endpoint = userEmail ? `/sales/email/${userEmail}` : '/sales';
+    // Use relative URL with /api prefix since api.js baseURL is the backend URL without /api
+    const endpoint = userEmail ? `/api/sales/email/${userEmail}` : '/api/sales';
     const response = await api.get(endpoint);
     return response;
   } catch (error) {
