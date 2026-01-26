@@ -5,7 +5,7 @@ import api from '../api/api';
 // Fetch inventory data
 export const fetchInventory = async (token = null) => {
   try {
-    const response = await api.get('/inventory');
+    const response = await api.get('/api/inventory');
     return response;
   } catch (error) {
     console.error('Error fetching inventory:', error);
@@ -16,7 +16,7 @@ export const fetchInventory = async (token = null) => {
 // Fetch stock movements
 export const fetchStockMovements = async (token = null) => {
   try {
-    const response = await api.get('/stock-movements');
+    const response = await api.get('/api/stock-movements');
     return response;
   } catch (error) {
     console.error('Error fetching stock movements:', error);
@@ -27,7 +27,7 @@ export const fetchStockMovements = async (token = null) => {
 // Fetch purchases data
 export const fetchPurchases = async (userEmail = null) => {
   try {
-    const endpoint = userEmail ? `/purchases/${userEmail}` : '/purchases';
+    const endpoint = userEmail ? `/api/purchases/${userEmail}` : '/api/purchases';
     const response = await api.get(endpoint);
     return response;
   } catch (error) {
@@ -65,7 +65,7 @@ export const fetchSales = async (userEmail = null) => {
 // Fetch other expenses
 export const fetchOtherExpenses = async () => {
   try {
-  const response = await api.get('/other_expenses');
+  const response = await api.get('/api/other_expenses');
     return response;
   } catch (error) {
     console.error('Error fetching other expenses:', error);
@@ -76,7 +76,7 @@ export const fetchOtherExpenses = async () => {
 // Fetch users data
 export const fetchUsers = async () => {
   try {
-    const response = await api.get('/users');
+    const response = await api.get('/api/users');
     return response;
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -87,7 +87,7 @@ export const fetchUsers = async () => {
 // Create a new sale
 export const createSale = async (saleData) => {
   try {
-    const response = await api.post('/sales', saleData);
+    const response = await api.post('/api/sales', saleData);
     return response;
   } catch (error) {
     console.error('Error creating sale:', error);
@@ -98,7 +98,7 @@ export const createSale = async (saleData) => {
 // Delete a sale
 export const deleteSale = async (saleId) => {
   try {
-    const response = await api.delete(`/sales/${saleId}`);
+    const response = await api.delete(`/api/sales/${saleId}`);
     return response;
   } catch (error) {
     console.error('Error deleting sale:', error);
@@ -109,7 +109,7 @@ export const deleteSale = async (saleId) => {
 // Create assignment
 export const createAssignment = async (assignmentData) => {
   try {
-    const response = await api.post('/assignments', assignmentData);
+    const response = await api.post('/api/assignments', assignmentData);
     return response;
   } catch (error) {
     console.error('Error creating assignment:', error);
@@ -120,7 +120,7 @@ export const createAssignment = async (assignmentData) => {
 // Create sale for assignment
 export const createSaleForAssignment = async (assignmentId, saleData) => {
   try {
-    const response = await api.post(`/assignments/${assignmentId}/sales`, saleData);
+    const response = await api.post(`/api/assignments/${assignmentId}/sales`, saleData);
     return response;
   } catch (error) {
     console.error('Error creating sale for assignment:', error);
@@ -131,7 +131,7 @@ export const createSaleForAssignment = async (assignmentId, saleData) => {
 // Delete purchase
 export const deletePurchase = async (purchaseId) => {
   try {
-    const response = await api.delete(`/purchases/${purchaseId}`);
+    const response = await api.delete(`/api/purchases/${purchaseId}`);
     return response;
   } catch (error) {
     console.error('Error deleting purchase:', error);
@@ -142,7 +142,7 @@ export const deletePurchase = async (purchaseId) => {
 // Add purchase
 export const addPurchase = async (purchaseData) => {
   try {
-    const response = await api.post('/purchases', purchaseData);
+    const response = await api.post('/api/purchases', purchaseData);
     return response;
   } catch (error) {
     console.error('Error adding purchase:', error);
@@ -153,7 +153,7 @@ export const addPurchase = async (purchaseData) => {
 // Add user
 export const addUser = async (userData) => {
   try {
-    const response = await api.post('/users', userData);
+    const response = await api.post('/api/users', userData);
     return response;
   } catch (error) {
     console.error('Error adding user:', error);
@@ -164,7 +164,7 @@ export const addUser = async (userData) => {
 // Update user
 export const updateUser = async (userId, userData) => {
   try {
-    const response = await api.put(`/users/${userId}`, userData);
+    const response = await api.put(`/api/users/${userId}`, userData);
     return response;
   } catch (error) {
     console.error('Error updating user:', error);
@@ -175,7 +175,7 @@ export const updateUser = async (userId, userData) => {
 // Delete user
 export const deleteUser = async (userId) => {
   try {
-    const response = await api.delete(`/users/${userId}`);
+    const response = await api.delete(`/api/users/${userId}`);
     return response;
   } catch (error) {
     console.error('Error deleting user:', error);
@@ -186,7 +186,7 @@ export const deleteUser = async (userId) => {
 // Get all users
 export const getAllUsers = async () => {
   try {
-    const response = await api.get('/users');
+    const response = await api.get('/api/users');
     return response.data || [];
   } catch (error) {
     console.error('Error getting all users:', error);
@@ -197,7 +197,7 @@ export const getAllUsers = async () => {
 // Fetch car expenses
 export const fetchCarExpenses = async () => {
   try {
-    const response = await api.get('/car-expenses');
+    const response = await api.get('/api/car-expenses');
     return response;
   } catch (error) {
     console.error('Error fetching car expenses:', error);
@@ -208,7 +208,7 @@ export const fetchCarExpenses = async () => {
 // Add car expense
 export const addCarExpense = async (expenseData) => {
   try {
-    const response = await api.post('/car-expenses', expenseData);
+    const response = await api.post('/api/car-expenses', expenseData);
     return response;
   } catch (error) {
     console.error('Error adding car expense:', error);
@@ -219,7 +219,7 @@ export const addCarExpense = async (expenseData) => {
 // Update car expense
 export const updateCarExpense = async (expenseId, expenseData) => {
   try {
-    const response = await api.put(`/car-expenses/${expenseId}`, expenseData);
+    const response = await api.put(`/api/car-expenses/${expenseId}`, expenseData);
     return response;
   } catch (error) {
     console.error('Error updating car expense:', error);
@@ -230,7 +230,7 @@ export const updateCarExpense = async (expenseId, expenseData) => {
 // Delete car expense
 export const deleteCarExpense = async (expenseId) => {
   try {
-    const response = await api.delete(`/car-expenses/${expenseId}`);
+    const response = await api.delete(`/api/car-expenses/${expenseId}`);
     return response;
   } catch (error) {
     console.error('Error deleting car expense:', error);
@@ -241,7 +241,7 @@ export const deleteCarExpense = async (expenseId) => {
 // Clear all data
 export const clearAllDataAPI = async () => {
   try {
-    const response = await api.delete('/clear-all');
+    const response = await api.delete('/api/clear-all');
     return response;
   } catch (error) {
     console.error('Error clearing all data:', error);
@@ -252,7 +252,7 @@ export const clearAllDataAPI = async () => {
 // Clear purchases data
 export const clearPurchasesDataAPI = async () => {
   try {
-    const response = await api.delete('/purchases');
+    const response = await api.delete('/api/purchases');
     return response;
   } catch (error) {
     console.error('Error clearing purchases data:', error);
@@ -263,7 +263,7 @@ export const clearPurchasesDataAPI = async () => {
 // Clear sales data
 export const clearSalesDataAPI = async () => {
   try {
-    const response = await api.delete('/sales');
+    const response = await api.delete('/api/sales');
     return response;
   } catch (error) {
     console.error('Error clearing sales data:', error);
@@ -274,7 +274,7 @@ export const clearSalesDataAPI = async () => {
 // Clear inventory data
 export const clearInventoryDataAPI = async () => {
   try {
-    const response = await api.delete('/inventory');
+    const response = await api.delete('/api/inventory');
     return response;
   } catch (error) {
     console.error('Error clearing inventory data:', error);
@@ -285,7 +285,7 @@ export const clearInventoryDataAPI = async () => {
 // Clear car expenses data
 export const clearCarExpensesDataAPI = async () => {
   try {
-    const response = await api.delete('/car-expenses');
+    const response = await api.delete('/api/car-expenses');
     return response;
   } catch (error) {
     console.error('Error clearing car expenses data:', error);
@@ -296,7 +296,7 @@ export const clearCarExpensesDataAPI = async () => {
 // Clear other expenses data
 export const clearOtherExpensesDataAPI = async () => {
   try {
-  const response = await api.delete('/other_expenses');
+  const response = await api.delete('/api/other_expenses');
     return response;
   } catch (error) {
     console.error('Error clearing other expenses data:', error);
@@ -307,7 +307,7 @@ export const clearOtherExpensesDataAPI = async () => {
 // Clear salaries data
 export const clearSalariesDataAPI = async () => {
   try {
-    const response = await api.delete('/salaries');
+    const response = await api.delete('/api/salaries');
     return response;
   } catch (error) {
     console.error('Error clearing salaries data:', error);
@@ -318,7 +318,7 @@ export const clearSalariesDataAPI = async () => {
 // Create other expense
 export const createOtherExpense = async (expenseData) => {
   try {
-  const response = await api.post('/other_expenses', expenseData);
+  const response = await api.post('/api/other_expenses', expenseData);
     return response;
   } catch (error) {
     console.error('Error creating other expense:', error);
@@ -329,7 +329,7 @@ export const createOtherExpense = async (expenseData) => {
 // Delete other expense
 export const deleteOtherExpense = async (expenseId) => {
   try {
-  const response = await api.delete(`/other_expenses/${expenseId}`);
+  const response = await api.delete(`/api/other_expenses/${expenseId}`);
     return response;
   } catch (error) {
     console.error('Error deleting other expense:', error);
@@ -340,7 +340,7 @@ export const deleteOtherExpense = async (expenseId) => {
 // Fetch salaries
 export const fetchSalaries = async () => {
   try {
-    const response = await api.get('/salaries');
+    const response = await api.get('/api/salaries');
     return response;
   } catch (error) {
     console.error('Error fetching salaries:', error);
@@ -351,7 +351,7 @@ export const fetchSalaries = async () => {
 // Delete salary
 export const deleteSalary = async (salaryId) => {
   try {
-    const response = await api.delete(`/salaries/${salaryId}`);
+    const response = await api.delete(`/api/salaries/${salaryId}`);
     return response;
   } catch (error) {
     console.error('Error deleting salary:', error);
