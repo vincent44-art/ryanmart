@@ -1,32 +1,47 @@
-# CEO Dashboard Purchaser and Salaries Tab Fix
+# CEO Dashboard 404 Fix
 
 ## Task
-Ensure that in the CEO dashboard:
-- When adding a purchase in the purchaser tab, it shows in the purchaser table
-- When adding a salary in the salaries tab, it shows in the salaries table
+Fix the 404 error when accessing CEO dashboard at `ryanmart-bacckend.onrender.com/ceo/dashboard`
 
-## Analysis
-- **Purchases Tab**: PurchasesTab component uses PurchaseFormModal, but the modal is incomplete - lacks form state and proper submission. The prop mismatch (onAddPurchase vs handleSubmit) prevents updates.
-- **Salaries Tab**: SalaryManagementTab already handles adding salaries correctly with data refresh.
+## Error (Original)
+```
+ryanmart-bacckend.onrender.com/ceo/dashboard?_t=1769467198661:1 Failed to load resource: the server responded with a status of 404 ()
+dashboard.js:105 Dashboard API Error: Object
+```
 
-## Plan
-1. Update PurchaseFormModal to include proper form state and fields matching backend requirements
-2. Fix prop passing in PurchasesTab (onAddPurchase -> handleSubmit)
-3. Ensure form submission updates the table state
-4. Verify salaries tab works (should already be functional)
+## Root Cause
+- Frontend calls API endpoints without the `/api` prefix
+- Backend routes are registered with the `/api` prefix
+- This mismatch causes the 404 errors
 
-## Files to Edit
-- frontend/src/components/PurchaseFormModal.jsx
-- frontend/src/components/PurchasesTab.jsx
+## Fixes Applied
+1. Updated `frontend/src/api/dashboard.js` to add `/api` prefix to all dashboard endpoints:
+   - `/ceo/dashboard` → `/api/ceo/dashboard`
+   - `/seller/dashboard` → `/api/seller/dashboard`
+   - `/purchaser/dashboard` → `/api/purchaser/dashboard`
+   - `/storekeeper/dashboard` → `/api/storekeeper/dashboard`
+
+2. Updated `frontend/src/components/apiHelpers.js` to add `/api` prefix to all endpoints:
+   - `/inventory` → `/api/inventory`
+   - `/stock-movements` → `/api/stock-movements`
+   - `/purchases` → `/api/purchases`
+   - `/other_expenses` → `/api/other_expenses`
+   - `/users` → `/api/users`
+   - `/sales` → `/api/sales`
+   - `/assignments` → `/api/assignments`
+   - `/car-expenses` → `/api/car-expenses`
+   - `/clear-all` → `/api/clear-all`
+   - `/salaries` → `/api/salaries`
 
 ## Changes Made
-- ✅ Updated PurchaseFormModal with complete form state, fields matching backend (employeeName, fruitType, quantity, unit, buyerName, amountPerKg, amount, date)
-- ✅ Added auto-calculation of total amount
-- ✅ Added proper form submission that calls API and updates parent component
-- ✅ Fixed prop names to match between PurchasesTab and PurchaseFormModal
-- ✅ Salaries tab was already working correctly
+- ✅ Fixed API endpoint paths in `frontend/src/api/dashboard.js`
+- ✅ Fixed API endpoint paths in `frontend/src/components/apiHelpers.js`
 
-## Testing
-- Build test: Running `npm run build` to check for errors
-- Add a purchase in CEO dashboard purchaser tab -> should appear in table
-- Add a salary in CEO dashboard salaries tab -> should appear in table
+## Note on 500 Errors
+The 404 errors are now fixed. If you're seeing 500 Internal Server Errors, these are backend issues. The frontend endpoints now correctly match the backend routes:
+- `/api/inventory` - InventoryListResource
+- `/api/purchases` - via purchases_bp blueprint
+- `/api/stock-movements` - StockMovementListResource (may need to be registered in app.py)
+- `/api/stock-tracking` - StockTrackingListResource
+
+Backend troubleshooting may be needed for the 500 errors.

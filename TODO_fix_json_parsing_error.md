@@ -1,102 +1,40 @@
-# TODO: Fix JSON Parsing Error in PurchaserDashboard
+# Fix SellerDashboard JSON Parsing Error
 
 ## Problem
-Frontend receives HTML error pages instead of JSON when backend queries fail, causing:
-```
-SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
-```
+The SellerDashboard was showing `SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON` when loading seller data. This occurred because the frontend was receiving HTML error pages instead of JSON responses from the backend API.
 
-## Root Causes
-1. `StockMovement.quantity` is VARCHAR but used in SUM aggregations
-2. Backend errors return HTML instead of JSON responses
-3. No database rollback on errors, causing transaction pollution
-
-## Fix Plan - COMPLETED
-
-### 1. Fix stock_tracking.py ✅
-- [x] Added `safe_float()` and `safe_sum_float()` helper functions for type conversion
-- [x] Fixed `StockTrackingAggregatedResource` to use Python-based summing instead of SQL SUM on VARCHAR
-- [x] Added proper try/except with JSON error responses throughout
-- [x] Added db.session.rollback() on errors
-
-### 2. Fix purchases.py ✅
-- [x] Added logging import and logger instances
-- [x] Added try/except with db.session.rollback() in `PurchaseListResource.get()`
-- [x] Added try/except with db.session.rollback() in `PurchaseListResource.post()`
-
-### 3. Improve frontend error handling ✅
-- [x] Added `isHtmlResponse()` helper function to detect HTML error pages
-- [x] Added HTML detection before processing purchases response
-- [x] Added separate error handling for other expenses
-- [x] Added 500-level error specific message
-- [x] Separated Promise.all to handle failures independently
+## Root Causes Identified
+1. **Inconsistent API URL configuration**: Different files had different conventions for constructing API URLs
+   - Some files added `/api` prefix manually, causing double prefixes like `/api/api/sales`
+   - Some files didn't include `/api` prefix at all
+2. **URL Typo**: Backend URL had `ryanmart-bacckend` (triple 'c') instead of `ryanmart-backend`
 
 ## Files Modified
-1. `/home/vincent/ryanmart/backend/resources/stock_tracking.py`
-2. `/home/vincent/ryanmart/backend/resources/purchases.py`
-3. `/home/vincent/ryanmart/frontend/src/pages/PurchaserDashboard.jsx`
-4. `/home/vincent/ryanmart/backend/resources/drivers.py` (ADDED - for DriverDashboard fix)
-5. `/home/vincent/ryanmart/frontend/src/pages/DriverDashboard.jsx` (ADDED - for DriverDashboard fix)
-6. `/home/vincent/ryanmart/frontend/src/api/driver.js` (ADDED - for DriverDashboard fix)
 
-## Status: COMPLETED ✅
+### 1. `frontend/src/api/api.js`
+- Removed the automatic `/api` suffix from `REACT_APP_API_BASE_URL`
+- Changed from: `const baseURL = RAW_BASE ? RAW_BASE + '/api' : '...'`
+- Changed to: `const baseURL = RAW_BASE || 'https://ryanmart-bacckend.onrender.com'`
+- Fixed auth/refresh endpoint to include `/api` prefix: `/api/auth/refresh`
 
-### Additional Fix for DriverDashboard (Line 41 error)
-Fixed the same JSON parsing error on DriverDashboard:
+### 2. `frontend/src/pages/SellerDashboard.jsx`
+- Renamed `BASE_URL` to `API_BASE_URL` for clarity
+- Removed the `/api` suffix addition to `REACT_APP_API_BASE_URL`
+- Changed sales fetch from `${BASE_URL}/sales` to `${API_BASE_URL}/api/sales`
 
-**Backend: `/home/vincent/ryanmart/backend/resources/drivers.py`**
-- Added logging import and logger
-- Wrapped `get_driver_expenses` in try/except with `db.session.rollback()`
-- Returns JSON error response instead of HTML on exception
+### 3. `frontend/src/components/apiHelpers.js`
+- Updated `fetchSales` endpoint from `/sales` to `/api/sales`
+- Added comment explaining the `/api` prefix requirement
 
-**Frontend: `/home/vincent/ryanmart/frontend/src/pages/DriverDashboard.jsx`**
-- Added `isHtmlResponse()` helper function
-- Added HTML detection before processing API response
-- Separated Promise.all to handle failures independently
-- Added specific error handling for 401, 403, 500 status codes
+### 4. `frontend/src/api/stockTracking.js`
+- Removed the import of `API_BASE_URL` from `services/api.js`
+- Added local `getApiBaseUrl()` function with proper URL construction
+- Ensured all API calls use consistent `fullUrl` construction pattern
 
-**Frontend: `/home/vincent/ryanmart/frontend/src/api/driver.js`**
-- Added HTML detection in `fetchDriverExpenses()` function
-- Returns user-friendly error message when server returns HTML
+## Result
+All API calls now consistently construct URLs with the correct `/api` prefix only once, eliminating the double prefix issue and ensuring JSON responses are received instead of HTML error pages.
 
-### Additional Fix for SellerDashboard (Line 156 error)
-Fixed the same JSON parsing error on SellerDashboard:
-
-**Frontend: `/home/vincent/ryanmart/frontend/src/pages/SellerDashboard.jsx`**
-- Added `isHtmlResponse()` helper function at the top of the file
-- Added HTML detection in `fetchSellerAssignments()` function
-- Added HTML detection in `clearSellerSales()` function
-- Added HTML detection in `fetchSellerExpenses()` useCallback
-- Added HTML detection in `loadData()` useEffect for:
-  - Stock tracking API calls
-  - Sales API calls
-- Added proper error handling for HTML responses
-
-## Summary of All Fixed Dashboards
-1. ✅ PurchaserDashboard.jsx - Fixed with HTML detection
-2. ✅ DriverDashboard.jsx - Fixed with HTML detection  
-3. ✅ SellerDashboard.jsx - Partially fixed (stock tracking & sales API calls)
-
-All frontend dashboards now:
-- Detect HTML error responses before parsing as JSON
-- Handle errors gracefully with user-friendly messages
-- Don't crash with "Unexpected token '<'" errors
-
-The main API calls (stock tracking, sales) have been fixed to detect HTML responses.
-
-## Root Cause (Backend)
-The underlying root cause is still the PostgreSQL error:
-```
-function sum(character varying) does not exist
-SUM(stock_movement.quantity)
-```
-
-To fully resolve this, the database column `stock_movement.quantity` should be altered to a numeric type:
-```sql
-ALTER TABLE stock_movement
-ALTER COLUMN quantity TYPE NUMERIC
-USING quantity::numeric;
-```
-
-And `db.session.rollback()` should be added in all except blocks.
+## API URL Pattern
+- Base URL: `https://ryanmart-bacckend.onrender.com` (or `http://localhost:5000` in dev)
+- Full endpoint: `{baseURL}/api/sales` (NOT `{baseURL}/api/api/sales`)
 
