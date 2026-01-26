@@ -1,5 +1,6 @@
 from datetime import datetime
 from .user import db
+from .user import User  # Direct import at top level is safe
 
 class Purchase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,15 +16,15 @@ class Purchase(db.Model):
     amount_per_kg = db.Column(db.Float, nullable=False, default=0)
 
     def to_dict(self):
-        # Use a separate query to get purchaser email to avoid relationship issues
+        # Get purchaser email using the imported User model
         purchaser_email = None
         try:
-            from models.user import User
-            user = User.query.get(self.purchaser_id)
+            # Use db.session to query to avoid detached instance issues
+            user = db.session.get(User, self.purchaser_id)
             if user:
                 purchaser_email = user.email
         except Exception:
-            # If there's an import error or query error, set email to None
+            # If there's any error, set email to None
             purchaser_email = None
         
         return {

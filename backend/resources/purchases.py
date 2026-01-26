@@ -199,7 +199,8 @@ class PurchaseByEmailResource(Resource):
 
         # Verify the requested email matches the current user's email
         # or if the user is a CEO/admin who can view all purchases
-        if email != current_user.email and current_user.role not in ['CEO', 'ADMIN', 'ceo', 'admin']:
+        user_role = str(current_user.role).upper() if current_user.role else ''
+        if email != current_user.email and user_role not in ['CEO', 'ADMIN']:
             return make_response_data(
                 success=False,
                 message="Not authorized to view these purchases.",

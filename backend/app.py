@@ -238,7 +238,7 @@ def create_app(config_class=Config):
     from resources.it_events import ITEventsResource, ITEventResource, ITAcknowledgeAlertsResource
     from resources.it_alerts import ITAlertsResource, ITIncidentsResource
     from resources.sales import SaleListResource, SaleByEmailResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
-    from resources.purchases import DailyPurchasesReportResource
+    from resources.purchases import DailyPurchasesReportResource, PurchaseByEmailResource
     from resources.ai_assistance import AIAssistanceResource
     from resources.receipts import ReceiptResource
     from resources.seller_fruits import SellerFruitListResource, SellerFruitResource
@@ -280,6 +280,7 @@ def create_app(config_class=Config):
     api.add_resource(DailySalesReportResource, '/api/sales/report/<string:date_str>')
     api.add_resource(CustomerDebtReportResource, '/api/sales/debts/<string:customer_email>/report')
     api.add_resource(DailyPurchasesReportResource, '/api/purchases/report/<string:date_str>')
+    api.add_resource(PurchaseByEmailResource, '/api/purchases/by-email/<string:email>')
     api.add_resource(AIAssistanceResource, '/api/ai-assistance')
     api.add_resource(ReceiptResource, '/api/receipts', '/api/receipts/<string:receipt_num>')
     api.add_resource(SellerFruitListResource, '/api/seller-fruits')
