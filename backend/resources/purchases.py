@@ -53,9 +53,37 @@ class PurchaseListResource(Resource):
         per_page = request.args.get('per_page', default=20, type=int)
 
         try:
-            # Both CEO and purchasers can see all purchases
-            pagination = Purchase.query.order_by(Purchase.purchase_date.desc()).paginate(page=page, per_page=per_page, error_out=False)
-            purchases = pagination.items
+            # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
+            # Get total count first
+            count_result = db.session.execute(text("SELECT COUNT(*) FROM purchase")).fetchone()
+            total_count = count_result[0] if count_result else 0
+
+            # Calculate offset for pagination
+            offset = (page - 1) * per_page
+
+            # Fetch paginated purchases
+            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase ORDER BY purchase_date DESC LIMIT {per_page} OFFSET {offset}")).fetchall()
+
+            # Convert to dict-like objects for compatibility
+            purchases = []
+            for row in purchases_result:
+                purchase_dict = {
+                    'id': row[0],
+                    'purchaser_id': row[1],
+                    'employee_name': row[2],
+                    'fruit_type': row[3],
+                    'quantity': row[4],
+                    'unit': row[5],
+                    'buyer_name': row[6],
+                    'cost': row[7],
+                    'purchase_date': row[8],
+                    'created_at': row[9],
+                    'amount_per_kg': row[10]
+                }
+                purchases.append(type('PurchaseObj', (), purchase_dict)())
+
+            # Calculate total pages
+            total_pages = (total_count + per_page - 1) // per_page
 
             return make_response_data(
                 data={
@@ -63,8 +91,8 @@ class PurchaseListResource(Resource):
                     "meta": {
                         "page": page,
                         "per_page": per_page,
-                        "total": pagination.total,
-                        "pages": pagination.pages
+                        "total": total_count,
+                        "pages": total_pages
                     }
                 },
                 message="Purchases fetched."

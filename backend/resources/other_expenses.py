@@ -10,6 +10,7 @@ from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+from sqlalchemy import text
 import io
 
 parser = reqparse.RequestParser()
@@ -130,7 +131,26 @@ def generate_other_expenses_pdf(expenses, report_date):
 class OtherExpensesResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def get(self):
-        expenses = OtherExpense.query.order_by(OtherExpense.date.desc()).all()
+        try:
+            # Use raw SQL to fetch other expenses as strings to avoid numeric type conversion issues
+            expenses_result = db.session.execute(text("SELECT id, expense_type, description, amount::text, date, user_id FROM other_expense ORDER BY date DESC")).fetchall()
+            # Convert to dict-like objects for compatibility
+            expenses = []
+            for row in expenses_result:
+                expense_dict = {
+                    'id': row[0],
+                    'expense_type': row[1],
+                    'description': row[2],
+                    'amount': row[3],
+                    'date': row[4],
+                    'user_id': row[5]
+                }
+                expenses.append(type('ExpenseObj', (), expense_dict)())
+        except Exception as e:
+            db.session.rollback()
+            response_data, status_code = make_response_data(success=False, message=f"Error fetching other expenses: {str(e)}", status_code=500)
+            return jsonify(response_data), status_code
+
         response_data, status_code = make_response_data(data=[e.to_dict() for e in expenses], message="Other expenses fetched successfully.")
         return jsonify(response_data), status_code
 
