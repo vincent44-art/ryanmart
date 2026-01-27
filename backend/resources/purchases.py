@@ -180,6 +180,7 @@ class PurchaseSummaryResource(Resource):
         return make_response_data(data=summary, message="Purchase summary fetched.")
 
 class PurchaseByEmailResource(Resource):
+    @jwt_required()
     def get(self):
         """
         Get purchases by purchaser email.
