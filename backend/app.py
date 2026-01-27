@@ -301,6 +301,7 @@ def create_app(config_class=Config):
     api.add_resource(InventoryListResource, '/api/inventory')
     api.add_resource(InventoryResource, '/api/inventory/<int:inv_id>')
     api.add_resource(ClearInventoryResource, '/api/inventory/clear')
+    api.add_resource(StockMovementListResource, '/api/stock-movements')
 
     # =====================================================================
     # HEALTH CHECK & DEBUG ROUTES
