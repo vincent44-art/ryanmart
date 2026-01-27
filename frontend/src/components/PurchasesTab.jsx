@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, Plus, Download } from 'lucide-react';
+import { Search, Trash2, Download } from 'lucide-react';
 import { fetchPurchases, deletePurchase } from '../api/purchase';
-// import { deletePurchase } from './apiHelpers'; // If needed, implement deletePurchase in ../api/purchase.js
-
-import PurchaseFormModal from './PurchaseFormModal';
 
 const PurchasesTab = (props) => {
   // Accept data prop for dashboard integration, fallback to fetching if not provided
@@ -11,7 +8,6 @@ const PurchasesTab = (props) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
 
   // Fetch purchases from API
   useEffect(() => {
@@ -53,16 +49,6 @@ const PurchasesTab = (props) => {
     } catch (err) {
       console.error('Failed to delete purchase:', err);
       setError('Failed to delete purchase. Please try again.');
-    }
-  };
-
-  const handleAddPurchase = (newPurchase) => {
-    // If onPurchaseAdded prop is provided (e.g., from CEO dashboard), use it to update parent state
-    if (props.onPurchaseAdded) {
-      props.onPurchaseAdded(newPurchase);
-    } else {
-      // Otherwise, update local state (for standalone usage)
-      setPurchases([...purchases, newPurchase]);
     }
   };
 
@@ -131,13 +117,6 @@ const PurchasesTab = (props) => {
     <div className="container-fluid py-3">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">Purchase Management</h2>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowAddModal(true)}
-        >
-          <Plus size={18} className="me-2" />
-          Add Purchase
-        </button>
       </div>
 
       {error && (
@@ -263,14 +242,9 @@ const PurchasesTab = (props) => {
           )}
         </div>
       </div>
-
-      <PurchaseFormModal
-        show={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAddPurchase={handleAddPurchase}
-      />
     </div>
   );
 };
 
 export default PurchasesTab;
+
