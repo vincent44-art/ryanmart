@@ -422,8 +422,30 @@ def generate_stock_pdf_group(records, date, type_):
         elements.append(Spacer(1, 6))
 
         # Get all sales for the stock names in this group
+        # Use raw SQL to avoid "Unknown PG numeric type: 1043" error
         stock_names = [r.stock_name for r in records]
-        sales_records = Sale.query.filter(Sale.stock_name.in_(stock_names)).order_by(Sale.date.desc()).all()
+        stock_names_placeholder = ','.join([f"'{name}'" for name in stock_names])
+        sales_result = db.session.execute(text(f"SELECT id, seller_id, seller_fruit_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale WHERE stock_name IN ({stock_names_placeholder}) ORDER BY date DESC")).fetchall()
+        
+        # Convert to dict-like objects for compatibility
+        sales_records = []
+        for row in sales_result:
+            sale_dict = {
+                'id': row[0],
+                'seller_id': row[1],
+                'seller_fruit_id': row[2],
+                'stock_name': row[3],
+                'fruit_name': row[4],
+                'qty': row[5],
+                'unit_price': row[6],
+                'amount': row[7],
+                'paid_amount': row[8],
+                'remaining_amount': row[9],
+                'customer_name': row[10],
+                'date': row[11],
+                'created_at': row[12]
+            }
+            sales_records.append(type('SaleObj', (), sale_dict)())
 
         if sales_records:
             sales_headers = ['Date', 'Fruit Name', 'Quantity', 'Amount']
@@ -780,8 +802,30 @@ def generate_stock_pdf_combined(date):
         elements.append(Spacer(1, 6))
 
         # Get all sales for the stock names in the out stocks
+        # Use raw SQL to avoid "Unknown PG numeric type: 1043" error
         stock_names = [r.stock_name for r in stocks_out]
-        sales_records = Sale.query.filter(Sale.stock_name.in_(stock_names)).order_by(Sale.date.desc()).all()
+        stock_names_placeholder = ','.join([f"'{name}'" for name in stock_names])
+        sales_result = db.session.execute(text(f"SELECT id, seller_id, seller_fruit_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale WHERE stock_name IN ({stock_names_placeholder}) ORDER BY date DESC")).fetchall()
+        
+        # Convert to dict-like objects for compatibility
+        sales_records = []
+        for row in sales_result:
+            sale_dict = {
+                'id': row[0],
+                'seller_id': row[1],
+                'seller_fruit_id': row[2],
+                'stock_name': row[3],
+                'fruit_name': row[4],
+                'qty': row[5],
+                'unit_price': row[6],
+                'amount': row[7],
+                'paid_amount': row[8],
+                'remaining_amount': row[9],
+                'customer_name': row[10],
+                'date': row[11],
+                'created_at': row[12]
+            }
+            sales_records.append(type('SaleObj', (), sale_dict)())
 
         if sales_records:
             sales_headers = ['Date', 'Fruit Name', 'Quantity', 'Amount']
@@ -928,19 +972,22 @@ class StockTrackingAggregatedResource(Resource):
                         db.session.rollback()
 
                     # Calculate revenue and quantity sold from sales (sum for stock_name from date_start to now)
+                    # Use raw SQL to avoid "Unknown PG numeric type: 1043" error
                     revenue = 0
                     quantity_sold = 0
                     try:
                         date_start = earliest_date_in or datetime.now().date() - timedelta(days=365)
                         date_end = datetime.now().date()  # Include all sales up to current date
-                        sales_query = Sale.query.filter(
-                            Sale.stock_name == stock_name,
-                            Sale.date >= date_start,
-                            Sale.date <= date_end
-                        ).all()
-                        # Sum safely in Python to avoid numeric type issues
-                        revenue = sum(safe_float(s.amount) for s in sales_query)
-                        quantity_sold = sum(safe_float(s.qty) for s in sales_query)
+                        
+                        # Use raw SQL with proper date handling
+                        sales_result = db.session.execute(
+                            text(f"SELECT qty::text, amount::text FROM sale WHERE stock_name = '{stock_name}' AND date >= '{date_start}' AND date <= '{date_end}'")
+                        ).fetchall()
+                        
+                        # Sum safely in Python
+                        for row in sales_result:
+                            quantity_sold += safe_float(row[0])
+                            revenue += safe_float(row[1])
                     except Exception as e:
                         logger.warning(f"Error calculating revenue and quantity sold for stock {stock_name}: {str(e)}")
                         revenue = 0
@@ -974,8 +1021,26 @@ class StockTrackingAggregatedResource(Resource):
             fruit_profitability = {}
 
             # Get purchases with error handling - fetch all and sum in Python
+            # Use raw SQL to avoid "Unknown PG numeric type: 1043" error
             try:
-                purchases = Purchase.query.all()
+                purchases_result = db.session.execute(text("SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase")).fetchall()
+                # Convert to dict-like objects for compatibility
+                purchases = []
+                for row in purchases_result:
+                    purchase_dict = {
+                        'id': row[0],
+                        'purchaser_id': row[1],
+                        'employee_name': row[2],
+                        'fruit_type': row[3],
+                        'quantity': row[4],
+                        'unit': row[5],
+                        'buyer_name': row[6],
+                        'cost': row[7],
+                        'purchase_date': row[8],
+                        'created_at': row[9],
+                        'amount_per_kg': row[10]
+                    }
+                    purchases.append(type('PurchaseObj', (), purchase_dict)())
             except Exception as e:
                 logger.error(f"Error fetching purchases: {str(e)}")
                 db.session.rollback()
@@ -1010,9 +1075,27 @@ class StockTrackingAggregatedResource(Resource):
                 sales = []
 
             # Get seller fruits with error handling
+            # Use raw SQL to avoid "Unknown PG numeric type: 1043" error
             try:
                 from models.seller_fruit import SellerFruit
-                seller_fruits = SellerFruit.query.all()
+                seller_fruits_result = db.session.execute(text("SELECT id, seller_id, fruit_name, quantity::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM seller_fruit")).fetchall()
+                # Convert to dict-like objects for compatibility
+                seller_fruits = []
+                for row in seller_fruits_result:
+                    seller_fruit_dict = {
+                        'id': row[0],
+                        'seller_id': row[1],
+                        'fruit_name': row[2],
+                        'quantity': row[3],
+                        'unit_price': row[4],
+                        'amount': row[5],
+                        'paid_amount': row[6],
+                        'remaining_amount': row[7],
+                        'customer_name': row[8],
+                        'date': row[9],
+                        'created_at': row[10]
+                    }
+                    seller_fruits.append(type('SellerFruitObj', (), seller_fruit_dict)())
             except Exception as e:
                 logger.error(f"Error fetching seller fruits: {str(e)}")
                 db.session.rollback()
