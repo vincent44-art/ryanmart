@@ -163,19 +163,42 @@ class ClearPurchasesResource(Resource):
 class PurchaseSummaryResource(Resource):
     @role_required('ceo')
     def get(self):
-        # Fetch all purchases and calculate sum in Python to avoid PostgreSQL numeric type issues
-        purchases = Purchase.query.all()
-        
-        total_cost = sum(float(p.cost) for p in purchases) if purchases else 0
-        
+        # Fetch all purchases using raw SQL to avoid PostgreSQL numeric type issues
+        try:
+            purchases_result = db.session.execute(text("SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase")).fetchall()
+            # Convert to dict-like objects for compatibility
+            purchases = []
+            for row in purchases_result:
+                purchase_dict = {
+                    'id': row[0],
+                    'purchaser_id': row[1],
+                    'employee_name': row[2],
+                    'fruit_type': row[3],
+                    'quantity': row[4],
+                    'unit': row[5],
+                    'buyer_name': row[6],
+                    'cost': row[7],
+                    'purchase_date': row[8],
+                    'created_at': row[9],
+                    'amount_per_kg': row[10]
+                }
+                purchases.append(type('PurchaseObj', (), purchase_dict)())
+        except Exception as e:
+            logger.error(f"Error fetching purchases for summary: {str(e)}")
+            db.session.rollback()
+            purchases = []
+
+        from utils.helpers import safe_float
+        total_cost = sum(safe_float(p.cost) for p in purchases) if purchases else 0
+
         # Group by fruit type
         cost_by_fruit_dict = {}
         for purchase in purchases:
             fruit = purchase.fruit_type
             if fruit not in cost_by_fruit_dict:
                 cost_by_fruit_dict[fruit] = 0
-            cost_by_fruit_dict[fruit] += float(purchase.cost)
-        
+            cost_by_fruit_dict[fruit] += safe_float(purchase.cost)
+
         cost_by_fruit = [
             {'fruit_type': fruit, 'total_cost': cost}
             for fruit, cost in cost_by_fruit_dict.items()
@@ -242,7 +265,27 @@ class PurchaseByEmailResource(Resource):
                     message="No user found with this email."
                 )
 
-            purchases = Purchase.query.filter_by(purchaser_id=user.id).all()
+            # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
+            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchaser_id = {user.id}")).fetchall()
+
+            # Convert to dict-like objects for compatibility
+            purchases = []
+            for row in purchases_result:
+                purchase_dict = {
+                    'id': row[0],
+                    'purchaser_id': row[1],
+                    'employee_name': row[2],
+                    'fruit_type': row[3],
+                    'quantity': row[4],
+                    'unit': row[5],
+                    'buyer_name': row[6],
+                    'cost': row[7],
+                    'purchase_date': row[8],
+                    'created_at': row[9],
+                    'amount_per_kg': row[10]
+                }
+                purchases.append(type('PurchaseObj', (), purchase_dict)())
+
             return make_response_data(
                 data=[p.to_dict() for p in purchases],
                 message="Purchases fetched successfully."
@@ -265,8 +308,26 @@ class DailyPurchasesReportResource(Resource):
         except ValueError:
             return make_response_data(success=False, message="Invalid date format. Use YYYY-MM-DD.", status_code=400)
 
-        # Get all purchases for the specified date
-        purchases = Purchase.query.filter_by(purchase_date=report_date).all()
+        # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
+        purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchase_date = '{report_date}'")).fetchall()
+
+        # Convert to dict-like objects for compatibility
+        purchases = []
+        for row in purchases_result:
+            purchase_dict = {
+                'id': row[0],
+                'purchaser_id': row[1],
+                'employee_name': row[2],
+                'fruit_type': row[3],
+                'quantity': row[4],
+                'unit': row[5],
+                'buyer_name': row[6],
+                'cost': row[7],
+                'purchase_date': row[8],
+                'created_at': row[9],
+                'amount_per_kg': row[10]
+            }
+            purchases.append(type('PurchaseObj', (), purchase_dict)())
 
         if not purchases:
             return make_response_data(success=False, message=f"No purchases found for {date_str}.", status_code=404)
@@ -283,8 +344,9 @@ class DailyPurchasesReportResource(Resource):
         elements.append(Spacer(1, 12))
 
         # Summary
-        total_cost = sum(purchase.cost for purchase in purchases)
-        total_quantity = sum(float(purchase.quantity) for purchase in purchases)
+        from utils.helpers import safe_float
+        total_cost = sum(safe_float(purchase.cost) for purchase in purchases)
+        total_quantity = sum(safe_float(purchase.quantity) for purchase in purchases)
         summary_text = f"Total Purchases: {len(purchases)} | Total Quantity: {total_quantity:.2f} | Total Cost: KES {total_cost:,.2f}"
         summary = Paragraph(summary_text, styles['Normal'])
         elements.append(summary)

@@ -5,6 +5,7 @@ from models.inventory import Inventory
 from models.stock_movement import StockMovement
 from utils.helpers import make_response_data, get_current_user
 from utils.decorators import role_required
+from sqlalchemy import text
 
 parser = reqparse.RequestParser()
 parser.add_argument('name', type=str, required=True)
@@ -17,7 +18,30 @@ parser.add_argument('expiry_date', type=str)
 class InventoryListResource(Resource):
     @role_required('ceo', 'storekeeper')
     def get(self):
-        inventory = Inventory.query.order_by(Inventory.created_at.desc()).all()
+        try:
+            # Use raw SQL to fetch inventory as strings to avoid numeric type conversion issues
+            inventory_result = db.session.execute(text("SELECT id, name, quantity::text, fruit_type, unit, location, expiry_date, purchase_price::text, purchase_date, added_by, created_at FROM inventory ORDER BY created_at DESC")).fetchall()
+            # Convert to dict-like objects for compatibility
+            inventory = []
+            for row in inventory_result:
+                item_dict = {
+                    'id': row[0],
+                    'name': row[1],
+                    'quantity': row[2],
+                    'fruit_type': row[3],
+                    'unit': row[4],
+                    'location': row[5],
+                    'expiry_date': row[6],
+                    'purchase_price': row[7],
+                    'purchase_date': row[8],
+                    'added_by': row[9],
+                    'created_at': row[10]
+                }
+                inventory.append(type('InventoryObj', (), item_dict)())
+        except Exception as e:
+            db.session.rollback()
+            return make_response_data(success=False, message=f"Error fetching inventory: {str(e)}", status_code=500)
+
         return make_response_data(data=[item.to_dict() for item in inventory], message="Inventory fetched.")
 
     @role_required('storekeeper')

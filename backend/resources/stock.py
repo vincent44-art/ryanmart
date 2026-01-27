@@ -5,6 +5,7 @@ from extensions import db
 from models.stock_movement import StockMovement
 from utils.helpers import make_response_data, get_current_user
 from utils.decorators import role_required
+from sqlalchemy import text
 
 stock_parser = reqparse.RequestParser()
 stock_parser.add_argument('inventory_id', type=int, required=True)
@@ -18,7 +19,30 @@ stock_parser.add_argument('notes', type=str)
 class StockMovementListResource(Resource):
     @jwt_required()
     def get(self):
-        movements = StockMovement.query.order_by(StockMovement.date.desc()).all()
+        try:
+            # Use raw SQL to fetch stock movements as strings to avoid numeric type conversion issues
+            movements_result = db.session.execute(text("SELECT id, inventory_id, movement_type, quantity::text, unit, remaining_stock::text, date, notes, selling_price::text, added_by, created_at FROM stock_movement ORDER BY date DESC")).fetchall()
+            # Convert to dict-like objects for compatibility
+            movements = []
+            for row in movements_result:
+                movement_dict = {
+                    'id': row[0],
+                    'inventory_id': row[1],
+                    'movement_type': row[2],
+                    'quantity': row[3],
+                    'unit': row[4],
+                    'remaining_stock': row[5],
+                    'date': row[6],
+                    'notes': row[7],
+                    'selling_price': row[8],
+                    'added_by': row[9],
+                    'created_at': row[10]
+                }
+                movements.append(type('MovementObj', (), movement_dict)())
+        except Exception as e:
+            db.session.rollback()
+            return make_response_data(success=False, message=f"Error fetching stock movements: {str(e)}", status_code=500)
+
         return make_response_data(data=[m.to_dict() for m in movements], message="Stock movements fetched.")
 
     from flask_jwt_extended import jwt_required
