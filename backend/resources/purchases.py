@@ -180,14 +180,14 @@ class PurchaseSummaryResource(Resource):
         return make_response_data(data=summary, message="Purchase summary fetched.")
 
 class PurchaseByEmailResource(Resource):
-    @jwt_required()
-    def get(self, email):
+    def get(self):
         """
         Get purchases by purchaser email.
         Requires JWT authentication.
+        Email is passed as query parameter.
         """
         logger = logging.getLogger('purchases')
-        
+
         try:
             # Get current user from JWT to verify access
             current_user_id = get_jwt_identity()
@@ -198,6 +198,15 @@ class PurchaseByEmailResource(Resource):
                     success=False,
                     message="User not found.",
                     status_code=401
+                )
+
+            # Get email from query parameters
+            email = request.args.get('email')
+            if not email:
+                return make_response_data(
+                    success=False,
+                    message="Email parameter is required.",
+                    status_code=400
                 )
 
             # Verify the requested email matches the current user's email
@@ -216,7 +225,7 @@ class PurchaseByEmailResource(Resource):
                     data=[],
                     message="No user found with this email."
                 )
-            
+
             purchases = Purchase.query.filter_by(purchaser_id=user.id).all()
             return make_response_data(
                 data=[p.to_dict() for p in purchases],
