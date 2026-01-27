@@ -89,7 +89,13 @@ const fetchSellerAssignments = async (emailOrName) => {
     }
     throw new Error('Failed to fetch assignments');
   }
-  return await res.json();
+  // Check for HTML response before parsing JSON
+  const text = await res.text();
+  if (isHtmlResponse(text)) {
+    console.error('Server returned HTML for assignments');
+    throw new Error('Server error. Failed to fetch assignments.');
+  }
+  return JSON.parse(text);
 };
 
 const clearSellerSales = async (emailOrName) => {
@@ -103,7 +109,13 @@ const clearSellerSales = async (emailOrName) => {
     }
     throw new Error('Failed to clear sales');
   }
-  return await res.json();
+  // Check for HTML response before parsing JSON
+  const text = await res.text();
+  if (isHtmlResponse(text)) {
+    console.error('Server returned HTML for clear sales');
+    throw new Error('Server error. Failed to clear sales.');
+  }
+  return JSON.parse(text);
 };
 
 const SellerDashboard = () => {
@@ -184,19 +196,24 @@ const SellerDashboard = () => {
               console.warn('Server returned HTML for sales');
               setSellerSales([]);
             } else {
-              const body = JSON.parse(text);
-              let allSales = [];
-              if (Array.isArray(body?.data?.sales)) {
-                allSales = body.data.sales;
-              } else if (Array.isArray(body?.data)) {
-                allSales = body.data;
-              } else if (Array.isArray(body?.sales)) {
-                allSales = body.sales;
+              try {
+                const body = JSON.parse(text);
+                let allSales = [];
+                if (Array.isArray(body?.data?.sales)) {
+                  allSales = body.data.sales;
+                } else if (Array.isArray(body?.data)) {
+                  allSales = body.data;
+                } else if (Array.isArray(body?.sales)) {
+                  allSales = body.sales;
+                }
+                // Filter for this seller's email
+                const sellerEmail = user?.email;
+                const mySales = allSales.filter(sale => sale.seller_email === sellerEmail);
+                setSellerSales(mySales);
+              } catch (parseErr) {
+                console.warn('Error parsing sales JSON:', parseErr);
+                setSellerSales([]);
               }
-              // Filter for this seller's email
-              const sellerEmail = user?.email;
-              const mySales = allSales.filter(sale => sale.seller_email === sellerEmail);
-              setSellerSales(mySales);
             }
           } catch (salesErr) {
             console.warn('Error fetching sales:', salesErr);

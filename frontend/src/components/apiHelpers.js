@@ -1,5 +1,14 @@
 import api from '../api/api';
 
+// Helper function to check if text is HTML
+const isHtmlResponse = (text) => {
+  if (typeof text !== 'string') return false;
+  const trimmed = text.trim().toLowerCase();
+  return trimmed.startsWith('<!doctype') || 
+         trimmed.startsWith('<html') || 
+         trimmed.startsWith('<!html');
+};
+
 // API Helper Functions
 
 // Fetch inventory data
@@ -36,15 +45,6 @@ export const fetchPurchases = async (userEmail = null) => {
   }
 };
 
-// Helper function to check if text is HTML
-const isHtmlResponse = (text) => {
-  if (typeof text !== 'string') return false;
-  const trimmed = text.trim().toLowerCase();
-  return trimmed.startsWith('<!doctype') || 
-         trimmed.startsWith('<html') || 
-         trimmed.startsWith('<!html');
-};
-
 // Fetch sales data
 export const fetchSales = async (userEmail = null) => {
   try {
@@ -65,7 +65,7 @@ export const fetchSales = async (userEmail = null) => {
 // Fetch other expenses
 export const fetchOtherExpenses = async () => {
   try {
-  const response = await api.get('/api/other_expenses');
+    const response = await api.get('/api/other_expenses');
     return response;
   } catch (error) {
     console.error('Error fetching other expenses:', error);
@@ -296,7 +296,7 @@ export const clearCarExpensesDataAPI = async () => {
 // Clear other expenses data
 export const clearOtherExpensesDataAPI = async () => {
   try {
-  const response = await api.delete('/api/other_expenses');
+    const response = await api.delete('/api/other_expenses');
     return response;
   } catch (error) {
     console.error('Error clearing other expenses data:', error);
@@ -318,7 +318,7 @@ export const clearSalariesDataAPI = async () => {
 // Create other expense
 export const createOtherExpense = async (expenseData) => {
   try {
-  const response = await api.post('/api/other_expenses', expenseData);
+    const response = await api.post('/api/other_expenses', expenseData);
     return response;
   } catch (error) {
     console.error('Error creating other expense:', error);
@@ -329,7 +329,7 @@ export const createOtherExpense = async (expenseData) => {
 // Delete other expense
 export const deleteOtherExpense = async (expenseId) => {
   try {
-  const response = await api.delete(`/api/other_expenses/${expenseId}`);
+    const response = await api.delete(`/api/other_expenses/${expenseId}`);
     return response;
   } catch (error) {
     console.error('Error deleting other expense:', error);

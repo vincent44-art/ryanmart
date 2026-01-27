@@ -60,7 +60,7 @@ export const addDriverExpense = async (expenseData) => {
  */
 export const updateDriverExpense = async (expenseId, updates) => {
   try {
-    const response = await api.patch(`/drivers/expenses/${expenseId}`, updates);
+    const response = await api.patch(`/api/drivers/expenses/${expenseId}`, updates);
     return response.data;
   } catch (error) {
     console.error('Error updating driver expense:', error);
