@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
-from sqlalchemy import func
 from extensions import db
 from models.purchases import Purchase
 from models.user import UserRole, User
@@ -164,18 +163,27 @@ class ClearPurchasesResource(Resource):
 class PurchaseSummaryResource(Resource):
     @role_required('ceo')
     def get(self):
-        total_cost = db.session.query(func.sum(Purchase.cost)).scalar() or 0
-        cost_by_fruit = db.session.query(
-            Purchase.fruit_type,
-            func.sum(Purchase.cost)
-        ).group_by(Purchase.fruit_type).all()
+        # Fetch all purchases and calculate sum in Python to avoid PostgreSQL numeric type issues
+        purchases = Purchase.query.all()
+        
+        total_cost = sum(float(p.cost) for p in purchases) if purchases else 0
+        
+        # Group by fruit type
+        cost_by_fruit_dict = {}
+        for purchase in purchases:
+            fruit = purchase.fruit_type
+            if fruit not in cost_by_fruit_dict:
+                cost_by_fruit_dict[fruit] = 0
+            cost_by_fruit_dict[fruit] += float(purchase.cost)
+        
+        cost_by_fruit = [
+            {'fruit_type': fruit, 'total_cost': cost}
+            for fruit, cost in cost_by_fruit_dict.items()
+        ]
 
         summary = {
             'total_cost': total_cost,
-            'cost_by_fruit': [
-                {'fruit_type': fruit, 'total_cost': cost}
-                for fruit, cost in cost_by_fruit
-            ]
+            'cost_by_fruit': cost_by_fruit
         }
         return make_response_data(data=summary, message="Purchase summary fetched.")
 

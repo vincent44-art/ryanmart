@@ -16,7 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from sqlalchemy import cast, Float, func
+from sqlalchemy import cast, Float, func, text
 import io
 import logging
 
@@ -894,10 +894,11 @@ class StockTrackingAggregatedResource(Resource):
                     # Calculate transport costs from driver expenses (sum for group)
                     transport_costs = 0
                     try:
-                        transport_result = DriverExpense.query.filter(
+                        driver_expenses = DriverExpense.query.filter(
                             DriverExpense.stock_name == stock_name
-                        ).with_entities(db.func.sum(DriverExpense.amount)).scalar()
-                        transport_costs = float(transport_result) if transport_result else 0
+                        ).all()
+                        # Sum safely in Python to avoid numeric type issues
+                        transport_costs = sum(safe_float(de.amount) for de in driver_expenses)
                     except Exception as e:
                         logger.warning(f"Error calculating transport costs for stock {stock_name}: {str(e)}")
                         transport_costs = 0
@@ -915,11 +916,12 @@ class StockTrackingAggregatedResource(Resource):
                             date_start = datetime.now().date() - timedelta(days=30)
                             date_end = datetime.now().date() + timedelta(days=30)
 
-                        expense_result = OtherExpense.query.filter(
+                        other_expenses_list = OtherExpense.query.filter(
                             OtherExpense.date >= date_start,
                             OtherExpense.date <= date_end
-                        ).with_entities(db.func.sum(OtherExpense.amount)).scalar()
-                        other_expenses = float(expense_result) if expense_result else 0
+                        ).all()
+                        # Sum safely in Python to avoid numeric type issues
+                        other_expenses = sum(safe_float(oe.amount) for oe in other_expenses_list)
                     except Exception as e:
                         logger.warning(f"Error calculating other expenses for stock {stock_name}: {str(e)}")
                         other_expenses = 0
@@ -935,11 +937,10 @@ class StockTrackingAggregatedResource(Resource):
                             Sale.stock_name == stock_name,
                             Sale.date >= date_start,
                             Sale.date <= date_end
-                        )
-                        revenue_result = sales_query.with_entities(db.func.sum(Sale.amount)).scalar()
-                        quantity_result = sales_query.with_entities(db.func.sum(Sale.qty)).scalar()
-                        revenue = float(revenue_result) if revenue_result else 0
-                        quantity_sold = float(quantity_result) if quantity_result else 0
+                        ).all()
+                        # Sum safely in Python to avoid numeric type issues
+                        revenue = sum(safe_float(s.amount) for s in sales_query)
+                        quantity_sold = sum(safe_float(s.qty) for s in sales_query)
                     except Exception as e:
                         logger.warning(f"Error calculating revenue and quantity sold for stock {stock_name}: {str(e)}")
                         revenue = 0
@@ -972,7 +973,7 @@ class StockTrackingAggregatedResource(Resource):
             # Also calculate fruit profitability summary from purchases and sales
             fruit_profitability = {}
 
-            # Get purchases with error handling
+            # Get purchases with error handling - fetch all and sum in Python
             try:
                 purchases = Purchase.query.all()
             except Exception as e:
@@ -980,9 +981,29 @@ class StockTrackingAggregatedResource(Resource):
                 db.session.rollback()
                 purchases = []
 
-            # Get sales with error handling
+            # Get sales with error handling - fetch all and sum in Python
             try:
-                sales = Sale.query.all()
+                # Use raw SQL to fetch sales as strings to avoid numeric type conversion issues
+                sales_result = db.session.execute(text("SELECT id, seller_id, seller_fruit_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale")).fetchall()
+                # Convert to dict-like objects for compatibility
+                sales = []
+                for row in sales_result:
+                    sale_dict = {
+                        'id': row[0],
+                        'seller_id': row[1],
+                        'seller_fruit_id': row[2],
+                        'stock_name': row[3],
+                        'fruit_name': row[4],
+                        'qty': row[5],
+                        'unit_price': row[6],
+                        'amount': row[7],
+                        'paid_amount': row[8],
+                        'remaining_amount': row[9],
+                        'customer_name': row[10],
+                        'date': row[11],
+                        'created_at': row[12]
+                    }
+                    sales.append(type('SaleObj', (), sale_dict)())
             except Exception as e:
                 logger.error(f"Error fetching sales: {str(e)}")
                 db.session.rollback()
@@ -1010,15 +1031,12 @@ class StockTrackingAggregatedResource(Resource):
                             'total_costs': 0
                         }
 
-                    # Parse quantity, handling strings with units
-                    quantity_str = str(purchase.quantity).strip()
-                    # Extract numeric part
-                    import re
-                    quantity_match = re.search(r'(\d+(\.\d+)?)', quantity_str)
-                    quantity = float(quantity_match.group(1)) if quantity_match else 0.0
+                    # Use the already parsed quantity and cost from raw SQL fetch
+                    quantity = safe_float(purchase.quantity)
+                    cost = safe_float(purchase.cost)
 
                     fruit_profitability[fruit]['total_purchased'] += quantity
-                    fruit_profitability[fruit]['total_costs'] += float(purchase.cost or 0)
+                    fruit_profitability[fruit]['total_costs'] += cost
 
                 except Exception as e:
                     logger.error(f"Error processing purchase for fruit {purchase.fruit_type}: {str(e)}")
@@ -1038,8 +1056,9 @@ class StockTrackingAggregatedResource(Resource):
                             'total_costs': 0
                         }
 
-                    fruit_profitability[fruit]['total_sold'] += float(sale.qty)
-                    fruit_profitability[fruit]['total_revenue'] += sale.amount
+                    # Use safe_float for qty and amount
+                    fruit_profitability[fruit]['total_sold'] += safe_float(sale.qty)
+                    fruit_profitability[fruit]['total_revenue'] += safe_float(sale.amount)
 
                 except Exception as e:
                     logger.error(f"Error processing sale for fruit {sale.fruit_name}: {str(e)}")
