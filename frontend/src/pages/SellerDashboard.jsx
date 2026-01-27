@@ -165,7 +165,6 @@ const SellerDashboard = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        await fetchSellerAssignments(user?.email || user?.name);
 
         // Load stock tracking records and keep only those that are stocked out
         const token = localStorage.getItem('access_token');
