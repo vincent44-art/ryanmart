@@ -19,7 +19,8 @@ const isHtmlResponse = (text) => {
  */
 export const fetchDriverExpenses = async (driverEmail) => {
   try {
-    const response = await api.get(`/drivers/${driverEmail}/expenses`);
+    const encodedEmail = encodeURIComponent(driverEmail);
+    const response = await api.get(`/api/drivers/${encodedEmail}/expenses`);
     return response.data;
   } catch (error) {
     console.error('Error fetching driver expenses:', error);
@@ -43,7 +44,7 @@ export const fetchDriverExpenses = async (driverEmail) => {
  */
 export const addDriverExpense = async (expenseData) => {
   try {
-    const response = await api.post('/drivers/expenses', expenseData);
+    const response = await api.post('/api/drivers/expenses', expenseData);
     return response.data;
   } catch (error) {
     console.error('Error adding driver expense:', error);
@@ -74,7 +75,7 @@ export const updateDriverExpense = async (expenseId, updates) => {
  */
 export const deleteDriverExpense = async (expenseId) => {
   try {
-    const response = await api.delete(`/drivers/expenses/${expenseId}`);
+    const response = await api.delete(`/api/drivers/expenses/${expenseId}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting driver expense:', error);
@@ -89,7 +90,8 @@ export const deleteDriverExpense = async (expenseId) => {
  */
 export const fetchDriverProfile = async (driverEmail) => {
   try {
-    const response = await api.get(`/drivers/${driverEmail}/profile`);
+    const encodedEmail = encodeURIComponent(driverEmail);
+    const response = await api.get(`/api/drivers/${encodedEmail}/profile`);
     return response.data;
   } catch (error) {
     console.error('Error fetching driver profile:', error);
@@ -105,7 +107,8 @@ export const fetchDriverProfile = async (driverEmail) => {
  */
 export const updateDriverProfile = async (driverEmail, updates) => {
   try {
-    const response = await api.patch(`/drivers/${driverEmail}/profile`, updates);
+    const encodedEmail = encodeURIComponent(driverEmail);
+    const response = await api.patch(`/api/drivers/${encodedEmail}/profile`, updates);
     return response.data;
   } catch (error) {
     console.error('Error updating driver profile:', error);
