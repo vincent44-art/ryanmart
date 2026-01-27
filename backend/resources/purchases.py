@@ -180,7 +180,6 @@ class PurchaseSummaryResource(Resource):
         return make_response_data(data=summary, message="Purchase summary fetched.")
 
 class PurchaseByEmailResource(Resource):
-    @jwt_required()
     def get(self):
         """
         Get purchases by purchaser email.
@@ -192,8 +191,15 @@ class PurchaseByEmailResource(Resource):
         try:
             # Get current user from JWT to verify access
             current_user_id = get_jwt_identity()
-            current_user = User.query.get(current_user_id)
+            if not current_user_id:
+                return make_response_data(
+                    success=False,
+                    message="Missing access token",
+                    error="authorization_required",
+                    status_code=401
+                )
 
+            current_user = User.query.get(current_user_id)
             if not current_user:
                 return make_response_data(
                     success=False,
