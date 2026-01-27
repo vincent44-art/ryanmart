@@ -227,7 +227,7 @@ def create_app(config_class=Config):
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(purchases_bp, url_prefix='/api')
     from resources.assignments import assignments_bp
-    app.register_blueprint(assignments_bp)
+    app.register_blueprint(assignments_bp, url_prefix='/api')
     app.register_blueprint(dashboard_bp)
     from resources.drivers import drivers_bp
     app.register_blueprint(drivers_bp)

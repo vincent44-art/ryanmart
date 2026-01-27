@@ -1,40 +1,33 @@
-# Fix SellerDashboard JSON Parsing Error
+# Fix JSON Parsing Error in SellerDashboard.jsx
 
-## Problem
-The SellerDashboard was showing `SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON` when loading seller data. This occurred because the frontend was receiving HTML error pages instead of JSON responses from the backend API.
+## Issue
+SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+- Frontend expects JSON but backend returns HTML (error page, 404, etc.)
+- Happens when fetch calls try to parse HTML as JSON
 
-## Root Causes Identified
-1. **Inconsistent API URL configuration**: Different files had different conventions for constructing API URLs
-   - Some files added `/api` prefix manually, causing double prefixes like `/api/api/sales`
-   - Some files didn't include `/api` prefix at all
-2. **URL Typo**: Backend URL had `ryanmart-bacckend` (triple 'c') instead of `ryanmart-backend`
+## Root Cause
+Some fetch calls in SellerDashboard.jsx lack HTML response checks before calling response.json()
 
-## Files Modified
+## Plan
+- [x] Add safe JSON parsing to all fetch calls in SellerDashboard.jsx
+- [x] Use existing safeJsonParse function or add HTML checks
+- [x] Ensure consistent error handling across all API calls
 
-### 1. `frontend/src/api/api.js`
-- Removed the automatic `/api` suffix from `REACT_APP_API_BASE_URL`
-- Changed from: `const baseURL = RAW_BASE ? RAW_BASE + '/api' : '...'`
-- Changed to: `const baseURL = RAW_BASE || 'https://ryanmart-bacckend.onrender.com'`
-- Fixed auth/refresh endpoint to include `/api` prefix: `/api/auth/refresh`
+## Files to Edit
+- frontend/src/pages/SellerDashboard.jsx
 
-### 2. `frontend/src/pages/SellerDashboard.jsx`
-- Renamed `BASE_URL` to `API_BASE_URL` for clarity
-- Removed the `/api` suffix addition to `REACT_APP_API_BASE_URL`
-- Changed sales fetch from `${BASE_URL}/sales` to `${API_BASE_URL}/api/sales`
+## Steps
+1. [x] Identify all fetch calls in SellerDashboard.jsx
+2. [x] Add HTML response checks before JSON parsing
+3. [x] Test the changes
 
-### 3. `frontend/src/components/apiHelpers.js`
-- Updated `fetchSales` endpoint from `/sales` to `/api/sales`
-- Added comment explaining the `/api` prefix requirement
+## Additional Issues Found and Fixed
+- [x] Fixed assignments endpoint registration issue in backend/resources/assignments.py
+  - Removed conflicting url_prefix from blueprint since it's registered with proper prefix in app.py
+  - This was causing the endpoint to return HTML instead of JSON
 
-### 4. `frontend/src/api/stockTracking.js`
-- Removed the import of `API_BASE_URL` from `services/api.js`
-- Added local `getApiBaseUrl()` function with proper URL construction
-- Ensured all API calls use consistent `fullUrl` construction pattern
-
-## Result
-All API calls now consistently construct URLs with the correct `/api` prefix only once, eliminating the double prefix issue and ensuring JSON responses are received instead of HTML error pages.
-
-## API URL Pattern
-- Base URL: `https://ryanmart-bacckend.onrender.com` (or `http://localhost:5000` in dev)
-- Full endpoint: `{baseURL}/api/sales` (NOT `{baseURL}/api/api/sales`)
-
+## Testing Status
+- [x] Frontend compilation errors fixed
+- [x] Backend endpoint registration corrected
+- [x] HTML response detection working properly (error messages now correctly identify when server returns HTML)
+- [x] JSON parsing errors prevented by safe parsing implementation
