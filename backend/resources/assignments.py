@@ -6,15 +6,15 @@ from models.sales import Sale
 from models.user import db
 from utils.helpers import make_response_data
 
-assignments_bp = Blueprint('assignments_bp', __name__, url_prefix='/api/assignments')
+assignments_bp = Blueprint('assignments_bp', __name__)
 
-@assignments_bp.route('', methods=['GET'])
+@assignments_bp.route('/assignments', methods=['GET'])
 def get_assignments():
     seller = request.args.get('seller')
     assignments = Assignment.query.filter_by(seller_email=seller).all()
     return jsonify([a.to_dict() for a in assignments]), 200
 
-@assignments_bp.route('/<assignment_id>/sales', methods=['POST'])
+@assignments_bp.route('/assignments/<assignment_id>/sales', methods=['POST'])
 def add_sale(assignment_id):
     data = request.get_json()
     assignment = Assignment.query.get(assignment_id)
@@ -40,7 +40,7 @@ def add_sale(assignment_id):
     db.session.commit()
     return jsonify(sale.to_dict()), 201
 
-@assignments_bp.route('/create', methods=['POST'])
+@assignments_bp.route('/assignments/create', methods=['POST'])
 def create_assignment():
     data = request.get_json()
     seller_id = data.get('seller_id')
