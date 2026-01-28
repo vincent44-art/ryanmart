@@ -92,19 +92,20 @@ class PurchaseListResource(Resource):
                     'created_at': row[9]
                 }
                 purchase_obj = type('PurchaseObj', (), purchase_dict)()
-                purchase_obj.to_dict = lambda self: {
-                    'id': self.id,
-                    'purchaser_id': self.purchaser_id,
-                    'purchaserEmail': self.purchaserEmail,
-                    'employeeName': self.employeeName,
-                    'fruitType': self.fruitType,
-                    'quantity': self.quantity,
-                    'unit': self.unit,
-                    'buyerName': self.buyerName,
-                    'amount': self.amount,
-                    'amountPerKg': self.amountPerKg,
-                    'date': self.date.isoformat() if self.date else None,
-                    'created_at': self.created_at.isoformat() if self.created_at else None
+                # Use default argument to capture purchase_obj at definition time
+                purchase_obj.to_dict = lambda s=purchase_obj: {
+                    'id': s.id,
+                    'purchaser_id': s.purchaser_id,
+                    'purchaserEmail': s.purchaserEmail,
+                    'employeeName': s.employeeName,
+                    'fruitType': s.fruitType,
+                    'quantity': s.quantity,
+                    'unit': s.unit,
+                    'buyerName': s.buyerName,
+                    'amount': s.amount,
+                    'amountPerKg': s.amountPerKg,
+                    'date': s.date.isoformat() if s.date else None,
+                    'created_at': s.created_at.isoformat() if s.created_at else None
                 }
                 purchases.append(purchase_obj)
 
@@ -340,19 +341,20 @@ class PurchaseByEmailResource(Resource):
                     'created_at': row[9]
                 }
                 purchase_obj = type('PurchaseObj', (), purchase_dict)()
-                purchase_obj.to_dict = lambda self: {
-                    'id': self.id,
-                    'purchaser_id': self.purchaser_id,
-                    'purchaserEmail': self.purchaserEmail,
-                    'employeeName': self.employeeName,
-                    'fruitType': self.fruitType,
-                    'quantity': self.quantity,
-                    'unit': self.unit,
-                    'buyerName': self.buyerName,
-                    'amount': self.amount,
-                    'amountPerKg': self.amountPerKg,
-                    'date': self.date.isoformat() if self.date else None,
-                    'created_at': self.created_at.isoformat() if self.created_at else None
+                # Use default argument to capture purchase_obj at definition time
+                purchase_obj.to_dict = lambda s=purchase_obj: {
+                    'id': s.id,
+                    'purchaser_id': s.purchaser_id,
+                    'purchaserEmail': s.purchaserEmail,
+                    'employeeName': s.employeeName,
+                    'fruitType': s.fruitType,
+                    'quantity': s.quantity,
+                    'unit': s.unit,
+                    'buyerName': s.buyerName,
+                    'amount': s.amount,
+                    'amountPerKg': s.amountPerKg,
+                    'date': s.date.isoformat() if s.date else None,
+                    'created_at': s.created_at.isoformat() if s.created_at else None
                 }
                 purchases.append(purchase_obj)
 
