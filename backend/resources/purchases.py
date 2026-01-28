@@ -68,20 +68,45 @@ class PurchaseListResource(Resource):
             # Convert to dict-like objects for compatibility
             purchases = []
             for row in purchases_result:
+                # Get purchaser email
+                purchaser_email = None
+                try:
+                    user = db.session.get(User, row[1])
+                    if user:
+                        purchaser_email = user.email
+                except Exception:
+                    purchaser_email = None
+
                 purchase_dict = {
                     'id': row[0],
                     'purchaser_id': row[1],
-                    'employee_name': row[2],
-                    'fruit_type': row[3],
+                    'purchaserEmail': purchaser_email,
+                    'employeeName': row[2],
+                    'fruitType': row[3],
                     'quantity': row[4],
                     'unit': row[5],
-                    'buyer_name': row[6],
-                    'cost': row[7],
-                    'purchase_date': row[8],
-                    'created_at': row[9],
-                    'amount_per_kg': row[10]
+                    'buyerName': row[6],
+                    'amount': row[7],
+                    'amountPerKg': row[10],
+                    'date': row[8],
+                    'created_at': row[9]
                 }
-                purchases.append(type('PurchaseObj', (), purchase_dict)())
+                purchase_obj = type('PurchaseObj', (), purchase_dict)()
+                purchase_obj.to_dict = lambda self: {
+                    'id': self.id,
+                    'purchaser_id': self.purchaser_id,
+                    'purchaserEmail': self.purchaserEmail,
+                    'employeeName': self.employeeName,
+                    'fruitType': self.fruitType,
+                    'quantity': self.quantity,
+                    'unit': self.unit,
+                    'buyerName': self.buyerName,
+                    'amount': self.amount,
+                    'amountPerKg': self.amountPerKg,
+                    'date': self.date.isoformat() if self.date else None,
+                    'created_at': self.created_at.isoformat() if self.created_at else None
+                }
+                purchases.append(purchase_obj)
 
             # Calculate total pages
             total_pages = (total_count + per_page - 1) // per_page
@@ -303,17 +328,33 @@ class PurchaseByEmailResource(Resource):
                 purchase_dict = {
                     'id': row[0],
                     'purchaser_id': row[1],
-                    'employee_name': row[2],
-                    'fruit_type': row[3],
+                    'purchaserEmail': email,
+                    'employeeName': row[2],
+                    'fruitType': row[3],
                     'quantity': row[4],
                     'unit': row[5],
-                    'buyer_name': row[6],
-                    'cost': row[7],
-                    'purchase_date': row[8],
-                    'created_at': row[9],
-                    'amount_per_kg': row[10]
+                    'buyerName': row[6],
+                    'amount': row[7],
+                    'amountPerKg': row[10],
+                    'date': row[8],
+                    'created_at': row[9]
                 }
-                purchases.append(type('PurchaseObj', (), purchase_dict)())
+                purchase_obj = type('PurchaseObj', (), purchase_dict)()
+                purchase_obj.to_dict = lambda self: {
+                    'id': self.id,
+                    'purchaser_id': self.purchaser_id,
+                    'purchaserEmail': self.purchaserEmail,
+                    'employeeName': self.employeeName,
+                    'fruitType': self.fruitType,
+                    'quantity': self.quantity,
+                    'unit': self.unit,
+                    'buyerName': self.buyerName,
+                    'amount': self.amount,
+                    'amountPerKg': self.amountPerKg,
+                    'date': self.date.isoformat() if self.date else None,
+                    'created_at': self.created_at.isoformat() if self.created_at else None
+                }
+                purchases.append(purchase_obj)
 
             return make_response_data(
                 data=[p.to_dict() for p in purchases],
@@ -343,9 +384,19 @@ class DailyPurchasesReportResource(Resource):
         # Convert to dict-like objects for compatibility
         purchases = []
         for row in purchases_result:
+            # Get purchaser email
+            purchaser_email = None
+            try:
+                user = db.session.get(User, row[1])
+                if user:
+                    purchaser_email = user.email
+            except Exception:
+                purchaser_email = None
+
             purchase_dict = {
                 'id': row[0],
                 'purchaser_id': row[1],
+                'purchaser': user if 'user' in locals() and user else None,  # For backward compatibility in PDF generation
                 'employee_name': row[2],
                 'fruit_type': row[3],
                 'quantity': row[4],
