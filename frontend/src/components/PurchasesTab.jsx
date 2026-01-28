@@ -90,18 +90,8 @@ const PurchasesTab = (props) => {
     purchase.buyerName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Group purchases by date
-  const groupedPurchases = filteredPurchases.reduce((groups, purchase) => {
-    const date = purchase.date;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(purchase);
-    return groups;
-  }, {});
-
-  // Sort dates in descending order
-  const sortedDates = Object.keys(groupedPurchases).sort((a, b) => new Date(b) - new Date(a));
+  // Sort purchases by date in descending order (most recent first)
+  const sortedPurchases = [...filteredPurchases].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   if (loading) {
     return (
@@ -139,7 +129,7 @@ const PurchasesTab = (props) => {
             <input
               type="text"
               className="form-control"
-              placeholder="Search purchases by purchaser, employee, fruit type, or buyer..."
+              placeholder="Search purchases by purchaser, fruit type, farmer, or date..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -149,90 +139,47 @@ const PurchasesTab = (props) => {
 
       <div className="card shadow-sm">
         <div className="card-body p-0">
-          {sortedDates.length > 0 ? (
-            sortedDates.map((date, index) => {
-              const dayPurchases = groupedPurchases[date];
-              const totalAmount = dayPurchases.reduce((sum, purchase) => sum + purchase.amount, 0);
-              const totalQuantity = dayPurchases.reduce((sum, purchase) => sum + parseFloat(purchase.quantity || 0), 0);
-
-              return (
-                <div key={date}>
-                  {/* Black column separator */}
-                  {index > 0 && <div style={{height: '2px', backgroundColor: 'black', margin: '20px 0'}}></div>}
-
-                  {/* Day header with PDF download */}
-                  <div className="d-flex justify-content-between align-items-center mb-3 px-3 pt-3">
-                    <h4 className="mb-0">
-                      {new Date(date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </h4>
-                    <div className="d-flex align-items-center gap-3">
-                      <div className="text-muted">
-                        <small>
-                          {dayPurchases.length} purchase{dayPurchases.length !== 1 ? 's' : ''} |
-                          Total: {formatCurrency(totalAmount)} |
-                          Qty: {totalQuantity.toFixed(2)}
-                        </small>
-                      </div>
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => downloadDailyReport(date)}
-                        title="Download PDF Report"
-                      >
-                        <Download size={16} className="me-1" />
-                        PDF
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Purchases table for this day */}
-                  <div className="table-responsive mb-4">
-                    <table className="table table-hover mb-0">
-                      <thead className="table-light">
-                        <tr>
-                          <th>Purchaser</th>
-                          <th>Employee</th>
-                          <th>Fruit Type</th>
-                          <th>Quantity</th>
-                          <th>Buyer</th>
-                          <th>Amount</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dayPurchases.map(purchase => (
-                          <tr key={purchase.id}>
-                            <td>{purchase.purchaserEmail}</td>
-                            <td>{purchase.employeeName}</td>
-                            <td>
-                              <span className="badge bg-success">
-                                {purchase.fruitType}
-                              </span>
-                            </td>
-                            <td>{purchase.quantity} {purchase.unit}</td>
-                            <td>{purchase.buyerName}</td>
-                            <td className="fw-bold">{formatCurrency(purchase.amount)}</td>
-                            <td>
-                              <button
-                                className="btn btn-sm btn-outline-danger"
-                                onClick={() => handleDelete(purchase.id)}
-                                title="Delete purchase"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              );
-            })
+          {sortedPurchases.length > 0 ? (
+            <div className="table-responsive">
+              <table className="table table-hover mb-0">
+                <thead className="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Purchaser</th>
+                    <th>Fruit</th>
+                    <th>Quantity</th>
+                    <th>Unit</th>
+                    <th>Farmer</th>
+                    <th>Amount per KG</th>
+                    <th>Total Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedPurchases.map(purchase => (
+                    <tr key={purchase.id}>
+                      <td>{new Date(purchase.date).toLocaleDateString()}</td>
+                      <td>{purchase.purchaserEmail}</td>
+                      <td>{purchase.fruitType}</td>
+                      <td>{purchase.quantity}</td>
+                      <td>{purchase.unit}</td>
+                      <td>{purchase.buyerName}</td>
+                      <td>{formatCurrency(purchase.amountPerKg)}</td>
+                      <td className="fw-bold text-success">{formatCurrency(purchase.amount)}</td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleDelete(purchase.id)}
+                          title="Delete purchase"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div className="text-center py-4">
               {purchases.length === 0
