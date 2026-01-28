@@ -1078,7 +1078,7 @@ class StockTrackingAggregatedResource(Resource):
             # Use raw SQL to avoid "Unknown PG numeric type: 1043" error
             try:
                 from models.seller_fruit import SellerFruit
-                seller_fruits_result = db.session.execute(text("SELECT id, seller_id, fruit_name, quantity::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM seller_fruit")).fetchall()
+                seller_fruits_result = db.session.execute(text("SELECT id, seller_id, fruit_name, quantity::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM seller_fruits")).fetchall()
                 # Convert to dict-like objects for compatibility
                 seller_fruits = []
                 for row in seller_fruits_result:

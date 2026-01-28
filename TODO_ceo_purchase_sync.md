@@ -1,98 +1,36 @@
-# CEO Purchase Dashboard Sync Fix
+# CEO Dashboard Purchase Sync
 
-## Problem
-When a purchase is added in the Purchaser Dashboard, it should reflect in the Purchase tab on the CEO page. Currently:
-1. The CEO Dashboard doesn't show purchaser email (shows "N/A")
-2. No auto-refresh when purchases are added from elsewhere
+## Goal
+Sync the purchase tab in the CEO dashboard with the PurchaserDashboard data.
 
-## Plan
+## Changes Made
 
-### Step 1: Update Purchase Model ✅ COMPLETED
-- Add purchaserEmail field to Purchase.to_dict() by querying User model
-- File: backend/models/purchases.py
+### 1. `frontend/src/components/PurchasesTab.jsx`
+- Updated to fetch purchases directly from `/api/purchases` API (which returns all purchases)
+- Added event listener for `purchase-update` events to refresh data when purchases are added elsewhere
+- Added support for `onUpdateData` and `forceRefresh` props for better integration
+- Handles multiple response formats (paginated items, direct arrays)
 
-### Step 2: Fix CEO Dashboard Refetch ✅ COMPLETED
-- Fix the refetch mechanism in Dashboard.jsx to properly refresh data
-- Expose setData from useDashboardData hook
-- File: frontend/src/pages/Dashboard.jsx
-- File: frontend/src/api/dashboard.js
+### 2. `frontend/src/pages/PurchaserDashboard.jsx`
+- Added `window.dispatchEvent` to emit `purchase-update` event when a new purchase is added
+- This notifies the CEO Dashboard to refresh its data
 
-### Step 3: Optimize CEO Dashboard Query ✅ COMPLETED
-- Use JOIN query to get purchaser email efficiently
-- File: backend/resources/ceo_dashboard.py
+### 3. `frontend/src/pages/Dashboard.jsx`
+- Added event listener for `purchase-update` events
+- When a purchase is added in PurchaserDashboard, the CEO Dashboard will automatically refetch data
 
-### Step 4: Add HTML Error Detection ✅ COMPLETED
-- Add detection for HTML error pages in API response interceptor
-- File: frontend/src/api/api.js
+## How It Works
 
-## Implementation Details
+1. **Data Flow**: Both dashboards now use the same `/api/purchases` endpoint for fetching all purchases
+2. **Real-time Sync**: When a purchase is added in PurchaserDashboard, a custom event is dispatched
+3. **Auto Refresh**: The CEO Dashboard listens for this event and refreshes its data automatically
+4. **Field Mapping**: The backend already returns the correct field names (date, employeeName, fruitType, etc.)
 
-### 1. Purchase Model Update ✅
-Added purchaserEmail field to to_dict() with safe User query:
-```python
-def to_dict(self):
-    purchaser_email = None
-    try:
-        from models.user import User
-        user = User.query.get(self.purchaser_id)
-        if user:
-            purchaser_email = user.email
-    except Exception:
-        purchaser_email = None
-    
-    return {
-        ...
-        'purchaserEmail': purchaser_email,
-        ...
-    }
-```
+## Testing
+- Test that adding a purchase in PurchaserDashboard updates the CEO Dashboard Purchase tab
+- Test that the CEO can see all purchases from all purchasers
+- Test search and filtering functionality works in both dashboards
 
-### 2. Dashboard.jsx Refetch Fix ✅
-Ensure the handlePurchaseAdded properly triggers a refetch:
-```javascript
-const handlePurchaseAdded = (newPurchase) => {
-  setData(prevData => ({
-    ...prevData,
-    purchases: [...(prevData?.purchases || []), newPurchase]
-  }));
-  setTimeout(() => refetch(), 100);
-};
-```
-
-### 3. CEO Dashboard Query Optimization ✅
-Use JOIN to get purchaser email efficiently:
-```python
-purchases_query = db.session.query(
-    Purchase,
-    User.email.label('purchaser_email')
-).outerjoin(
-    User, Purchase.purchaser_id == User.id
-).order_by(Purchase.purchase_date.desc())
-
-purchases_data = []
-for purchase, purchaser_email in purchases_query.all():
-    purchase_dict = purchase.to_dict()
-    purchase_dict['purchaserEmail'] = purchaser_email
-    purchases_data.append(purchase_dict)
-```
-
-### 4. API Error Handling ✅
-Added HTML error detection in response interceptor:
-```javascript
-if (contentType.includes('text/html') || 
-    (typeof responseData === 'string' && responseData.trim().startsWith('<!DOCTYPE'))) {
-  return Promise.reject({
-    status: 500,
-    message: 'Server error - received HTML instead of JSON.',
-    isHtmlError: true
-  });
-}
-```
-
-## Status: COMPLETED ✅
-All changes have been implemented. The CEO Dashboard should now:
-1. Show purchaser email for each purchase
-2. Automatically refresh when purchases are added from the Purchaser Dashboard
-3. Handle server errors gracefully when HTML is returned instead of JSON
-
+## Status
+✅ COMPLETED
 
