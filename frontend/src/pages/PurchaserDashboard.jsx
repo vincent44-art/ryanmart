@@ -169,6 +169,10 @@ const PurchaserDashboard = () => {
       };
       const response = await addPurchase(newPurchase);
       setPurchases(prev => [...prev, response.data]);
+      
+      // Emit event to notify other components (like CEO Dashboard) to refresh
+      window.dispatchEvent(new CustomEvent('purchase-update', { detail: { refresh: true, purchase: response.data } }));
+      
       setFormData({
         employeeName: user?.name || '',
         fruitType: '',

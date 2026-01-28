@@ -1,37 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Trash2, Download } from 'lucide-react';
 import { fetchPurchases, deletePurchase } from '../api/purchase';
+import { useAuth } from '../contexts/AuthContext';
 
 const PurchasesTab = (props) => {
+  const { user } = useAuth();
   // Accept data prop for dashboard integration, fallback to fetching if not provided
-  const [purchases, setPurchases] = useState(Array.isArray(props.data) ? props.data : []);
+  const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch purchases from API
+  // Fetch purchases from API - syncs with PurchaserDashboard data
+  const loadPurchases = async () => {
+    try {
+      setLoading(true);
+      // Fetch all purchases (no email filter) to match PurchaserDashboard data
+      const response = await fetchPurchases();
+      // Use paginated response: response.data.data.items
+      const purchasesData = Array.isArray(response.data?.data?.items) ? response.data.data.items : 
+                           Array.isArray(response.data?.data) ? response.data.data : 
+                           Array.isArray(response.data) ? response.data : [];
+      setPurchases(purchasesData);
+      // Also update the parent dashboard data if onUpdateData is provided
+      if (props.onUpdateData) {
+        props.onUpdateData(purchasesData);
+      }
+    } catch (err) {
+      console.error('Failed to fetch purchases:', err);
+      setError('Failed to load purchases. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch purchases on mount or when triggered
   useEffect(() => {
-    // If data is passed as prop, use it, otherwise fetch all purchases from DB
-    if (Array.isArray(props.data)) {
+    // If data is passed as prop, use it, but still fetch fresh data from API to sync with PurchaserDashboard
+    if (Array.isArray(props.data) && props.data.length > 0 && !props.forceRefresh) {
       setPurchases(props.data);
       setLoading(false);
     } else {
-      const loadPurchases = async () => {
-        try {
-          // Fetch all purchases (no email filter)
-          const response = await fetchPurchases();
-          // Use paginated response: response.data.data.items
-          setPurchases(Array.isArray(response.data?.data?.items) ? response.data.data.items : []);
-        } catch (err) {
-          console.error('Failed to fetch purchases:', err);
-          setError('Failed to load purchases. Please try again.');
-        } finally {
-          setLoading(false);
-        }
-      };
       loadPurchases();
     }
-  }, [props.data]);
+  }, [props.data, props.forceRefresh]);
+
+  // Listen for purchase updates from other components
+  useEffect(() => {
+    const handlePurchaseUpdate = (event) => {
+      if (event.detail?.refresh) {
+        loadPurchases();
+      }
+    };
+    window.addEventListener('purchase-update', handlePurchaseUpdate);
+    return () => window.removeEventListener('purchase-update', handlePurchaseUpdate);
+  }, []);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-KE', {

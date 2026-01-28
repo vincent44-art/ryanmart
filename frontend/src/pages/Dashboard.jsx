@@ -38,6 +38,18 @@ const Dashboard = () => {
     setTimeout(() => refetch(), 100);
   };
 
+  // Listen for purchase updates from PurchaserDashboard
+  useEffect(() => {
+    const handlePurchaseUpdate = (event) => {
+      if (event.detail?.refresh) {
+        // Refresh dashboard data when a purchase is added elsewhere
+        refetch();
+      }
+    };
+    window.addEventListener('purchase-update', handlePurchaseUpdate);
+    return () => window.removeEventListener('purchase-update', handlePurchaseUpdate);
+  }, [refetch]);
+
   const renderTabContent = () => {
     if (loading) {
       return (
