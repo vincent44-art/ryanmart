@@ -358,3 +358,25 @@ export const deleteSalary = async (salaryId) => {
     throw error;
   }
 };
+
+// Create salary
+export const createSalary = async (salaryData) => {
+  try {
+    const response = await api.post('/api/salaries', salaryData);
+    return response;
+  } catch (error) {
+    console.error('Error creating salary:', error);
+    throw error;
+  }
+};
+
+// Toggle salary payment status
+export const toggleSalaryStatus = async (salaryId) => {
+  try {
+    const response = await api.post(`/api/salary-payments/${salaryId}/toggle-status`);
+    return response;
+  } catch (error) {
+    console.error('Error toggling salary status:', error);
+    throw error;
+  }
+};

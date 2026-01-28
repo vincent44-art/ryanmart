@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSalaries, fetchUsers, deleteSalary } from './apiHelpers';
+import { fetchSalaries, fetchUsers, deleteSalary, createSalary, toggleSalaryStatus } from './apiHelpers';
 import SalaryFormModal from './SalaryFormModal';
 
 const SalaryManagementTab = ({ data }) => {
@@ -116,13 +116,9 @@ const SalaryManagementTab = ({ data }) => {
                         <td>
                           <button className={`btn btn-sm ${salary.is_paid ? 'btn-warning' : 'btn-success'} me-2`}
                             onClick={async () => {
-                              await fetch('/api/salary-payments/' + salary.id + '/toggle-status', {
-                                method: 'POST',
-                                headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` }
-                              });
+                              await toggleSalaryStatus(salary.id);
                               // Refresh salaries
-                              const token = localStorage.getItem('access_token');
-                              const salariesRes = await fetchSalaries(token);
+                              const salariesRes = await fetchSalaries();
                               setSalaries(salariesRes.data?.data || []);
                             }}>
                             {salary.is_paid ? 'Mark Pending' : 'Mark Paid'}
@@ -157,20 +153,12 @@ const SalaryManagementTab = ({ data }) => {
       <SalaryFormModal
         show={showSalaryModal}
         onClose={() => setShowSalaryModal(false)}
-          onSave={async (salaryData) => {
-          await fetch('/api/salaries', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-            },
-            body: JSON.stringify(salaryData)
-          });
+        onSave={async (salaryData) => {
+          await createSalary(salaryData);
           setShowSalaryModal(false);
           // Refresh salaries
-          const token = localStorage.getItem('access_token');
-          const salariesRes = await fetchSalaries(token);
-          setSalaries(salariesRes.data || []);
+          const salariesRes = await fetchSalaries();
+          setSalaries(salariesRes.data?.data || []);
         }}
         users={users}
       />
