@@ -11,8 +11,8 @@ from .purchases import (
     ClearPurchasesResource, PurchaseSummaryResource, PurchaseByEmailResource
 )
 from .stock import StockMovementListResource, ClearStockMovementsResource
-from .expenses import OtherExpensesResource, CarExpensesResource
-from .other_expenses import OtherExpenseResource
+from .expenses import CarExpensesResource
+from .other_expenses import OtherExpensesResource, OtherExpenseResource
 from .salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
 from .gradients import GradientListResource, ClearGradientsResource
 from .messages import MessageListResource, MessageResource, ClearMessagesResource
