@@ -40,12 +40,22 @@ const OtherExpenseForm = ({ onExpenseAdded }) => {
       // Get raw response text for debugging
       const text = await response.text();
       console.log('Raw response:', text);
+      console.log('Response status:', response.status);
 
       let result;
       try {
         result = JSON.parse(text);
       } catch (parseErr) {
+        // Check if it's an HTML error page (common for 500 errors)
+        if (text.includes('<!DOCTYPE') || text.includes('<html') || text.includes('500 Internal Server Error')) {
+          throw new Error(`Server error (500): Backend returned an error page instead of JSON. Check server logs.`);
+        }
         throw new Error(`Invalid JSON response: ${text || 'empty response'}`);
+      }
+
+      // Additional validation: check if result has expected structure
+      if (!result || typeof result !== 'object') {
+        throw new Error(`Unexpected response format: expected object, got ${typeof result}`);
       }
 
       if (!response.ok) {

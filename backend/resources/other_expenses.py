@@ -135,7 +135,7 @@ class OtherExpensesResource(Resource):
         try:
             # Use raw SQL to fetch other expenses as strings to avoid numeric type conversion issues
             expenses_result = db.session.execute(text("SELECT id, expense_type, description, amount::text, date, user_id FROM other_expense ORDER BY date DESC")).fetchall()
-            # Convert to dict-like objects for compatibility
+            # Convert to proper dict objects for compatibility
             expenses = []
             for row in expenses_result:
                 expense_dict = {
@@ -146,13 +146,13 @@ class OtherExpensesResource(Resource):
                     'date': row[4],
                     'user_id': row[5]
                 }
-                expenses.append(type('ExpenseObj', (), expense_dict)())
+                expenses.append(expense_dict)
         except Exception as e:
             db.session.rollback()
             response_data, status_code = make_response_data(success=False, message=f"Error fetching other expenses: {str(e)}", status_code=500)
             return jsonify(response_data), status_code
 
-        response_data, status_code = make_response_data(data=[e.to_dict() for e in expenses], message="Other expenses fetched successfully.")
+        response_data, status_code = make_response_data(data=expenses, message="Other expenses fetched successfully.")
         return jsonify(response_data), status_code
 
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
