@@ -224,13 +224,13 @@ def create_app(config_class=Config):
     api = Api(app, catch_all_404s=False)  # We handle 404s ourselves
 
     # Register Blueprints (only those with custom non-API routes)
+    app.register_blueprint(api_bp, url_prefix='/api')  # This registers all routes from resources/__init__.py
     app.register_blueprint(dashboard_bp)
     from resources.drivers import drivers_bp
     app.register_blueprint(drivers_bp)
     
     # Import and register resources directly on the main Api
-    # All routes get /api prefix from the route definition
-    from resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
+    # Note: Most routes are registered in resources/__init__.py via api_bp blueprint
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
     from resources.expenses import CarExpensesResource
     from resources.user import UserListResource
@@ -252,17 +252,16 @@ def create_app(config_class=Config):
         StockTrackingCombinedPDFResource
     )
 
-    # Add all API resources with /api prefix
+    # Add additional API resources with /api prefix (not registered via blueprint)
+    # Note: Most routes are registered in resources/__init__.py via api_bp
     api.add_resource(LoginResource, '/api/auth/login')
     api.add_resource(RefreshResource, '/api/auth/refresh')
     api.add_resource(MeResource, '/api/auth/me')
     api.add_resource(ChangePasswordResource, '/api/auth/change-password')
     api.add_resource(CurrentStockResource, '/api/current-stock')
-    api.add_resource(OtherExpensesResource, '/api/other_expenses', '/api/expenses/other')
-    api.add_resource(OtherExpenseResource, '/api/other_expenses/<int:expense_id>')
-    api.add_resource(OtherExpensesPDFResource, '/api/other-expenses/pdf')
-    api.add_resource(CEODashboardResource, '/api/ceo/dashboard')
-    api.add_resource(SalariesResource, '/api/salaries')
+    # OtherExpensesResource is registered in resources/__init__.py via api_bp
+    # CEODashboardResource is registered in resources/__init__.py via api_bp
+    # SalariesResource is registered in resources/__init__.py via api_bp
     api.add_resource(SalaryResource, '/api/salaries/<int:salary_id>')
     api.add_resource(SalaryPaymentToggleStatusResource, '/api/salary-payments/<int:payment_id>/toggle-status')
     api.add_resource(CarExpensesResource, '/api/car-expenses', '/api/car-expenses/<int:expense_id>')
