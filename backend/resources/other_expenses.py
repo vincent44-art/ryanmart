@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask import request, send_file, jsonify
+from flask import request, send_file
 from extensions import db
 from models.other_expense import OtherExpense
 from utils.helpers import make_response_data, get_current_user
@@ -150,10 +150,10 @@ class OtherExpensesResource(Resource):
         except Exception as e:
             db.session.rollback()
             response_data, status_code = make_response_data(success=False, message=f"Error fetching other expenses: {str(e)}", status_code=500)
-            return jsonify(response_data), status_code
+            return response_data, status_code
 
         response_data, status_code = make_response_data(data=expenses, message="Other expenses fetched successfully.")
-        return jsonify(response_data), status_code
+        return response_data, status_code
 
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def post(self):
@@ -168,7 +168,7 @@ class OtherExpensesResource(Resource):
                     message="Authentication required. Please log in again.", 
                     status_code=401
                 )
-                return jsonify(response_data), status_code
+                return response_data, status_code
             
             try:
                 expense_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
@@ -178,7 +178,7 @@ class OtherExpensesResource(Resource):
                     message="Invalid date format for date. Use YYYY-MM-DD.", 
                     status_code=400
                 )
-                return jsonify(response_data), status_code
+                return response_data, status_code
             
             expense = OtherExpense(
                 expense_type=data['expense_type'],
@@ -197,7 +197,7 @@ class OtherExpensesResource(Resource):
                 message="Other expense added successfully.", 
                 status_code=201
             )
-            return jsonify(response_data), status_code
+            return response_data, status_code
             
         except Exception as e:
             db.session.rollback()
@@ -209,7 +209,7 @@ class OtherExpensesResource(Resource):
                 message=f"Failed to add expense: {str(e)}", 
                 status_code=500
             )
-            return jsonify(response_data), status_code
+            return response_data, status_code
 
 class OtherExpenseResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
@@ -217,11 +217,11 @@ class OtherExpenseResource(Resource):
         expense = OtherExpense.query.get(expense_id)
         if not expense:
             response_data, status_code = make_response_data(success=False, message="Expense not found.", status_code=404)
-            return jsonify(response_data), status_code
+            return response_data, status_code
         db.session.delete(expense)
         db.session.commit()
         response_data, status_code = make_response_data(success=True, message="Expense deleted successfully.")
-        return jsonify(response_data), status_code
+        return response_data, status_code
 
 class OtherExpensesPDFResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
