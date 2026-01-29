@@ -12,6 +12,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from sqlalchemy import text
 import io
+import logging
 
 parser = reqparse.RequestParser()
 parser.add_argument('expense_type', type=str, required=True)
@@ -156,24 +157,59 @@ class OtherExpensesResource(Resource):
 
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def post(self):
-        data = parser.parse_args()
-        current_user = get_current_user()
+        # Wrap everything in try-catch to ensure we always return JSON
         try:
-            expense_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-        except ValueError:
-            response_data, status_code = make_response_data(success=False, message="Invalid date format for date. Use YYYY-MM-DD.", status_code=400)
+            data = parser.parse_args()
+            current_user = get_current_user()
+            
+            if not current_user:
+                response_data, status_code = make_response_data(
+                    success=False, 
+                    message="Authentication required. Please log in again.", 
+                    status_code=401
+                )
+                return jsonify(response_data), status_code
+            
+            try:
+                expense_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+            except ValueError:
+                response_data, status_code = make_response_data(
+                    success=False, 
+                    message="Invalid date format for date. Use YYYY-MM-DD.", 
+                    status_code=400
+                )
+                return jsonify(response_data), status_code
+            
+            expense = OtherExpense(
+                expense_type=data['expense_type'],
+                description=data.get('description'),
+                amount=data['amount'],
+                date=expense_date,
+                user_id=current_user.id
+            )
+            db.session.add(expense)
+            db.session.commit()
+            
+            # Get the expense data after commit
+            expense_data = expense.to_dict()
+            response_data, status_code = make_response_data(
+                data=expense_data, 
+                message="Other expense added successfully.", 
+                status_code=201
+            )
             return jsonify(response_data), status_code
-        expense = OtherExpense(
-            expense_type=data['expense_type'],
-            description=data.get('description'),
-            amount=data['amount'],
-            date=expense_date,
-            user_id=current_user.id
-        )
-        db.session.add(expense)
-        db.session.commit()
-        response_data, status_code = make_response_data(data=expense.to_dict(), message="Other expense added successfully.", status_code=201)
-        return jsonify(response_data), status_code
+            
+        except Exception as e:
+            db.session.rollback()
+            logger = logging.getLogger('other_expenses')
+            logger.error(f"Error adding other expense: {str(e)}", exc_info=True)
+            
+            response_data, status_code = make_response_data(
+                success=False, 
+                message=f"Failed to add expense: {str(e)}", 
+                status_code=500
+            )
+            return jsonify(response_data), status_code
 
 class OtherExpenseResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
