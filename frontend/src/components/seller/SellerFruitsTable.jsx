@@ -34,23 +34,28 @@ const SellerFruitsTable = ({
     return fruits.sort();
   }, [sellerFruits]);
 
+  // Check if any filters are applied
+  const hasFiltersApplied = useMemo(() => {
+    return searchTerm !== '' || filterDateFrom !== '' || filterDateTo !== '' || filterFruitType !== '';
+  }, [searchTerm, filterDateFrom, filterDateTo, filterFruitType]);
+
   // Filter and sort data
   const filteredAndSortedData = useMemo(() => {
     let filtered = sellerFruits.filter(fruit => {
-      const matchesSearch = searchTerm === '' || 
-        Object.values(fruit).some(value => 
+      const matchesSearch = searchTerm === '' ||
+        Object.values(fruit).some(value =>
           value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
-      
+
       const fruitDate = new Date(fruit.date);
       const fromDate = filterDateFrom ? new Date(filterDateFrom) : null;
       const toDate = filterDateTo ? new Date(filterDateTo) : null;
-      
+
       const matchesDateFrom = !fromDate || fruitDate >= fromDate;
       const matchesDateTo = !toDate || fruitDate <= toDate;
-      
+
       const matchesFruitType = filterFruitType === '' || fruit.fruit_name === filterFruitType;
-      
+
       return matchesSearch && matchesDateFrom && matchesDateTo && matchesFruitType;
     });
 
@@ -286,7 +291,26 @@ const SellerFruitsTable = ({
               {paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan={Object.values(visibleColumns).filter(Boolean).length + 1} className="text-center text-muted py-4">
-                    No data matches the current filters
+                    {hasFiltersApplied ? (
+                      <div>
+                        <p className="mb-2">No data matches the current filters.</p>
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => {
+                            setSearchTerm('');
+                            setFilterDateFrom('');
+                            setFilterDateTo('');
+                            setFilterFruitType('');
+                            setSortConfig({ key: null, direction: 'asc' });
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Clear All Filters
+                        </button>
+                      </div>
+                    ) : (
+                      sellerFruits.length === 0 ? "No sales data available" : "No data matches the current filters"
+                    )}
                   </td>
                 </tr>
               ) : (
