@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createSellerFruit, updateSellerFruit } from '../../api/sellerFruits';
+import { createSale } from '../apiHelpers';
 
 const SellerFruitsForm = ({ fruit, initialData, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -79,7 +80,7 @@ const SellerFruitsForm = ({ fruit, initialData, onSave, onCancel }) => {
       if (fruit) {
         await updateSellerFruit(fruit.id, data);
       } else {
-        await createSellerFruit(data);
+        await createSale(data);
       }
 
       onSave();

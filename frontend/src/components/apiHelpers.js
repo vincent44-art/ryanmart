@@ -51,7 +51,8 @@ export const fetchSales = async (userEmail = null) => {
     // Use relative URL with /api prefix since api.js baseURL is the backend URL without /api
     const endpoint = userEmail ? `/api/sales/email/${userEmail}` : '/api/sales';
     const response = await api.get(endpoint);
-    return response;
+    // Return the actual sales data array from the nested response structure
+    return response.data.data.sales || [];
   } catch (error) {
     console.error('Error fetching sales:', error);
     // Check if response is HTML (server error page)

@@ -224,14 +224,8 @@ const SellerDashboard = () => {
             const salesData = await fetchSales(user?.email, token);
             console.log('Seller sales data:', salesData); // Debug log
             
-            // Handle the new response format from /api/sales/email/<email>
-            let sellerSalesData = [];
-            if (Array.isArray(salesData)) {
-              sellerSalesData = salesData;
-            } else if (salesData?.data && Array.isArray(salesData.data)) {
-              sellerSalesData = salesData.data;
-            }
-            setSellerFruits(sellerSalesData);
+            // fetchSales now returns the array directly
+            setSellerFruits(salesData);
           } catch (error) {
             console.error('Error fetching seller sales:', error);
             setSellerFruits([]);
@@ -430,16 +424,9 @@ const SellerDashboard = () => {
 
       // Refresh sellerFruits (from /api/sales/email/<email>)
       let salesData = await fetchSales(user?.email, token);
-      // Normalize: if salesData is not an array, try to extract array from known response shapes
-      if (!Array.isArray(salesData)) {
-        if (salesData && Array.isArray(salesData.data)) {
-          salesData = salesData.data;
-        } else if (salesData && Array.isArray(salesData.sales)) {
-          salesData = salesData.sales;
-        } else {
-          salesData = [];
-        }
-      }
+      console.log('refreshTableData - user.email:', user?.email);
+      console.log('refreshTableData - salesData:', salesData);
+      // fetchSales now returns the array directly, so no need to extract
       setSellerFruits(salesData);
 
       // Refresh sellerSales (from /api/sales, filtered for this seller)
@@ -465,7 +452,9 @@ const SellerDashboard = () => {
             }
             // Filter for this seller's email
             const sellerEmail = user?.email;
+            console.log('refreshTableData - filtering by sellerEmail:', sellerEmail);
             const mySales = allSales.filter(sale => sale.seller_email === sellerEmail);
+            console.log('refreshTableData - mySales:', mySales);
             setSellerSales(mySales);
           } catch (parseErr) {
             console.warn('Error parsing sales JSON:', parseErr);
