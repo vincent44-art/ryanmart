@@ -223,16 +223,13 @@ def create_app(config_class=Config):
     # =====================================================================
     api = Api(app, catch_all_404s=False)  # We handle 404s ourselves
 
-    # Register Blueprints
-    app.register_blueprint(api_bp, url_prefix='/api')
-    app.register_blueprint(purchases_bp, url_prefix='/api')
-    from resources.assignments import assignments_bp
-    app.register_blueprint(assignments_bp, url_prefix='/api')
+    # Register Blueprints (only those with custom non-API routes)
     app.register_blueprint(dashboard_bp)
     from resources.drivers import drivers_bp
     app.register_blueprint(drivers_bp)
     
-    # Import and register resources
+    # Import and register resources directly on the main Api
+    # All routes get /api prefix from the route definition
     from resources.other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
     from resources.expenses import CarExpensesResource
@@ -255,7 +252,7 @@ def create_app(config_class=Config):
         StockTrackingCombinedPDFResource
     )
 
-    # Add all API resources with consistent /api prefix
+    # Add all API resources with /api prefix
     api.add_resource(LoginResource, '/api/auth/login')
     api.add_resource(RefreshResource, '/api/auth/refresh')
     api.add_resource(MeResource, '/api/auth/me')

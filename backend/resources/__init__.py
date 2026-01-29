@@ -12,7 +12,6 @@ from .purchases import (
 )
 from .stock import StockMovementListResource, ClearStockMovementsResource
 from .expenses import CarExpensesResource
-from .other_expenses import OtherExpensesResource, OtherExpenseResource
 from .salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
 from .gradients import GradientListResource, ClearGradientsResource
 from .messages import MessageListResource, MessageResource, ClearMessagesResource
@@ -73,9 +72,7 @@ api.add_resource(StockMovementListResource, '/stock-movements')
 api.add_resource(ClearStockMovementsResource, '/stock-movements/clear')
 
 # ----------- EXPENSES -----------
-api.add_resource(OtherExpensesResource, '/other_expenses')
-api.add_resource(OtherExpenseResource, '/other_expenses/<int:expense_id>')
-# CarExpensesResource registered in app.py to handle both endpoints
+# OtherExpensesResource is now registered in app.py
 
 # ----------- SALARIES -----------
 api.add_resource(SalariesResource, '/salaries')
