@@ -134,7 +134,7 @@ class OtherExpensesResource(Resource):
     def get(self):
         try:
             # Use raw SQL to fetch other expenses as strings to avoid numeric type conversion issues
-            expenses_result = db.session.execute(text("SELECT id, expense_type, description, amount::text, date, user_id FROM other_expense ORDER BY date DESC")).fetchall()
+            expenses_result = db.session.execute(text("SELECT id, expense_type, description, amount::text, date, user_id FROM other_expenses ORDER BY date DESC")).fetchall()
             # Convert to proper dict objects for compatibility
             expenses = []
             for row in expenses_result:
