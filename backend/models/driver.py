@@ -2,7 +2,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from .user import db
+from extensions import db
+from datetime import datetime
+from models.user import User
 
 class DriverExpense(db.Model):
     __tablename__ = 'driver_expenses'

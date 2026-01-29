@@ -1,5 +1,6 @@
 from datetime import datetime
-from .user import db, UserRole
+from extensions import db
+from models.user import UserRole
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)

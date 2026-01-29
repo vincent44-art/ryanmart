@@ -41,16 +41,23 @@ const OtherExpenseForm = ({ onExpenseAdded }) => {
       const text = await response.text();
       console.log('Raw response:', text);
       console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      // Check for empty response
+      if (!text || text.trim() === '') {
+        console.error('Empty response received from server');
+        throw new Error(`Server returned empty response (status: ${response.status}). Backend may have crashed or failed to return JSON.`);
+      }
 
       let result;
       try {
         result = JSON.parse(text);
       } catch (parseErr) {
         // Check if it's an HTML error page (common for 500 errors)
-        if (text.includes('<!DOCTYPE') || text.includes('<html') || text.includes('500 Internal Server Error')) {
-          throw new Error(`Server error (500): Backend returned an error page instead of JSON. Check server logs.`);
+        if (text.includes('<!DOCTYPE') || text.includes('<html') || text.toLowerCase().includes('error')) {
+          throw new Error(`Server error (${response.status}): Backend returned an error page. Check server logs for details.`);
         }
-        throw new Error(`Invalid JSON response: ${text || 'empty response'}`);
+        throw new Error(`Invalid JSON response: ${text.substring(0, 100)}...`);
       }
 
       // Additional validation: check if result has expected structure

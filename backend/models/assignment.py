@@ -1,5 +1,5 @@
 from datetime import datetime
-from .user import db
+from extensions import db
 
 class Assignment(db.Model):
     __tablename__ = 'assignments'
