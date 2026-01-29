@@ -427,6 +427,8 @@ const SellerDashboard = () => {
   const refreshTableData = async () => {
     try {
       const token = localStorage.getItem('access_token');
+
+      // Refresh sellerFruits (from /api/sales/email/<email>)
       let salesData = await fetchSales(user?.email, token);
       // Normalize: if salesData is not an array, try to extract array from known response shapes
       if (!Array.isArray(salesData)) {
@@ -439,6 +441,41 @@ const SellerDashboard = () => {
         }
       }
       setSellerFruits(salesData);
+
+      // Refresh sellerSales (from /api/sales, filtered for this seller)
+      try {
+        const salesRes = await fetch(`${API_BASE_URL}/api/sales`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        const text = await salesRes.text();
+        if (isHtmlResponse(text)) {
+          console.warn('Server returned HTML for sales');
+          setSellerSales([]);
+        } else {
+          try {
+            const body = JSON.parse(text);
+            let allSales = [];
+            if (Array.isArray(body?.data?.sales)) {
+              allSales = body.data.sales;
+            } else if (Array.isArray(body?.data)) {
+              allSales = body.data;
+            } else if (Array.isArray(body?.sales)) {
+              allSales = body.sales;
+            }
+            // Filter for this seller's email
+            const sellerEmail = user?.email;
+            const mySales = allSales.filter(sale => sale.seller_email === sellerEmail);
+            setSellerSales(mySales);
+          } catch (parseErr) {
+            console.warn('Error parsing sales JSON:', parseErr);
+            setSellerSales([]);
+          }
+        }
+      } catch (salesErr) {
+        console.warn('Error fetching sales:', salesErr);
+        setSellerSales([]);
+      }
     } catch (err) {
       setError('Failed to refresh sales data.');
       console.error('Error refreshing sales data:', err);
