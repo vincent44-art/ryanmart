@@ -143,7 +143,7 @@ class OtherExpensesResource(Resource):
                     'expense_type': row[1],
                     'description': row[2],
                     'amount': row[3],
-                    'date': row[4],
+                    'date': row[4].isoformat() if row[4] else None,
                     'user_id': row[5]
                 }
                 expenses.append(expense_dict)
