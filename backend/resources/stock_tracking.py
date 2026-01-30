@@ -603,11 +603,13 @@ class StockTrackingPDFResource(Resource):
             record = StockTracking.query.get_or_404(record_id)
             pdf_buffer = generate_stock_pdf(record)
 
-            response = make_response(pdf_buffer.getvalue())
-            response.headers['Content-Type'] = 'application/pdf'
-            response.headers['Content-Disposition'] = f'attachment; filename=stock_report_{record.stock_name}_{record.id}.pdf'
-
-            return response
+            pdf_buffer.seek(0)
+            return send_file(
+                pdf_buffer,
+                as_attachment=True,
+                download_name=f"stock_report_{record.stock_name}_{record.id}.pdf",
+                mimetype='application/pdf'
+            )
         except Exception as e:
             return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 
@@ -630,11 +632,13 @@ class StockTrackingGroupPDFResource(Resource):
                 return make_response_data(success=False, message="No records found for the specified date", status_code=404)
 
             pdf_buffer = generate_stock_pdf_group(records, date, type_)
-            response = make_response(pdf_buffer.getvalue())
-            response.headers['Content-Type'] = 'application/pdf'
-            response.headers['Content-Disposition'] = f'attachment; filename=stock_report_{type_}_{date}.pdf'
-
-            return response
+            pdf_buffer.seek(0)
+            return send_file(
+                pdf_buffer,
+                as_attachment=True,
+                download_name=f"stock_report_{type_}_{date}.pdf",
+                mimetype='application/pdf'
+            )
         except Exception as e:
             return make_response_data(success=False, message=f"Error generating group PDF: {str(e)}", status_code=500)
 
@@ -650,11 +654,13 @@ class StockTrackingUnmovedPDFResource(Resource):
                 return make_response_data(success=False, message="No unmoved stock records found", status_code=404)
 
             pdf_buffer = generate_unmoved_stock_pdf(records)
-            response = make_response(pdf_buffer.getvalue())
-            response.headers['Content-Type'] = 'application/pdf'
-            response.headers['Content-Disposition'] = 'attachment; filename=stock_report_unmoved.pdf'
-
-            return response
+            pdf_buffer.seek(0)
+            return send_file(
+                pdf_buffer,
+                as_attachment=True,
+                download_name='stock_report_unmoved.pdf',
+                mimetype='application/pdf'
+            )
         except Exception as e:
             return make_response_data(success=False, message=f"Error generating unmoved stock PDF: {str(e)}", status_code=500)
 
@@ -881,11 +887,13 @@ class StockTrackingCombinedPDFResource(Resource):
                 return make_response_data(success=False, message="No stock records found for the specified date", status_code=404)
 
             pdf_buffer = generate_stock_pdf_combined(date)
-            response = make_response(pdf_buffer.getvalue())
-            response.headers['Content-Type'] = 'application/pdf'
-            response.headers['Content-Disposition'] = f'attachment; filename=stock_report_combined_{date}.pdf'
-
-            return response
+            pdf_buffer.seek(0)
+            return send_file(
+                pdf_buffer,
+                as_attachment=True,
+                download_name=f"stock_report_combined_{date}.pdf",
+                mimetype='application/pdf'
+            )
         except Exception as e:
             return make_response_data(success=False, message=f"Error generating combined PDF: {str(e)}", status_code=500)
 
