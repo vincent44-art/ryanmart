@@ -65,35 +65,41 @@ class UserResource(Resource):
 
     @role_required('ceo')
     def delete(self, user_id):
-        user = User.query.get_or_404(user_id)
-        
-        # Use raw SQL to delete related records first to avoid
-        # "Unknown PG numeric type: 1043" error during cascade delete
-        # This prevents SQLAlchemy from lazy-loading related Sales
-        # which triggers the numeric type conversion issue
+        # Use raw SQL for all operations to avoid ORM numeric type issues
+        # First, check if user exists and get name
+        result = db.session.execute(text("SELECT name FROM \"user\" WHERE id = :user_id"), {"user_id": user_id}).fetchone()
+        if not result:
+            return make_response_data(success=False, message="User not found.", status_code=404)
+
+        user_name = result[0]
+
         try:
+            # Expunge any tracked User object from session to prevent cascade delete issues
+            # This prevents SQLAlchemy from trying to lazy-load related records during commit
+            user = db.session.get(User, user_id)
+            if user:
+                db.session.expunge(user)
+            
             # Delete related records using raw SQL
             db.session.execute(text("DELETE FROM sale WHERE seller_id = :user_id"), {"user_id": user_id})
             db.session.execute(text("DELETE FROM purchase WHERE purchaser_id = :user_id"), {"user_id": user_id})
             db.session.execute(text("DELETE FROM other_expenses WHERE user_id = :user_id"), {"user_id": user_id})
             db.session.execute(text("DELETE FROM inventory WHERE added_by = :user_id"), {"user_id": user_id})
             db.session.execute(text("DELETE FROM message WHERE sender_id = :user_id OR recipient_id = :user_id"), {"user_id": user_id})
+            # Delete the user
+            db.session.execute(text("DELETE FROM \"user\" WHERE id = :user_id"), {"user_id": user_id})
             db.session.commit()
+            return make_response_data(message=f"User {user_name} deleted successfully.")
         except Exception as e:
             db.session.rollback()
             # If foreign key constraints prevent deletion, set user to inactive instead
-            user.is_active = False
+            db.session.execute(text("UPDATE \"user\" SET is_active = false WHERE id = :user_id"), {"user_id": user_id})
             db.session.commit()
             return make_response_data(
-                success=True, 
-                message=f"User {user.name} has been deactivated (could not delete due to existing records).",
+                success=True,
+                message=f"User {user_name} has been deactivated (could not delete due to existing records).",
                 warning=True
             )
-        
-        # Now safe to delete the user
-        db.session.delete(user)
-        db.session.commit()
-        return make_response_data(message=f"User {user.name} deleted successfully.")
 
 class UserSalaryResource(Resource):
     @role_required('ceo')

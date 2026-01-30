@@ -72,6 +72,46 @@ def delete(self, user_id):
 
 ---
 
+## Fix 3: user.py - Expunge User from session (COMPLETED)
+Fixed user deletion by expunging the User object from the session before raw SQL deletes.
+
+### Changes Made
+1. Updated `UserResource.delete()` method to:
+   - Fetch the User object using `db.session.get(User, user_id)`
+   - Expunge the user from session using `db.session.expunge(user)` before raw SQL deletes
+   - This prevents SQLAlchemy from processing cascade relationships during commit
+
+### Why This Is Needed
+Even though raw SQL is used for deleting related records, SQLAlchemy's ORM still tracks the User object in the session. During commit, SQLAlchemy tries to process cascade delete relationships (via the `sales` and `purchases` relationships with `cascade="all, delete-orphan"`), triggering lazy-load queries that cause the numeric type error.
+
+### Code Pattern
+```python
+@role_required('ceo')
+def delete(self, user_id):
+    result = db.session.execute(text("SELECT name FROM \"user\" WHERE id = :user_id"), {"user_id": user_id}).fetchone()
+    if not result:
+        return make_response_data(success=False, message="User not found.", status_code=404)
+
+    user_name = result[0]
+
+    try:
+        # Expunge any tracked User object from session to prevent cascade delete issues
+        # This prevents SQLAlchemy from trying to lazy-load related records during commit
+        user = db.session.get(User, user_id)
+        if user:
+            db.session.expunge(user)
+        
+        # Delete related records using raw SQL
+        db.session.execute(text("DELETE FROM sale WHERE seller_id = :user_id"), {"user_id": user_id})
+        # ... more deletes.commit()
+        return
+        db.session make_response_data(message=f"User {user_name} deleted successfully.")
+    except Exception as e:
+        db.session.rollback()
+        # Fallback to deactivation
+        ...
+```
+
 ## Status
-✅ COMPLETED - All numeric type errors fixed
+✅ COMPLETED - All numeric type errors fixed (including user deletion cascade issue)
 
