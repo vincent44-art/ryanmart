@@ -24,7 +24,7 @@ def make_response_data(data=None, success=True, message="", errors=None, status_
     Returns:
         Flask Response object with proper JSON Content-Type header
     """
-    response = {
+    response_payload = {
         "success": success,
         "message": message,
         "data": data or {},
@@ -37,9 +37,11 @@ def make_response_data(data=None, success=True, message="", errors=None, status_
     except Exception:
         pass
     
-    # Always return a Flask Response object with explicit jsonify
-    # This ensures proper JSON serialization even in edge cases
-    return jsonify(response), status_code
+    # Return just the Response object with status code set directly on it.
+    # This prevents Flask-RESTful from trying to serialize the Response as JSON data.
+    resp = jsonify(response_payload)
+    resp.status_code = status_code
+    return resp
 
 def get_current_user():
     """Get the current authenticated user from JWT identity."""
