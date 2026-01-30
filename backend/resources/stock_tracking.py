@@ -426,7 +426,7 @@ def generate_stock_pdf_group(records, date, type_):
         stock_names = [r.stock_name for r in records]
         stock_names_placeholder = ','.join([f"'{name}'" for name in stock_names])
         sales_result = db.session.execute(text(f"SELECT id, seller_id, seller_fruit_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale WHERE stock_name IN ({stock_names_placeholder}) ORDER BY date DESC")).fetchall()
-        
+
         # Convert to dict-like objects for compatibility
         sales_records = []
         for row in sales_result:
@@ -455,8 +455,8 @@ def generate_stock_pdf_group(records, date, type_):
                 sales_table_data.append([
                     sale.date.strftime('%Y-%m-%d') if sale.date else 'N/A',
                     sale.fruit_name,
-                    f"{sale.qty}",
-                    f"KES {sale.amount:.2f}"
+                    f"{safe_float(sale.qty):.2f}",
+                    f"KES {safe_float(sale.amount):.2f}"
                 ])
 
             sales_table = Table(sales_table_data, colWidths=[1.2*inch, 1.5*inch, 1*inch, 1.2*inch])
@@ -806,7 +806,7 @@ def generate_stock_pdf_combined(date):
         stock_names = [r.stock_name for r in stocks_out]
         stock_names_placeholder = ','.join([f"'{name}'" for name in stock_names])
         sales_result = db.session.execute(text(f"SELECT id, seller_id, seller_fruit_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale WHERE stock_name IN ({stock_names_placeholder}) ORDER BY date DESC")).fetchall()
-        
+
         # Convert to dict-like objects for compatibility
         sales_records = []
         for row in sales_result:
@@ -835,8 +835,8 @@ def generate_stock_pdf_combined(date):
                 sales_table_data.append([
                     sale.date.strftime('%Y-%m-%d') if sale.date else 'N/A',
                     sale.fruit_name,
-                    f"{sale.qty}",
-                    f"KES {sale.amount:.2f}"
+                    f"{safe_float(sale.qty):.2f}",
+                    f"KES {safe_float(sale.amount):.2f}"
                 ])
 
             sales_table = Table(sales_table_data, colWidths=[1.2*inch, 1.5*inch, 1*inch, 1.2*inch])
