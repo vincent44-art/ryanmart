@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse
 from models.user import db, User, UserRole
 from utils.decorators import role_required
 from utils.helpers import make_response_data
+from sqlalchemy import text
 
 parser = reqparse.RequestParser()
 parser.add_argument('email', type=str, required=True)
@@ -65,6 +66,31 @@ class UserResource(Resource):
     @role_required('ceo')
     def delete(self, user_id):
         user = User.query.get_or_404(user_id)
+        
+        # Use raw SQL to delete related records first to avoid
+        # "Unknown PG numeric type: 1043" error during cascade delete
+        # This prevents SQLAlchemy from lazy-loading related Sales
+        # which triggers the numeric type conversion issue
+        try:
+            # Delete related records using raw SQL
+            db.session.execute(text("DELETE FROM sale WHERE seller_id = :user_id"), {"user_id": user_id})
+            db.session.execute(text("DELETE FROM purchase WHERE purchaser_id = :user_id"), {"user_id": user_id})
+            db.session.execute(text("DELETE FROM other_expenses WHERE user_id = :user_id"), {"user_id": user_id})
+            db.session.execute(text("DELETE FROM inventory WHERE added_by = :user_id"), {"user_id": user_id})
+            db.session.execute(text("DELETE FROM message WHERE sender_id = :user_id OR recipient_id = :user_id"), {"user_id": user_id})
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            # If foreign key constraints prevent deletion, set user to inactive instead
+            user.is_active = False
+            db.session.commit()
+            return make_response_data(
+                success=True, 
+                message=f"User {user.name} has been deactivated (could not delete due to existing records).",
+                warning=True
+            )
+        
+        # Now safe to delete the user
         db.session.delete(user)
         db.session.commit()
         return make_response_data(message=f"User {user.name} deleted successfully.")

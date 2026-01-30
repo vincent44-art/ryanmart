@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, current_app
 from flask_jwt_extended import get_jwt_identity
 from models.user import User
 from extensions import db
@@ -7,14 +7,39 @@ import logging
 logger = logging.getLogger('helpers')
 
 def make_response_data(data=None, success=True, message="", errors=None, status_code=200):
-    """Return plain dict + status_code (not Flask Response) to support Flask-RESTful."""
+    """
+    Return a Flask Response object with proper JSON serialization.
+    
+    This function ensures consistent JSON responses across all API endpoints,
+    preventing "empty response" errors that can occur when plain dicts are
+    not properly serialized in edge cases (CORS middleware, exception handlers, etc.)
+    
+    Args:
+        data: The data payload to return (will be wrapped in the standard response format)
+        success: Boolean indicating if the request was successful
+        message: A status message to include in the response
+        errors: A list of error messages (if any)
+        status_code: The HTTP status code to return
+        
+    Returns:
+        Flask Response object with proper JSON Content-Type header
+    """
     response = {
         "success": success,
         "message": message,
         "data": data or {},
         "errors": errors or []
     }
-    return response, status_code
+    
+    # Log the response for debugging
+    try:
+        logger.debug(f"make_response_data: status_code={status_code}, success={success}, message={message}")
+    except Exception:
+        pass
+    
+    # Always return a Flask Response object with explicit jsonify
+    # This ensures proper JSON serialization even in edge cases
+    return jsonify(response), status_code
 
 def get_current_user():
     """Get the current authenticated user from JWT identity."""
