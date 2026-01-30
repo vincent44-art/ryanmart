@@ -3,7 +3,7 @@ from flask import request, jsonify, current_app
 import io
 from flask_jwt_extended import jwt_required, get_current_user
 from datetime import datetime
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.orm import joinedload
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -329,8 +329,28 @@ class DailySalesReportResource(Resource):
         except ValueError:
             return make_response_data(success=False, message="Invalid date format. Use YYYY-MM-DD.", status_code=400)
 
-        # Get all sales for the specified date
-        sales = Sale.query.filter_by(date=report_date).all()
+        # Use raw SQL to fetch sales as strings to avoid numeric type conversion issues
+        sales_result = db.session.execute(text(f"SELECT s.id, s.seller_id, s.stock_name, s.fruit_name, s.qty::text, s.unit_price::text, s.amount::text, s.paid_amount::text, s.remaining_amount::text, s.customer_name, s.date, s.created_at, u.email as seller_email FROM sale s LEFT JOIN \"user\" u ON s.seller_id = u.id WHERE s.date = '{report_date}'")).fetchall()
+
+        # Convert to dict-like objects for compatibility
+        sales = []
+        for row in sales_result:
+            sale_dict = {
+                'id': row[0],
+                'seller_id': row[1],
+                'stock_name': row[2],
+                'fruit_name': row[3],
+                'qty': row[4],
+                'unit_price': row[5],
+                'amount': row[6],
+                'paid_amount': row[7],
+                'remaining_amount': row[8],
+                'customer_name': row[9],
+                'date': row[10],
+                'created_at': row[11],
+                'seller_email': row[12]
+            }
+            sales.append(type('SaleObj', (), sale_dict)())
 
         if not sales:
             return make_response_data(success=False, message=f"No sales found for {date_str}.", status_code=404)
@@ -346,10 +366,11 @@ class DailySalesReportResource(Resource):
         elements.append(title)
         elements.append(Spacer(1, 12))
 
-        # Summary
-        total_amount = sum(sale.amount for sale in sales)
-        total_qty = sum(sale.qty for sale in sales)
-        summary_text = f"Total Sales: {len(sales)} | Total Qty: {total_qty} | Total Amount: KES {total_amount:,.2f}"
+        # Summary - use safe_float to handle string values
+        from utils.helpers import safe_float
+        total_amount = sum(safe_float(sale.amount) for sale in sales)
+        total_qty = sum(safe_float(sale.qty) for sale in sales)
+        summary_text = f"Total Sales: {len(sales)} | Total Qty: {total_qty:.2f} | Total Amount: KES {total_amount:,.2f}"
         summary = Paragraph(summary_text, styles['Normal'])
         elements.append(summary)
         elements.append(Spacer(1, 12))
@@ -359,12 +380,12 @@ class DailySalesReportResource(Resource):
         for sale in sales:
             data.append([
                 sale.date.strftime('%Y-%m-%d'),
-                sale.seller.email if sale.seller else 'N/A',
+                sale.seller_email or 'N/A',
                 sale.stock_name,
                 sale.fruit_name,
-                sale.qty,
-                f'KES {sale.unit_price:,.2f}',
-                f'KES {sale.amount:,.2f}'
+                f"{safe_float(sale.qty):.2f}",
+                f'KES {safe_float(sale.unit_price):,.2f}',
+                f'KES {safe_float(sale.amount):,.2f}'
             ])
 
         # Create table
@@ -397,11 +418,27 @@ class DailySalesReportResource(Resource):
 class CustomerDebtReportResource(Resource):
     @role_required('ceo')
     def get(self, customer_email):
-        # Get all sales for the customer with remaining_amount > 0
-        sales = Sale.query.filter(
-            Sale.customer_name == customer_email,
-            Sale.remaining_amount > 0
-        ).all()
+        # Use raw SQL to fetch sales as strings to avoid numeric type conversion issues
+        sales_result = db.session.execute(text(f"SELECT id, seller_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale WHERE customer_name = '{customer_email}' AND remaining_amount::numeric > 0")).fetchall()
+
+        # Convert to dict-like objects for compatibility
+        sales = []
+        for row in sales_result:
+            sale_dict = {
+                'id': row[0],
+                'seller_id': row[1],
+                'stock_name': row[2],
+                'fruit_name': row[3],
+                'qty': row[4],
+                'unit_price': row[5],
+                'amount': row[6],
+                'paid_amount': row[7],
+                'remaining_amount': row[8],
+                'customer_name': row[9],
+                'date': row[10],
+                'created_at': row[11]
+            }
+            sales.append(type('SaleObj', (), sale_dict)())
 
         if not sales:
             return make_response_data(success=False, message=f"No outstanding debts found for {customer_email}.", status_code=404)
@@ -417,9 +454,10 @@ class CustomerDebtReportResource(Resource):
         elements.append(title)
         elements.append(Spacer(1, 12))
 
-        # Summary
-        total_debt = sum(sale.remaining_amount for sale in sales)
-        total_amount = sum(sale.amount for sale in sales)
+        # Summary - use safe_float to handle string values
+        from utils.helpers import safe_float
+        total_debt = sum(safe_float(sale.remaining_amount) for sale in sales)
+        total_amount = sum(safe_float(sale.amount) for sale in sales)
         total_paid = total_amount - total_debt
         summary_text = f"Total Amount: KES {total_amount:,.2f} | Total Paid: KES {total_paid:,.2f} | Outstanding Debt: KES {total_debt:,.2f}"
         summary = Paragraph(summary_text, styles['Normal'])
@@ -433,11 +471,11 @@ class CustomerDebtReportResource(Resource):
                 sale.date.strftime('%Y-%m-%d'),
                 sale.stock_name,
                 sale.fruit_name,
-                sale.qty,
-                f'KES {sale.unit_price:,.2f}',
-                f'KES {sale.amount:,.2f}',
-                f'KES {sale.paid_amount:,.2f}',
-                f'KES {sale.remaining_amount:,.2f}'
+                f"{safe_float(sale.qty):.2f}",
+                f'KES {safe_float(sale.unit_price):,.2f}',
+                f'KES {safe_float(sale.amount):,.2f}',
+                f'KES {safe_float(sale.paid_amount):,.2f}',
+                f'KES {safe_float(sale.remaining_amount):,.2f}'
             ])
 
         # Create table
