@@ -68,8 +68,8 @@ def generate_other_expenses_pdf(expenses, report_date):
         no_data = Paragraph("No expenses recorded for this date.", styles['Normal'])
         story.append(no_data)
     else:
-        # Summary statistics
-        total_amount = sum(expense['amount'] for expense in expenses)
+        # Summary statistics - use safe_float to handle string values from raw SQL
+        total_amount = sum(safe_float(expense['amount']) for expense in expenses)
         expense_count = len(expenses)
 
         summary_data = [
@@ -149,11 +149,9 @@ class OtherExpensesResource(Resource):
                 expenses.append(expense_dict)
         except Exception as e:
             db.session.rollback()
-            response_data, status_code = make_response_data(success=False, message=f"Error fetching other expenses: {str(e)}", status_code=500)
-            return response_data, status_code
+            return make_response_data(success=False, message=f"Error fetching other expenses: {str(e)}", status_code=500)
 
-        response_data, status_code = make_response_data(data=expenses, message="Other expenses fetched successfully.")
-        return response_data, status_code
+        return make_response_data(data=expenses, message="Other expenses fetched successfully.")
 
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def post(self):
@@ -163,22 +161,20 @@ class OtherExpensesResource(Resource):
             current_user = get_current_user()
             
             if not current_user:
-                response_data, status_code = make_response_data(
-                    success=False, 
-                    message="Authentication required. Please log in again.", 
+                return make_response_data(
+                    success=False,
+                    message="Authentication required. Please log in again.",
                     status_code=401
                 )
-                return response_data, status_code
             
             try:
                 expense_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
             except ValueError:
-                response_data, status_code = make_response_data(
-                    success=False, 
-                    message="Invalid date format for date. Use YYYY-MM-DD.", 
+                return make_response_data(
+                    success=False,
+                    message="Invalid date format for date. Use YYYY-MM-DD.",
                     status_code=400
                 )
-                return response_data, status_code
             
             expense = OtherExpense(
                 expense_type=data['expense_type'],
@@ -192,36 +188,32 @@ class OtherExpensesResource(Resource):
             
             # Get the expense data after commit
             expense_data = expense.to_dict()
-            response_data, status_code = make_response_data(
-                data=expense_data, 
-                message="Other expense added successfully.", 
+            return make_response_data(
+                data=expense_data,
+                message="Other expense added successfully.",
                 status_code=201
             )
-            return response_data, status_code
             
         except Exception as e:
             db.session.rollback()
             logger = logging.getLogger('other_expenses')
             logger.error(f"Error adding other expense: {str(e)}", exc_info=True)
-            
-            response_data, status_code = make_response_data(
-                success=False, 
-                message=f"Failed to add expense: {str(e)}", 
+
+            return make_response_data(
+                success=False,
+                message=f"Failed to add expense: {str(e)}",
                 status_code=500
             )
-            return response_data, status_code
 
 class OtherExpenseResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def delete(self, expense_id):
         expense = OtherExpense.query.get(expense_id)
         if not expense:
-            response_data, status_code = make_response_data(success=False, message="Expense not found.", status_code=404)
-            return response_data, status_code
+            return make_response_data(success=False, message="Expense not found.", status_code=404)
         db.session.delete(expense)
         db.session.commit()
-        response_data, status_code = make_response_data(success=True, message="Expense deleted successfully.")
-        return response_data, status_code
+        return make_response_data(success=True, message="Expense deleted successfully.")
 
 class OtherExpensesPDFResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
