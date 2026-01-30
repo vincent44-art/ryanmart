@@ -378,8 +378,18 @@ class DailySalesReportResource(Resource):
         # Table data
         data = [['Date', 'Seller', 'Stock Name', 'Fruit Name', 'Qty', 'Unit Price', 'Amount']]
         for sale in sales:
+            # Handle date - it could be a string or datetime object
+            date_str = sale.date
+            if hasattr(sale.date, 'strftime'):
+                date_str = sale.date.strftime('%Y-%m-%d')
+            elif isinstance(sale.date, str):
+                # Already a string, use as-is
+                pass
+            else:
+                date_str = str(sale.date)
+            
             data.append([
-                sale.date.strftime('%Y-%m-%d'),
+                date_str,
                 sale.seller_email or 'N/A',
                 sale.stock_name,
                 sale.fruit_name,
@@ -467,8 +477,18 @@ class CustomerDebtReportResource(Resource):
         # Table data
         data = [['Date', 'Stock Name', 'Fruit Name', 'Qty', 'Unit Price', 'Amount', 'Paid Amount', 'Remaining Amount']]
         for sale in sales:
+            # Handle date - it could be a string or datetime object
+            date_str = sale.date
+            if hasattr(sale.date, 'strftime'):
+                date_str = sale.date.strftime('%Y-%m-%d')
+            elif isinstance(sale.date, str):
+                # Already a string, use as-is
+                pass
+            else:
+                date_str = str(sale.date)
+            
             data.append([
-                sale.date.strftime('%Y-%m-%d'),
+                date_str,
                 sale.stock_name,
                 sale.fruit_name,
                 f"{safe_float(sale.qty):.2f}",
