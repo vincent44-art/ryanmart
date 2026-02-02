@@ -3,24 +3,41 @@ from flask_jwt_extended import get_jwt_identity
 from models.user import User
 from extensions import db
 import logging
+import re
 
 logger = logging.getLogger('helpers')
 
-def make_response_data(data=None, success=True, message="", errors=None, status_code=200):
+def safe_float(value, default=0.0):
+    """Safely convert a value to float, handling strings and None"""
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            # Extract numeric part from string
+            match = re.search(r'(\d+(\.\d+)?)', value)
+            return float(match.group(1)) if match else default
+        except (ValueError, TypeError):
+            return default
+    return default
+
+def make_response_data(data=None, success=True, message="", errors=None, status_code=200, warning=False):
     """
     Return a Flask Response object with proper JSON serialization.
-    
+
     This function ensures consistent JSON responses across all API endpoints,
     preventing "empty response" errors that can occur when plain dicts are
     not properly serialized in edge cases (CORS middleware, exception handlers, etc.)
-    
+
     Args:
         data: The data payload to return (will be wrapped in the standard response format)
         success: Boolean indicating if the request was successful
         message: A status message to include in the response
         errors: A list of error messages (if any)
         status_code: The HTTP status code to return
-        
+        warning: Boolean indicating if this is a warning response
+
     Returns:
         Flask Response object with proper JSON Content-Type header
     """
@@ -28,7 +45,8 @@ def make_response_data(data=None, success=True, message="", errors=None, status_
         "success": success,
         "message": message,
         "data": data or {},
-        "errors": errors or []
+        "errors": errors or [],
+        "warning": warning
     }
     
     # Log the response for debugging

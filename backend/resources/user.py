@@ -3,6 +3,9 @@ from models.user import db, User, UserRole
 from utils.decorators import role_required
 from utils.helpers import make_response_data
 from sqlalchemy import text
+import logging
+
+logger = logging.getLogger(__name__)
 
 parser = reqparse.RequestParser()
 parser.add_argument('email', type=str, required=True)
@@ -67,7 +70,12 @@ class UserResource(Resource):
     def delete(self, user_id):
         # Use raw SQL for all operations to avoid ORM numeric type issues
         # First, check if user exists and get name
-        result = db.session.execute(text("SELECT name FROM \"user\" WHERE id = :user_id"), {"user_id": user_id}).fetchone()
+        try:
+            result = db.session.execute(text("SELECT name FROM \"user\" WHERE id = :user_id"), {"user_id": user_id}).fetchone()
+        except Exception as e:
+            logger.error(f"Database error checking user existence: {e}")
+            return make_response_data(success=False, message=f"Database error: {str(e)}", status_code=500)
+
         if not result:
             return make_response_data(success=False, message="User not found.", status_code=404)
 
@@ -79,27 +87,76 @@ class UserResource(Resource):
             user = db.session.get(User, user_id)
             if user:
                 db.session.expunge(user)
-            
-            # Delete related records using raw SQL
-            db.session.execute(text("DELETE FROM sale WHERE seller_id = :user_id"), {"user_id": user_id})
-            db.session.execute(text("DELETE FROM purchase WHERE purchaser_id = :user_id"), {"user_id": user_id})
-            db.session.execute(text("DELETE FROM other_expenses WHERE user_id = :user_id"), {"user_id": user_id})
-            db.session.execute(text("DELETE FROM inventory WHERE added_by = :user_id"), {"user_id": user_id})
-            db.session.execute(text("DELETE FROM message WHERE sender_id = :user_id OR recipient_id = :user_id"), {"user_id": user_id})
+
+            # Helper function to delete from a table only if it exists
+            # This prevents errors when tables don't exist in production
+            def safe_delete(table_name, user_field="user_id"):
+                try:
+                    db.session.execute(
+                        text(f'DELETE FROM {table_name} WHERE {user_field} = :user_id'),
+                        {"user_id": user_id}
+                    )
+                except Exception as e:
+                    # Table might not exist or have different schema
+                    logger.warning(f"Could not delete from {table_name}: {e}")
+                    # Ignore errors for tables that might not exist
+                    pass
+
+            # Delete related records using raw SQL - with safe handling for optional tables
+            # Core tables that should always exist
+            try:
+                db.session.execute(text("DELETE FROM sale WHERE seller_id = :user_id"), {"user_id": user_id})
+                db.session.execute(text("DELETE FROM purchase WHERE purchaser_id = :user_id"), {"user_id": user_id})
+                db.session.execute(text("DELETE FROM other_expenses WHERE user_id = :user_id"), {"user_id": user_id})
+            except Exception as e:
+                logger.error(f"Error deleting from core tables: {e}")
+                raise
+
+            # Optional tables - might not exist in all environments
+            safe_delete("it_event")
+            safe_delete("assignment", "seller_id")
+            safe_delete("salary")
+            safe_delete("seller_fruit", "created_by")
+            safe_delete("stock_movement", "added_by")
+            safe_delete("inventory", "added_by")
+            safe_delete("message", "sender_id")
+            # Also delete messages where user is recipient
+            try:
+                db.session.execute(
+                    text("DELETE FROM message WHERE recipient_id = :user_id"),
+                    {"user_id": user_id}
+                )
+            except Exception:
+                pass
+
             # Delete the user
             db.session.execute(text("DELETE FROM \"user\" WHERE id = :user_id"), {"user_id": user_id})
             db.session.commit()
+            logger.info(f"User {user_name} (ID: {user_id}) deleted successfully")
             return make_response_data(message=f"User {user_name} deleted successfully.")
+
         except Exception as e:
             db.session.rollback()
+            logger.error(f"Error deleting user {user_id}: {e}")
             # If foreign key constraints prevent deletion, set user to inactive instead
-            db.session.execute(text("UPDATE \"user\" SET is_active = false WHERE id = :user_id"), {"user_id": user_id})
-            db.session.commit()
-            return make_response_data(
-                success=True,
-                message=f"User {user_name} has been deactivated (could not delete due to existing records).",
-                warning=True
-            )
+            try:
+                db.session.execute(
+                    text("UPDATE \"user\" SET is_active = false WHERE id = :user_id"),
+                    {"user_id": user_id}
+                )
+                db.session.commit()
+                return make_response_data(
+                    success=True,
+                    message=f"User {user_name} has been deactivated (could not delete due to existing records)."
+                )
+            except Exception as deactivate_error:
+                db.session.rollback()
+                logger.error(f"Error deactivating user {user_id}: {deactivate_error}")
+                return make_response_data(
+                    success=False,
+                    message=f"Error deleting user: {str(e)}. Also failed to deactivate: {str(deactivate_error)}",
+                    status_code=500
+                )
 
 class UserSalaryResource(Resource):
     @role_required('ceo')

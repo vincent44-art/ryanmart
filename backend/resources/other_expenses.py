@@ -14,6 +14,22 @@ from sqlalchemy import text
 import io
 import logging
 
+def safe_float(value, default=0.0):
+    """Safely convert a value to float, handling strings and None"""
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            # Extract numeric part from string
+            import re
+            match = re.search(r'(\d+(\.\d+)?)', value)
+            return float(match.group(1)) if match else default
+        except (ValueError, TypeError):
+            return default
+    return default
+
 parser = reqparse.RequestParser()
 parser.add_argument('expense_type', type=str, required=True)
 parser.add_argument('description', type=str, required=False)
