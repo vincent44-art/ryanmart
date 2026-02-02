@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { addOtherExpense } from '../api/otherExpenses';
 
 const OtherExpenseForm = ({ onExpenseAdded }) => {
   const [formData, setFormData] = useState({
@@ -22,64 +23,24 @@ const OtherExpenseForm = ({ onExpenseAdded }) => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/other_expenses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          expense_type: 'Other',
-          description: formData.description,
-          amount: parseFloat(formData.amount),
-          date: formData.date
-        })
+      const expenseData = {
+        expense_type: 'Other',
+        description: formData.description,
+        amount: parseFloat(formData.amount),
+        date: formData.date
+      };
+
+      const result = await addOtherExpense(expenseData);
+
+      // Reset form on success
+      setFormData({
+        description: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0]
       });
 
-      // Get raw response text for debugging
-      const text = await response.text();
-      console.log('Raw response:', text);
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-      // Check for empty response
-      if (!text || text.trim() === '') {
-        console.error('Empty response received from server');
-        throw new Error(`Server returned empty response (status: ${response.status}). Backend may have crashed or failed to return JSON.`);
-      }
-
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch (parseErr) {
-        // Check if it's an HTML error page (common for 500 errors)
-        if (text.includes('<!DOCTYPE') || text.includes('<html') || text.toLowerCase().includes('error')) {
-          throw new Error(`Server error (${response.status}): Backend returned an error page. Check server logs for details.`);
-        }
-        throw new Error(`Invalid JSON response: ${text.substring(0, 100)}...`);
-      }
-
-      // Additional validation: check if result has expected structure
-      if (!result || typeof result !== 'object') {
-        throw new Error(`Unexpected response format: expected object, got ${typeof result}`);
-      }
-
-      if (!response.ok) {
-        throw new Error(result.message || result.error || `Server error (${response.status})`);
-      }
-
-      if (result.success) {
-        setFormData({
-          description: '',
-          amount: '',
-          date: new Date().toISOString().split('T')[0]
-        });
-        if (onExpenseAdded) {
-          onExpenseAdded(result.data);
-        }
-      } else {
-        setError(result.message || 'Failed to add expense');
+      if (onExpenseAdded) {
+        onExpenseAdded(result);
       }
     } catch (err) {
       const errorMessage = err.message || 'Failed to add expense. Please try again.';

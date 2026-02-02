@@ -47,8 +47,8 @@ const Login = () => {
       <div className="card card-custom" style={{ maxWidth: '400px', width: '100%' }}>
         <div className="card-body p-4">
           <div className="text-center mb-4">
-            <h1 className="h3 mb-3 text-gradient">🍊Ryanmart</h1>
-            <p className="text-muted">Ryan martManagement System</p>
+            <h1 className="h3 mb-3 text-gradient">🍊RYANMART GROCERIES</h1>
+            <p className="text-muted">RYANMART GROCERIES</p>
           </div>
           
           {error && (
