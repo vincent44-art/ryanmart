@@ -128,21 +128,26 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
   }
 
   function downloadReceipt() {
-    // Async logo load
-    return fetch('/logo.jpeg')
-      .then(response => response.ok ? response.blob() : null)
-      .then(blob => {
-        if (blob) {
-          return new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-          });
-        }
-        return null;
-      })
-      .then(logoBase64 => {
-        let receiptHTML = `
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      const day = d.getDate().toString().padStart(2, '0');
+      const month = d.toLocaleString('en-US', { month: 'short' });
+      const year = d.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+
+    const formattedDate = formatDate(date);
+    const formattedDueDate = dueDate ? formatDate(dueDate) : formatDate(date);
+    const status = getBalance() <= 0 ? 'PAID' : 'UNPAID';
+    const balance = getBalance();
+    const paidAmount = expectedAmount ? parseFloat(expectedAmount) : getFinalTotal() - balance;
+    const taxAmount = getTaxAmount();
+    const discountAmount = parseFloat(discount) || 0;
+    const finalTotal = getFinalTotal();
+    const subtotal = getSubtotal();
+
+    let receiptHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -150,36 +155,68 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice ${invoiceNum}</title>
     <style>
-        body { font-family: monospace; text-align: center; border: 2px solid #000; padding: 20px; }
-        .logo { max-width: 100px; margin: 10px; }
-        .header { font-size: 18px; font-weight: bold; }
-        .details { font-size: 14px; }
-        table { margin: 20px auto; border-collapse: collapse; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-        .total { font-weight: bold; }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            font-size: 12px;
+        }
+        .header { text-align: center; margin-bottom: 10px; }
+        .company-name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .title { font-size: 18px; font-weight: bold; margin: 10px 0; }
+        .info { text-align: center; line-height: 1.4; }
+        .divider { border-top: 1px dashed #000; margin: 10px 0; }
+        .divider-solid { border-top: 1px solid #000; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .col-item { text-align: left; }
+        .col-qty { text-align: center; }
+        .col-price { text-align: right; }
+        .col-total { text-align: right; }
+        .totals { margin-top: 10px; }
+        .total-row { display: flex; justify-content: space-between; }
+        .grand-total { font-weight: bold; font-size: 14px; }
+        .balance { font-weight: bold; }
+        .status { font-weight: bold; text-align: center; margin: 10px 0; }
+        .footer { text-align: center; margin-top: 15px; font-size: 10px; }
+        .signature { margin-top: 20px; }
+        .qr-section { text-align: center; margin: 10px 0; }
     </style>
 </head>
 <body>
-    <div class="header">Invoice</div>
-    <div class="header">${seller.name || 'Business Name'}</div>
-    ${logoBase64 ? `<img src="${logoBase64}" alt="Logo" class="logo">` : ''}
-    <div class="details">${seller.address || 'N/A'} | ${seller.phone || 'N/A'}</div>
-    <div class="details">Tax Registration / PIN: ${seller.taxId || 'N/A'}</div>
-    <div class="details">Invoice #: ${invoiceNum}</div>
-    <div class="details">Date Issued: ${date}</div>
-    <div class="details">Due Date: ${dueDate || 'N/A'}</div>
-    <div class="details">Payment Method: ${payment}</div>
-    <div class="details">Payment Details: ${paymentDetails || 'N/A'}</div>
-    <div class="details">Payment Terms: ${paymentTerms || 'N/A'}</div>
-    <div class="details">Buyer: ${buyer.name || 'N/A'}${buyer.contact ? ` | ${buyer.contact}` : ''}${buyer.address ? ` | ${buyer.address}` : ''}</div>
+    <div class="header">
+        <div class="company-name">${seller.name || 'RYANMART GROCERIES'}</div>
+        <div>Nairobi, Kenya</div>
+        <div>Tel: ${seller.phone || '0724327921'}</div>
+        <div>VAT PIN: ${seller.taxId || 'XXXXXXXX'}</div>
+    </div>
+    
+    <div class="title">INVOICE</div>
+    
+    <div class="info">
+        <div>Invoice No: ${invoiceNum}</div>
+        <div>Date: ${formattedDate}</div>
+        <div>Due: ${formattedDueDate}</div>
+        <div>Payment: ${payment}</div>
+    </div>
+    
+    <div class="divider-solid"></div>
+    
+    <div>
+        <div><strong>Customer:</strong></div>
+        <div>${buyer.name || 'John Mwangi'}</div>
+        <div>${buyer.contact || '07XXXXXXXX'}</div>
+    </div>
+    
+    <div class="divider"></div>
+    
     <table>
         <thead>
             <tr>
-                <th>Item / Service</th>
-                <th>Description</th>
-                <th>Qty</th>
-                <th>Unit Price</th>
-                <th>Total</th>
+                <th class="col-item">ITEM</th>
+                <th class="col-qty">QTY</th>
+                <th class="col-price">PRICE</th>
+                <th class="col-total">TOTAL</th>
             </tr>
         </thead>
         <tbody>
@@ -188,11 +225,10 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
     items.filter(i => i.fruit && i.quantity && i.unitPrice).forEach(i => {
       receiptHTML += `
             <tr>
-                <td>${i.fruit}</td>
-                <td>${i.description || '-'}</td>
-                <td>${i.quantity}</td>
-                <td>${parseFloat(i.unitPrice).toLocaleString()}</td>
-                <td>${parseFloat(i.total).toLocaleString()}</td>
+                <td class="col-item">${i.fruit}</td>
+                <td class="col-qty">${i.quantity}</td>
+                <td class="col-price">${parseFloat(i.unitPrice).toFixed(2)}</td>
+                <td class="col-total">${parseFloat(i.total).toFixed(2)}</td>
             </tr>
 `;
     });
@@ -200,106 +236,66 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
     receiptHTML += `
         </tbody>
     </table>
-    <div>Subtotal: KES ${getSubtotal().toLocaleString()}</div>
-    ${tax ? `<div>Tax (VAT ${tax}%): KES ${getTaxAmount().toLocaleString()}</div>` : ''}
-    ${discount ? `<div>Discount: KES ${parseFloat(discount).toLocaleString()}</div>` : ''}
-    <div class="total">Grand Total: KES ${getFinalTotal().toLocaleString()}</div>
-    ${expectedAmount ? `<div>Expected Amount: KES ${parseFloat(expectedAmount).toLocaleString()}</div>` : ''}
-    ${getBalance() !== 0 ? `<div>Balance: KES ${getBalance().toLocaleString()}</div>` : '<div>Paid in Full</div>'}
-    <div class="header">Thank You for Your Business!</div>
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${invoiceNum}" alt="QR Code" style="margin: 10px;">
-    <div>Payment Terms: ${paymentTerms || 'Due within 14 days'}.</div>
-    <div>Signature: ____________________</div>
+    
+    <div class="divider"></div>
+    
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal:</span>
+            <span>${subtotal.toFixed(2)}</span>
+        </div>
+        <div class="total-row">
+            <span>VAT (${tax || 16}%):</span>
+            <span>${taxAmount.toFixed(2)}</span>
+        </div>
+        <div class="total-row">
+            <span>Discount:</span>
+            <span>${discountAmount.toFixed(2)}</span>
+        </div>
+        <div class="divider-solid"></div>
+        <div class="total-row grand-total">
+            <span>TOTAL:</span>
+            <span>${finalTotal.toFixed(2)}</span>
+        </div>
+        <div class="total-row">
+            <span>Paid:</span>
+            <span>${paidAmount.toFixed(2)}</span>
+        </div>
+        <div class="total-row balance">
+            <span>Balance:</span>
+            <span>${balance.toFixed(2)}</span>
+        </div>
+    </div>
+    
+    <div class="status">Status: ${status}</div>
+    
+    <div class="qr-section">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${invoiceNum}" alt="QR Code" />
+    </div>
+    
+    <div class="info">
+        <div>Payment Terms: ${paymentTerms || 'Pay on receipt'}</div>
+        <div class="signature">Authorized By: ________</div>
+    </div>
+    
+    <div class="footer">
+        <div>Thank you for shopping with us!</div>
+        <div>Powered by RyanMart POS</div>
+    </div>
 </body>
 </html>
 `;
 
-        // Create blob and download
-        const blob = new Blob([receiptHTML], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Invoice_${invoiceNum}.html`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      })
-      .catch(() => {
-        // Fallback without logo
-        const receiptHTML = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice ${invoiceNum}</title>
-    <style>
-        body { font-family: monospace; text-align: center; border: 2px solid #000; padding: 20px; }
-        .header { font-size: 18px; font-weight: bold; }
-        .details { font-size: 14px; }
-        table { margin: 20px auto; border-collapse: collapse; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-        .total { font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="header">Invoice</div>
-    <div class="header">${seller.name || 'Business Name'}</div>
-    <div class="details">${seller.address || 'N/A'} | ${seller.phone || 'N/A'}</div>
-    <div class="details">Tax Registration / PIN: ${seller.taxId || 'N/A'}</div>
-    <div class="details">Invoice #: ${invoiceNum}</div>
-    <div class="details">Date Issued: ${date}</div>
-    <div class="details">Due Date: ${dueDate || 'N/A'}</div>
-    <div class="details">Payment Method: ${payment}</div>
-    <div class="details">Payment Details: ${paymentDetails || 'N/A'}</div>
-    <div class="details">Payment Terms: ${paymentTerms || 'N/A'}</div>
-    <div class="details">Buyer: ${buyer.name || 'N/A'}${buyer.contact ? ` | ${buyer.contact}` : ''}${buyer.address ? ` | ${buyer.address}` : ''}</div>
-    <div>Subtotal: KES ${getSubtotal().toLocaleString()}</div>
-    <thead>
-        <tr>
-            <th>Item / Service</th>
-            <th>Description</th>
-            <th>Qty</th>
-            <th>Unit Price</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        ${items.filter(i => i.fruit && i.quantity && i.unitPrice).map(i => `
-            <tr>
-                <td>${i.fruit}</td>
-                <td>${i.description || '-'}</td>
-                <td>${i.quantity}</td>
-                <td>${parseFloat(i.unitPrice).toLocaleString()}</td>
-                <td>${parseFloat(i.total).toLocaleString()}</td>
-            </tr>
-`).join('')}
-        </tbody>
-    </table>
-    ${tax ? `<div>Tax (VAT ${tax}%): KES ${getTaxAmount().toLocaleString()}</div>` : ''}
-    ${discount ? `<div>Discount: KES ${parseFloat(discount).toLocaleString()}</div>` : ''}
-    <div class="total">Grand Total: KES ${getFinalTotal().toLocaleString()}</div>
-    ${expectedAmount ? `<div>Expected Amount: KES ${parseFloat(expectedAmount).toLocaleString()}</div>` : ''}
-    ${getBalance() !== 0 ? `<div>Balance: KES ${getBalance().toLocaleString()}</div>` : '<div>Paid in Full</div>'}
-    <div class="header">Thank You for Your Business!</div>
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${invoiceNum}" alt="QR Code" style="margin: 10px;">
-    <div>Refund Policy: Returns accepted within 7 days with receipt.</div>
-    <div>Signature: ____________________</div>
-</body>
-</html>
-`;
-
-        const blob = new Blob([receiptHTML], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-  a.download = `Invoice_${invoiceNum}.html`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      });
+    // Create blob and download
+    const blob = new Blob([receiptHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Invoice_${invoiceNum}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
 
@@ -430,65 +426,88 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
         </form>
       </div>
       {submittedData && (
-        <div className="card m-3 shadow border border-secondary receipt-preview" style={{ maxWidth: 520, margin: '32px auto', fontFamily: 'monospace' }}>
+        <div className="card m-3 shadow border border-secondary" style={{ maxWidth: 420, margin: '20px auto', fontFamily: "'Courier New', Courier, monospace", fontSize: '11px' }}>
           <div className="card-body">
             <div className="text-center mb-2">
-              <div className="fw-bold" style={{ fontSize: 18 }}>Invoice</div>
-              <div className="fw-bold" style={{ fontSize: 18 }}>{submittedData.seller.name || 'Business Name'}</div>
-              <div style={{ fontSize: 12 }}>{submittedData.seller.address} | {submittedData.seller.phone}</div>
-              <div style={{ fontSize: 12 }}>Tax Registration / PIN: {submittedData.seller.taxId || 'N/A'}</div>
-              <div style={{ fontSize: 12 }}>Invoice #: {submittedData.invoiceNum}</div>
-              <div style={{ fontSize: 12 }}>Date Issued: {submittedData.date}</div>
-              <div style={{ fontSize: 12 }}>Due Date: {submittedData.dueDate || 'N/A'}</div>
-              <div style={{ fontSize: 12 }}>Payment Method: {submittedData.payment}</div>
-              <div style={{ fontSize: 12 }}>Payment Details: {submittedData.paymentDetails || 'N/A'}</div>
-              <div style={{ fontSize: 12 }}>Payment Terms: {submittedData.paymentTerms || 'N/A'}</div>
-              <div style={{ fontSize: 12 }}>Customer Name: {submittedData.customerName || 'N/A'}</div>
+              <div className="fw-bold text-uppercase" style={{ fontSize: 14 }}>{submittedData.seller.name || 'RYANMART GROCERIES'}</div>
+              <div style={{ fontSize: 10 }}>Nairobi, Kenya</div>
+              <div style={{ fontSize: 10 }}>Tel: {submittedData.seller.phone || '0724327921'}</div>
+              <div style={{ fontSize: 10 }}>VAT PIN: {submittedData.seller.taxId || 'XXXXXXXX'}</div>
             </div>
-            <hr />
-            <div className="mb-2">
-              <b>Buyer:</b> {submittedData.buyer.name} {submittedData.buyer.contact && (
-                <span className="ms-2">| {submittedData.buyer.contact}</span>)} {submittedData.buyer.address && (
-                <span className="ms-2">| {submittedData.buyer.address}</span>)}
+            
+            <div className="text-center fw-bold" style={{ fontSize: 16, margin: '10px 0' }}>INVOICE</div>
+            
+            <div className="text-center" style={{ fontSize: 10, lineHeight: 1.5 }}>
+              <div>Invoice No: {submittedData.invoiceNum}</div>
+              <div>Date: {(() => { const d = new Date(submittedData.date); return `${d.getDate().toString().padStart(2, '0')}-${d.toLocaleString('en-US', { month: 'short' })}-${d.getFullYear()}`; })()}</div>
+              <div>Due: {submittedData.dueDate ? (() => { const d = new Date(submittedData.dueDate); return `${d.getDate().toString().padStart(2, '0')}-${d.toLocaleString('en-US', { month: 'short' })}-${d.getFullYear()}`; })() : (() => { const d = new Date(submittedData.date); return `${d.getDate().toString().padStart(2, '0')}-${d.toLocaleString('en-US', { month: 'short' })}-${d.getFullYear()}`; })()}</div>
+              <div>Payment: {submittedData.payment}</div>
             </div>
-            <table className="table table-sm table-borderless mb-0">
+            
+            <hr style={{ borderTop: '1px solid #000', margin: '8px 0' }} />
+            
+            <div style={{ fontSize: 10 }}>
+              <div><strong>Customer:</strong></div>
+              <div>{submittedData.buyer.name || 'John Mwangi'}</div>
+              <div>{submittedData.buyer.contact || '07XXXXXXXX'}</div>
+            </div>
+            
+            <hr style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+            
+            <table className="table table-sm table-borderless mb-0" style={{ fontSize: 10 }}>
               <thead>
                 <tr>
-                  <th>Item / Service</th>
-                  <th>Description</th>
-                  <th>Qty</th>
-                  <th>Unit Price</th>
-                  <th>Total</th>
+                  <th style={{ textAlign: 'left', padding: '2px' }}>ITEM</th>
+                  <th style={{ textAlign: 'center', padding: '2px' }}>QTY</th>
+                  <th style={{ textAlign: 'right', padding: '2px' }}>PRICE</th>
+                  <th style={{ textAlign: 'right', padding: '2px' }}>TOTAL</th>
                 </tr>
               </thead>
               <tbody>
                 {submittedData.items.filter(i => i.fruit && i.quantity && i.unitPrice).map((i, idx) => (
                   <tr key={idx}>
-                    <td>{i.fruit}</td>
-                    <td>{i.description || '-'}</td>
-                    <td>{i.quantity}</td>
-                    <td>{parseFloat(i.unitPrice).toLocaleString()}</td>
-                    <td>{parseFloat(i.total).toLocaleString()}</td>
+                    <td style={{ textAlign: 'left', padding: '2px' }}>{i.fruit}</td>
+                    <td style={{ textAlign: 'center', padding: '2px' }}>{i.quantity}</td>
+                    <td style={{ textAlign: 'right', padding: '2px' }}>{parseFloat(i.unitPrice).toFixed(2)}</td>
+                    <td style={{ textAlign: 'right', padding: '2px' }}>{parseFloat(i.total).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <hr className="mt-1 mb-1" />
-            <div className="d-flex justify-content-between"><span>Subtotal:</span><span>KES {submittedData.subtotal.toLocaleString()}</span></div>
-            {submittedData.taxAmount > 0 && <div className="d-flex justify-content-between"><span>Tax (VAT {submittedData.tax}%):</span><span>KES {submittedData.taxAmount.toLocaleString()}</span></div>}
-            {submittedData.discount > 0 && <div className="d-flex justify-content-between"><span>Discount:</span><span>KES {parseFloat(submittedData.discount).toLocaleString()}</span></div>}
-            <div className="d-flex justify-content-between fw-bold"><span>Grand Total:</span><span>KES {submittedData.finalTotal.toLocaleString()}</span></div>
-            {submittedData.expectedAmount && <div className="d-flex justify-content-between"><span>Expected Amount:</span><span>KES {parseFloat(submittedData.expectedAmount).toLocaleString()}</span></div>}
-            {submittedData.balance !== 0 && <div className="d-flex justify-content-between"><span>Balance:</span><span>KES {submittedData.balance.toLocaleString()}</span></div>}
-            <div className="text-center text-success fw-bold mt-2" style={{ fontSize: 16 }}>
-              Thank You for Your Business!
+            
+            <hr style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
+            
+            <div style={{ fontSize: 10 }}>
+              <div className="d-flex justify-content-between"><span>Subtotal:</span><span>{submittedData.subtotal.toFixed(2)}</span></div>
+              <div className="d-flex justify-content-between"><span>VAT ({submittedData.tax || 16}%):</span><span>{submittedData.taxAmount.toFixed(2)}</span></div>
+              <div className="d-flex justify-content-between"><span>Discount:</span><span>{parseFloat(submittedData.discount || 0).toFixed(2)}</span></div>
+              <hr style={{ borderTop: '1px solid #000', margin: '8px 0' }} />
+              <div className="d-flex justify-content-between fw-bold" style={{ fontSize: 12 }}><span>TOTAL:</span><span>{submittedData.finalTotal.toFixed(2)}</span></div>
+              <div className="d-flex justify-content-between"><span>Paid:</span><span>{submittedData.expectedAmount ? parseFloat(submittedData.expectedAmount).toFixed(2) : (submittedData.finalTotal - submittedData.balance).toFixed(2)}</span></div>
+              <div className="d-flex justify-content-between fw-bold"><span>Balance:</span><span>{submittedData.balance.toFixed(2)}</span></div>
             </div>
-            <div className="text-center mt-2">
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(window.location.origin + '/invoice/' + submittedData.invoiceNum)}`} alt="QR Code" style={{ margin: '10px' }} />
+            
+            <div className="text-center fw-bold mt-2" style={{ fontSize: 11 }}>
+              Status: {submittedData.balance <= 0 ? 'PAID' : 'UNPAID'}
             </div>
+            
             <div className="text-center mt-2">
-              <button className="btn btn-outline-primary" onClick={downloadReceipt}>Download Invoice</button>
-              <button className="btn btn-outline-success ms-2" onClick={handleSaveToTable}>Save to Table</button>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${submittedData.invoiceNum}`} alt="QR Code" />
+            </div>
+            
+            <div className="text-center mt-2" style={{ fontSize: 10 }}>
+              <div>Payment Terms: {submittedData.paymentTerms || 'Pay on receipt'}</div>
+              <div style={{ marginTop: '15px' }}>Authorized By: ________</div>
+            </div>
+            
+            <div className="text-center mt-3" style={{ fontSize: 9 }}>
+              <div>Thank you for shopping with us!</div>
+              <div>Powered by RyanMart POS</div>
+            </div>
+            
+            <div className="text-center mt-3">
+              <button className="btn btn-outline-primary btn-sm me-2" onClick={downloadReceipt}>Download Invoice</button>
+              <button className="btn btn-outline-success btn-sm" onClick={handleSaveToTable}>Save to Table</button>
             </div>
             {showStockSelection && (
               <div className="mt-3 p-3 border rounded bg-light">
