@@ -394,7 +394,7 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
               <tr>
                 <th>#</th>
                 <th>Item / Service</th>
-                <th>Description</th>
+                <th className="text-muted">Description</th>
                 <th>Quantity</th>
                 <th>Unit Price (KES)</th>
                 <th>Total</th>
@@ -406,7 +406,7 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
                 <tr key={idx}>
                   <td>{idx + 1}</td>
                   <td><input className="form-control" value={item.fruit} onChange={e => handleItemChange(idx, 'fruit', e.target.value)} required /></td>
-                  <td><input className="form-control" value={item.description} onChange={e => handleItemChange(idx, 'description', e.target.value)} /></td>
+                  <td className="text-muted"><input className="form-control" value={item.description} onChange={e => handleItemChange(idx, 'description', e.target.value)} disabled /></td>
                   <td><input className="form-control" type="number" min="0" value={item.quantity} onChange={e => handleItemChange(idx, 'quantity', e.target.value)} required /></td>
                   <td><input className="form-control" type="number" min="0" value={item.unitPrice} onChange={e => handleItemChange(idx, 'unitPrice', e.target.value)} required /></td>
                   <td>{parseFloat(item.total || 0).toLocaleString()}</td>
