@@ -88,31 +88,51 @@ class UserResource(Resource):
             if user:
                 db.session.expunge(user)
 
-            # Helper function to delete from a table only if it exists
-            # This prevents errors when tables don't exist in production
+            # Helper function to check if a table exists and delete records
+            # Uses a separate transaction for each table to prevent cascading transaction abort
             def safe_delete(table_name, user_field="user_id"):
                 try:
-                    db.session.execute(
-                        text(f'DELETE FROM {table_name} WHERE {user_field} = :user_id'),
-                        {"user_id": user_id}
-                    )
+                    # First check if table exists
+                    result = db.session.execute(
+                        text("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = :table_name)"),
+                        {"table_name": table_name}
+                    ).scalar()
+                    if result:
+                        db.session.execute(
+                            text(f'DELETE FROM {table_name} WHERE {user_field} = :user_id'),
+                            {"user_id": user_id}
+                        )
+                        # Commit after each table deletion to avoid transaction abort propagation
+                        db.session.commit()
                 except Exception as e:
-                    # Table might not exist or have different schema
+                    # Rollback on error and start fresh transaction for next table
+                    try:
+                        db.session.rollback()
+                    except:
+                        pass
                     logger.warning(f"Could not delete from {table_name}: {e}")
-                    # Ignore errors for tables that might not exist
-                    pass
+                    # Ignore errors for tables that might not exist or have issues
+                finally:
+                    # Ensure we're in a clean transaction state for next operation
+                    try:
+                        if db.session.transaction:
+                            db.session.rollback()
+                    except:
+                        pass
 
             # Delete related records using raw SQL - with safe handling for optional tables
-            # Core tables that should always exist
+            # Core tables that should always exist - handle together
             try:
                 db.session.execute(text("DELETE FROM sale WHERE seller_id = :user_id"), {"user_id": user_id})
                 db.session.execute(text("DELETE FROM purchase WHERE purchaser_id = :user_id"), {"user_id": user_id})
                 db.session.execute(text("DELETE FROM other_expenses WHERE user_id = :user_id"), {"user_id": user_id})
+                db.session.execute(text("DELETE FROM message WHERE recipient_id = :user_id"), {"user_id": user_id})
             except Exception as e:
                 logger.error(f"Error deleting from core tables: {e}")
                 raise
 
             # Optional tables - might not exist in all environments
+            # Each safe_delete call handles its own transaction/rollback
             safe_delete("it_event")
             safe_delete("assignment", "seller_id")
             safe_delete("salary")
@@ -120,13 +140,11 @@ class UserResource(Resource):
             safe_delete("stock_movement", "added_by")
             safe_delete("inventory", "added_by")
             safe_delete("message", "sender_id")
-            # Also delete messages where user is recipient
+
+            # Start a fresh transaction for the main user deletion
             try:
-                db.session.execute(
-                    text("DELETE FROM message WHERE recipient_id = :user_id"),
-                    {"user_id": user_id}
-                )
-            except Exception:
+                db.session.rollback()  # Clean up any pending transaction
+            except:
                 pass
 
             # Delete the user
