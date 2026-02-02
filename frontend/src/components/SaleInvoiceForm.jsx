@@ -22,14 +22,14 @@ const paymentMethods = ['Cash', 'M-Pesa', 'Bank Transfer', 'Cheque', 'Other'];
 
 export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
   const today = new Date().toISOString().slice(0, 10);
-  const [seller, setSeller] = useState({ name: 'Ryanmart Company', address: 'Ryanmart Company', phone: '', taxId: '' });
+  const [seller, setSeller] = useState({ name: 'RYANMART GROCERIES', address: '', phone: '0724327921', taxId: '' });
   const [buyer, setBuyer] = useState({ name: '', contact: '', address: '' });
   const [invoiceNum, setInvoiceNum] = useState(generateReceiptNumber());
   const [date, setDate] = useState(today);
   const [dueDate, setDueDate] = useState('');
   const [payment, setPayment] = useState(paymentMethods[0]);
   const [paymentDetails, setPaymentDetails] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('Due within 14 days');
+  const [paymentTerms, setPaymentTerms] = useState('Due within 7 days');
   const [items, setItems] = useState([{ ...initialItem }]);
   const [discount, setDiscount] = useState('');
   const [tax, setTax] = useState('');
@@ -150,7 +150,7 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice ${invoiceNum}</title>
     <style>
-        body { font-family: monospace; text-align: center; }
+        body { font-family: monospace; text-align: center; border: 2px solid #000; padding: 20px; }
         .logo { max-width: 100px; margin: 10px; }
         .header { font-size: 18px; font-weight: bold; }
         .details { font-size: 14px; }
@@ -235,7 +235,7 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice ${invoiceNum}</title>
     <style>
-        body { font-family: monospace; text-align: center; }
+        body { font-family: monospace; text-align: center; border: 2px solid #000; padding: 20px; }
         .header { font-size: 18px; font-weight: bold; }
         .details { font-size: 14px; }
         table { margin: 20px auto; border-collapse: collapse; }

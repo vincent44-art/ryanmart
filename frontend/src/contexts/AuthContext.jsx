@@ -148,14 +148,33 @@ const verifyAuth = async () => {
         throw new Error("You can't delete yourself");
       }
 
-  await api.delete(`/api/users/${userId}`);
+      const response = await api.delete(`/api/users/${userId}`);
       setUsers(prev => prev.filter(u => u.id !== userId));
       toast.success('User deleted successfully');
       return true;
     } catch (error) {
       console.error('Error deleting user:', error);
-      const errorMsg = error.response?.data?.message || 'Failed to delete user';
-      toast.error(errorMsg);
+      // Extract error message from response or fallback to a generic message
+      let errorMsg = 'Failed to delete user';
+      
+      if (error.response?.data?.message) {
+        // Try to get message from API response
+        errorMsg = error.response.data.message;
+      } else if (error.response?.data?.warning) {
+        // Handle warning responses (like deactivation fallback)
+        errorMsg = error.response.data.message || 'User has been deactivated';
+        toast.success(errorMsg);
+        // Refresh users list to show the deactivated user
+        const updatedUsers = await getAllUsers();
+        setUsers(updatedUsers);
+        return true;
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      
+      if (!error.response?.data?.warning) {
+        toast.error(errorMsg);
+      }
       return false;
     }
   };
