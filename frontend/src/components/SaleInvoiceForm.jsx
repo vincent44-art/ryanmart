@@ -350,7 +350,28 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
             </div>
           <div className="row mb-2">
             <div className="col-md-4"><label className="form-label">Buyer Name</label>
-              <input className="form-control" value={buyer.name} onChange={e => setBuyer({ ...buyer, name: e.target.value })} /></div>
+              <select 
+                className="form-select" 
+                value={buyer.name} 
+                onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
+              >
+                <option value="">Select buyer...</option>
+                <option value="Beyond">Beyond</option>
+                <option value="Carrefour Supermarket">Carrefour Supermarket</option>
+                <option value="Chebet">Chebet</option>
+                <option value="Cilantro">Cilantro</option>
+                <option value="Cornershop">Cornershop</option>
+                <option value="Edith">Edith</option>
+                <option value="Fresh and Juice">Fresh and Juice</option>
+                <option value="Fruity Fruit">Fruity Fruit</option>
+                <option value="Jam">Jam</option>
+                <option value="Jarine Investment">Jarine Investment</option>
+                <option value="Johanna">Johanna</option>
+                <option value="Kalimoni">Kalimoni</option>
+                <option value="Parakash Juice">Parakash Juice</option>
+                <option value="Zucchini supermarket">Zucchini supermarket</option>
+              </select>
+            </div>
             <div className="col-md-4"><label className="form-label">Buyer Contact</label>
               <input className="form-control" value={buyer.contact} onChange={e => setBuyer({ ...buyer, contact: e.target.value })} /></div>
             <div className="col-md-4"><label className="form-label">Buyer Address</label>
@@ -505,30 +526,28 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
               <div className="mt-3 p-3 border rounded bg-light">
                 {/* Stock selection muted - will use default "stock 1" */}
                 <h6>Customer Name:</h6>
-                <input
-                  type="text"
-                  className="form-control mb-2"
+                <select
+                  className="form-select mb-2"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  list="customer-options"
-                  placeholder="Enter or select customer name"
-                />
-                <datalist id="customer-options">
-                  <option value="Beyond" />
-                  <option value="Carrefour Supermarket" />
-                  <option value="Chebet" />
-                  <option value="Cilantro" />
-                  <option value="Cornershop" />
-                  <option value="Edith" />
-                  <option value="Fresh and Juice" />
-                  <option value="Fruity Fruit" />
-                  <option value="Jam" />
-                  <option value="Jarine Investment" />
-                  <option value="Johanna" />
-                  <option value="Kalimoni" />
-                  <option value="Parakash Juice" />
-                  <option value="Zucchini supermarket" />
-                </datalist>
+                >
+                  <option value="">Select customer...</option>
+                  {buyer.name && <option value={buyer.name}>{buyer.name}</option>}
+                  <option value="Beyond">Beyond</option>
+                  <option value="Carrefour Supermarket">Carrefour Supermarket</option>
+                  <option value="Chebet">Chebet</option>
+                  <option value="Cilantro">Cilantro</option>
+                  <option value="Cornershop">Cornershop</option>
+                  <option value="Edith">Edith</option>
+                  <option value="Fresh and Juice">Fresh and Juice</option>
+                  <option value="Fruity Fruit">Fruity Fruit</option>
+                  <option value="Jam">Jam</option>
+                  <option value="Jarine Investment">Jarine Investment</option>
+                  <option value="Johanna">Johanna</option>
+                  <option value="Kalimoni">Kalimoni</option>
+                  <option value="Parakash Juice">Parakash Juice</option>
+                  <option value="Zucchini supermarket">Zucchini supermarket</option>
+                </select>
                 <button
                   className="btn btn-primary btn-sm me-2"
                   onClick={handleSaveToTable}
