@@ -41,7 +41,7 @@ const SalaryFormModal = ({ show, onClose, onSave, users }) => {
           <FloatingLabel controlId="userSelect" label="Employee" className="mb-3">
             <Form.Select name="user_id" value={form.user_id} onChange={handleChange} required>
               <option value="">Select Employee</option>
-              {Array.isArray(users) && users.map(u => (
+              {Array.isArray(users) && users.filter(u => u.role !== 'ceo' && u.is_active).map(u => (
                 <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
               ))}
             </Form.Select>
