@@ -36,7 +36,7 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
   const [expectedAmount, setExpectedAmount] = useState('');
   const [submittedData, setSubmittedData] = useState(null);
   const [stockRecords, setStockRecords] = useState([]);
-  const [selectedStockName, setSelectedStockName] = useState('');
+  const [selectedStockName, setSelectedStockName] = useState('stock 1');
   const [showStockSelection, setShowStockSelection] = useState(false);
   const [customerName, setCustomerName] = useState('');
 
@@ -299,13 +299,8 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
   }
 
 
-  // Save to sales table only after stock name is selected
+  // Save to sales table (stock name is auto-selected for now)
   const handleSaveToTable = async () => {
-    if (!selectedStockName) {
-      alert('Please select a stock name before saving to table.');
-      setShowStockSelection(true);
-      return;
-    }
     if (!customerName) {
       alert('Please enter a customer name.');
       return;
@@ -327,7 +322,6 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
       }
       alert('Items added to sales table successfully!');
       setShowStockSelection(false);
-      setSelectedStockName('');
       setCustomerName('');
       // Call parent callback to refresh table
       if (typeof onSellerFruitsAdded === 'function') {
@@ -509,58 +503,47 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
             </div>
             {showStockSelection && (
               <div className="mt-3 p-3 border rounded bg-light">
-                <h6>Select Stock Name:</h6>
-                <select
-                  className="form-select mb-2"
-                  value={selectedStockName}
-                  onChange={(e) => setSelectedStockName(e.target.value)}
+                {/* Stock selection muted - will use default "stock 1" */}
+                <h6>Customer Name:</h6>
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  list="customer-options"
+                  placeholder="Enter or select customer name"
+                />
+                <datalist id="customer-options">
+                  <option value="Beyond" />
+                  <option value="Carrefour Supermarket" />
+                  <option value="Chebet" />
+                  <option value="Cilantro" />
+                  <option value="Cornershop" />
+                  <option value="Edith" />
+                  <option value="Fresh and Juice" />
+                  <option value="Fruity Fruit" />
+                  <option value="Jam" />
+                  <option value="Jarine Investment" />
+                  <option value="Johanna" />
+                  <option value="Kalimoni" />
+                  <option value="Parakash Juice" />
+                  <option value="Zucchini supermarket" />
+                </datalist>
+                <button
+                  className="btn btn-primary btn-sm me-2"
+                  onClick={handleSaveToTable}
+                  disabled={!customerName}
                 >
-                  <option value="">Choose a stock name...</option>
-                  {stockRecords.map((stock) => (
-          <option key={stock.id} value={stock.stockName || stock.fruitType}>
-            {stock.stockName || stock.fruitType}
-          </option>
-        ))}
-      </select>
-      <input
-        type="text"
-        className="form-control mb-2"
-        value={customerName}
-        onChange={(e) => setCustomerName(e.target.value)}
-        list="customer-options"
-        placeholder="Enter or select customer name"
-      />
-      <datalist id="customer-options">
-        <option value="Beyond" />
-        <option value="Carrefour Supermarket" />
-        <option value="Chebet" />
-        <option value="Cilantro" />
-        <option value="Cornershop" />
-        <option value="Edith" />
-        <option value="Fresh and Juice" />
-        <option value="Fruity Fruit" />
-        <option value="Jam" />
-        <option value="Jarine Investment" />
-        <option value="Johanna" />
-        <option value="Kalimoni" />
-        <option value="Parakash Juice" />
-        <option value="Zucchini supermarket" />
-      </datalist>
-      <button
-        className="btn btn-primary btn-sm me-2"
-        onClick={handleSaveToTable}
-        disabled={!selectedStockName || !customerName}
-      >
-        Confirm Save to Table
-      </button>
-      <button
-        className="btn btn-secondary btn-sm"
-        onClick={() => setShowStockSelection(false)}
-      >
-        Cancel
-      </button>
-    </div>
-  )}
+                  Confirm Save to Table
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setShowStockSelection(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
