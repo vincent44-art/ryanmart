@@ -243,18 +243,23 @@ class OtherExpensesPDFResource(Resource):
         except ValueError:
             return make_response_data(success=False, message="Invalid date format. Use YYYY-MM-DD.", status_code=400)
 
-        expenses = OtherExpense.query.filter(OtherExpense.date == report_date).all()
-        expenses_data = [e.to_dict() for e in expenses]
+        try:
+            expenses = OtherExpense.query.filter(OtherExpense.date == report_date).all()
+            expenses_data = [e.to_dict() for e in expenses]
 
-        pdf_bytes = generate_other_expenses_pdf(expenses_data, date_param)
+            pdf_bytes = generate_other_expenses_pdf(expenses_data, date_param)
 
-        from io import BytesIO
-        pdf_buffer = BytesIO(pdf_bytes)
-        pdf_buffer.seek(0)
+            pdf_buffer = io.BytesIO(pdf_bytes)
+            pdf_buffer.seek(0)
 
-        return send_file(
-            pdf_buffer,
-            as_attachment=True,
-            download_name=f"other_expenses_{date_param}.pdf",
-            mimetype='application/pdf'
-        )
+            return send_file(
+                pdf_buffer,
+                as_attachment=True,
+                download_name=f"other_expenses_{date_param}.pdf",
+                mimetype='application/pdf'
+            )
+        except Exception as e:
+            logger = logging.getLogger('other_expenses')
+            logger.error(f"Error generating other expenses PDF: {str(e)}", exc_info=True)
+            # Return error as JSON since this is a data endpoint
+            return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)

@@ -245,12 +245,13 @@ def create_app(config_class=Config):
     from resources.receipts import ReceiptResource
     from resources.seller_fruits import SellerFruitListResource, SellerFruitResource
     from resources.seller_fruits_bulk import SellerFruitBulkResource
-    from resources.stock_tracking import (
-        StockTrackingAggregatedResource, StockTrackingListResource, 
-        ClearStockTrackingResource, StockTrackingPDFResource, 
-        StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource, 
-        StockTrackingCombinedPDFResource
-    )
+from resources.stock_tracking import (
+    StockTrackingAggregatedResource, StockTrackingListResource,
+    ClearStockTrackingResource, StockTrackingPDFResource,
+    StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource,
+    StockTrackingCombinedPDFResource
+)
+from utils.pdf_generator import DriverExpensePDFGenerator
 
     # Add additional API resources with /api prefix (not registered via blueprint)
     # Note: Most routes are registered in resources/__init__.py via api_bp

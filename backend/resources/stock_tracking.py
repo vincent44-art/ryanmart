@@ -611,6 +611,8 @@ class StockTrackingPDFResource(Resource):
                 mimetype='application/pdf'
             )
         except Exception as e:
+            logger = logging.getLogger('stock_tracking')
+            logger.error(f"Error generating stock PDF for record {record_id}: {str(e)}", exc_info=True)
             return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 
 class StockTrackingGroupPDFResource(Resource):
@@ -640,7 +642,9 @@ class StockTrackingGroupPDFResource(Resource):
                 mimetype='application/pdf'
             )
         except Exception as e:
-            return make_response_data(success=False, message=f"Error generating group PDF: {str(e)}", status_code=500)
+            logger = logging.getLogger('stock_tracking')
+            logger.error(f"Error generating stock group PDF: {str(e)}", exc_info=True)
+            return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 
 
 class StockTrackingUnmovedPDFResource(Resource):
@@ -662,7 +666,9 @@ class StockTrackingUnmovedPDFResource(Resource):
                 mimetype='application/pdf'
             )
         except Exception as e:
-            return make_response_data(success=False, message=f"Error generating unmoved stock PDF: {str(e)}", status_code=500)
+            logger = logging.getLogger('stock_tracking')
+            logger.error(f"Error generating unmoved stock PDF: {str(e)}", exc_info=True)
+            return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 
 
 def generate_stock_pdf_combined(date):
@@ -895,7 +901,9 @@ class StockTrackingCombinedPDFResource(Resource):
                 mimetype='application/pdf'
             )
         except Exception as e:
-            return make_response_data(success=False, message=f"Error generating combined PDF: {str(e)}", status_code=500)
+            logger = logging.getLogger('stock_tracking')
+            logger.error(f"Error generating combined stock PDF: {str(e)}", exc_info=True)
+            return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 
 
 class StockTrackingAggregatedResource(Resource):

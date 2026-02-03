@@ -380,96 +380,104 @@ class DailyPurchasesReportResource(Resource):
         except ValueError:
             return make_response_data(success=False, message="Invalid date format. Use YYYY-MM-DD.", status_code=400)
 
-        # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
-        purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchase_date = '{report_date}'")).fetchall()
+        try:
+            # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
+            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchase_date = '{report_date}'")).fetchall()
 
-        # Convert to dict-like objects for compatibility
-        purchases = []
-        for row in purchases_result:
-            # Get purchaser email
-            purchaser_email = None
-            try:
-                user = db.session.get(User, row[1])
-                if user:
-                    purchaser_email = user.email
-            except Exception:
+            # Convert to dict-like objects for compatibility
+            purchases = []
+            for row in purchases_result:
+                # Get purchaser email
                 purchaser_email = None
+                purchaser_user = None
+                try:
+                    user = db.session.get(User, row[1])
+                    if user:
+                        purchaser_email = user.email
+                        purchaser_user = user
+                except Exception:
+                    purchaser_email = None
 
-            purchase_dict = {
-                'id': row[0],
-                'purchaser_id': row[1],
-                'purchaser': user if 'user' in locals() and user else None,  # For backward compatibility in PDF generation
-                'employee_name': row[2],
-                'fruit_type': row[3],
-                'quantity': row[4],
-                'unit': row[5],
-                'buyer_name': row[6],
-                'cost': row[7],
-                'purchase_date': row[8],
-                'created_at': row[9],
-                'amount_per_kg': row[10]
-            }
-            purchases.append(type('PurchaseObj', (), purchase_dict)())
+                purchase_dict = {
+                    'id': row[0],
+                    'purchaser_id': row[1],
+                    'purchaser': purchaser_user,
+                    'employee_name': row[2],
+                    'fruit_type': row[3],
+                    'quantity': row[4],
+                    'unit': row[5],
+                    'buyer_name': row[6],
+                    'cost': row[7],
+                    'purchase_date': row[8],
+                    'created_at': row[9],
+                    'amount_per_kg': row[10]
+                }
+                purchases.append(type('PurchaseObj', (), purchase_dict)())
 
-        if not purchases:
-            return make_response_data(success=False, message=f"No purchases found for {date_str}.", status_code=404)
+            if not purchases:
+                return make_response_data(success=False, message=f"No purchases found for {date_str}.", status_code=404)
 
-        # Create PDF buffer
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        styles = getSampleStyleSheet()
-        elements = []
+            # Create PDF buffer
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            styles = getSampleStyleSheet()
+            elements = []
 
-        # Title
-        title = Paragraph(f"Daily Purchases Report - {report_date.strftime('%B %d, %Y')}", styles['Title'])
-        elements.append(title)
-        elements.append(Spacer(1, 12))
+            # Title
+            title = Paragraph(f"Daily Purchases Report - {report_date.strftime('%B %d, %Y')}", styles['Title'])
+            elements.append(title)
+            elements.append(Spacer(1, 12))
 
-        # Summary
-        from utils.helpers import safe_float
-        total_cost = sum(safe_float(purchase.cost) for purchase in purchases)
-        total_quantity = sum(safe_float(purchase.quantity) for purchase in purchases)
-        summary_text = f"Total Purchases: {len(purchases)} | Total Quantity: {total_quantity:.2f} | Total Cost: KES {total_cost:,.2f}"
-        summary = Paragraph(summary_text, styles['Normal'])
-        elements.append(summary)
-        elements.append(Spacer(1, 12))
+            # Summary
+            from utils.helpers import safe_float
+            total_cost = sum(safe_float(purchase.cost) for purchase in purchases)
+            total_quantity = sum(safe_float(purchase.quantity) for purchase in purchases)
+            summary_text = f"Total Purchases: {len(purchases)} | Total Quantity: {total_quantity:.2f} | Total Cost: KES {total_cost:,.2f}"
+            summary = Paragraph(summary_text, styles['Normal'])
+            elements.append(summary)
+            elements.append(Spacer(1, 12))
 
-        # Table data
-        data = [['Date', 'Purchaser', 'Employee', 'Fruit Type', 'Quantity', 'Buyer', 'Amount']]
-        for purchase in purchases:
-            purchaser_email = purchase.purchaser.email if purchase.purchaser and hasattr(purchase.purchaser, 'email') else 'N/A'
-            data.append([
-                purchase.purchase_date.strftime('%Y-%m-%d'),
-                purchaser_email,
-                purchase.employee_name,
-                purchase.fruit_type,
-                f"{purchase.quantity} {purchase.unit}",
-                purchase.buyer_name,
-                f'KES {purchase.cost:,.2f}'
-            ])
+            # Table data
+            data = [['Date', 'Purchaser', 'Employee', 'Fruit Type', 'Quantity', 'Buyer', 'Amount']]
+            for purchase in purchases:
+                purchaser_email = purchase.purchaser.email if purchase.purchaser and hasattr(purchase.purchaser, 'email') else 'N/A'
+                data.append([
+                    purchase.purchase_date.strftime('%Y-%m-%d') if hasattr(purchase.purchase_date, 'strftime') else str(purchase.purchase_date),
+                    purchaser_email,
+                    purchase.employee_name,
+                    purchase.fruit_type,
+                    f"{purchase.quantity} {purchase.unit}",
+                    purchase.buyer_name,
+                    f'KES {safe_float(purchase.cost):,.2f}'
+                ])
 
-        # Create table
-        table = Table(data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 14),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
+            # Create table
+            table = Table(data)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 14),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
 
-        elements.append(table)
+            elements.append(table)
 
-        # Build PDF
-        doc.build(elements)
-        buffer.seek(0)
+            # Build PDF
+            doc.build(elements)
+            buffer.seek(0)
 
-        return send_file(
-            buffer,
-            as_attachment=True,
-            download_name=f"purchases_report_{date_str}.pdf",
-            mimetype='application/pdf'
-        )
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=f"purchases_report_{date_str}.pdf",
+                mimetype='application/pdf'
+            )
+        except Exception as e:
+            logger = logging.getLogger('purchases')
+            logger.error(f"Error generating purchases PDF: {str(e)}", exc_info=True)
+            db.session.rollback()
+            return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)

@@ -329,198 +329,208 @@ class DailySalesReportResource(Resource):
         except ValueError:
             return make_response_data(success=False, message="Invalid date format. Use YYYY-MM-DD.", status_code=400)
 
-        # Use raw SQL to fetch sales as strings to avoid numeric type conversion issues
-        sales_result = db.session.execute(text(f"SELECT s.id, s.seller_id, s.stock_name, s.fruit_name, s.qty::text, s.unit_price::text, s.amount::text, s.paid_amount::text, s.remaining_amount::text, s.customer_name, s.date, s.created_at, u.email as seller_email FROM sale s LEFT JOIN \"user\" u ON s.seller_id = u.id WHERE s.date = '{report_date}'")).fetchall()
+        try:
+            # Use raw SQL to fetch sales as strings to avoid numeric type conversion issues
+            sales_result = db.session.execute(text(f"SELECT s.id, s.seller_id, s.stock_name, s.fruit_name, s.qty::text, s.unit_price::text, s.amount::text, s.paid_amount::text, s.remaining_amount::text, s.customer_name, s.date, s.created_at, u.email as seller_email FROM sale s LEFT JOIN \"user\" u ON s.seller_id = u.id WHERE s.date = '{report_date}'")).fetchall()
 
-        # Convert to dict-like objects for compatibility
-        sales = []
-        for row in sales_result:
-            sale_dict = {
-                'id': row[0],
-                'seller_id': row[1],
-                'stock_name': row[2],
-                'fruit_name': row[3],
-                'qty': row[4],
-                'unit_price': row[5],
-                'amount': row[6],
-                'paid_amount': row[7],
-                'remaining_amount': row[8],
-                'customer_name': row[9],
-                'date': row[10],
-                'created_at': row[11],
-                'seller_email': row[12]
-            }
-            sales.append(type('SaleObj', (), sale_dict)())
+            # Convert to dict-like objects for compatibility
+            sales = []
+            for row in sales_result:
+                sale_dict = {
+                    'id': row[0],
+                    'seller_id': row[1],
+                    'stock_name': row[2],
+                    'fruit_name': row[3],
+                    'qty': row[4],
+                    'unit_price': row[5],
+                    'amount': row[6],
+                    'paid_amount': row[7],
+                    'remaining_amount': row[8],
+                    'customer_name': row[9],
+                    'date': row[10],
+                    'created_at': row[11],
+                    'seller_email': row[12]
+                }
+                sales.append(type('SaleObj', (), sale_dict)())
 
-        if not sales:
-            return make_response_data(success=False, message=f"No sales found for {date_str}.", status_code=404)
+            if not sales:
+                return make_response_data(success=False, message=f"No sales found for {date_str}.", status_code=404)
 
-        # Create PDF buffer
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        styles = getSampleStyleSheet()
-        elements = []
+            # Create PDF buffer
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            styles = getSampleStyleSheet()
+            elements = []
 
-        # Title
-        title = Paragraph(f"Daily Sales Report - {report_date.strftime('%B %d, %Y')}", styles['Title'])
-        elements.append(title)
-        elements.append(Spacer(1, 12))
+            # Title
+            title = Paragraph(f"Daily Sales Report - {report_date.strftime('%B %d, %Y')}", styles['Title'])
+            elements.append(title)
+            elements.append(Spacer(1, 12))
 
-        # Summary - use safe_float to handle string values
-        from utils.helpers import safe_float
-        total_amount = sum(safe_float(sale.amount) for sale in sales)
-        total_qty = sum(safe_float(sale.qty) for sale in sales)
-        summary_text = f"Total Sales: {len(sales)} | Total Qty: {total_qty:.2f} | Total Amount: KES {total_amount:,.2f}"
-        summary = Paragraph(summary_text, styles['Normal'])
-        elements.append(summary)
-        elements.append(Spacer(1, 12))
+            # Summary - use safe_float to handle string values
+            from utils.helpers import safe_float
+            total_amount = sum(safe_float(sale.amount) for sale in sales)
+            total_qty = sum(safe_float(sale.qty) for sale in sales)
+            summary_text = f"Total Sales: {len(sales)} | Total Qty: {total_qty:.2f} | Total Amount: KES {total_amount:,.2f}"
+            summary = Paragraph(summary_text, styles['Normal'])
+            elements.append(summary)
+            elements.append(Spacer(1, 12))
 
-        # Table data
-        data = [['Date', 'Seller', 'Stock Name', 'Fruit Name', 'Qty', 'Unit Price', 'Amount']]
-        for sale in sales:
-            # Handle date - it could be a string or datetime object
-            date_str = sale.date
-            if hasattr(sale.date, 'strftime'):
-                date_str = sale.date.strftime('%Y-%m-%d')
-            elif isinstance(sale.date, str):
-                # Already a string, use as-is
-                pass
-            else:
-                date_str = str(sale.date)
-            
-            data.append([
-                date_str,
-                sale.seller_email or 'N/A',
-                sale.stock_name,
-                sale.fruit_name,
-                f"{safe_float(sale.qty):.2f}",
-                f'KES {safe_float(sale.unit_price):,.2f}',
-                f'KES {safe_float(sale.amount):,.2f}'
-            ])
+            # Table data
+            data = [['Date', 'Seller', 'Stock Name', 'Fruit Name', 'Qty', 'Unit Price', 'Amount']]
+            for sale in sales:
+                # Handle date - it could be a string or datetime object
+                sale_date_str = sale.date
+                if hasattr(sale.date, 'strftime'):
+                    sale_date_str = sale.date.strftime('%Y-%m-%d')
+                elif isinstance(sale.date, str):
+                    # Already a string, use as-is
+                    pass
+                else:
+                    sale_date_str = str(sale.date)
+                
+                data.append([
+                    sale_date_str,
+                    sale.seller_email or 'N/A',
+                    sale.stock_name,
+                    sale.fruit_name,
+                    f"{safe_float(sale.qty):.2f}",
+                    f'KES {safe_float(sale.unit_price):,.2f}',
+                    f'KES {safe_float(sale.amount):,.2f}'
+                ])
 
-        # Create table
-        table = Table(data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 14),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
+            # Create table
+            table = Table(data)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 14),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
 
-        elements.append(table)
+            elements.append(table)
 
-        # Build PDF
-        doc.build(elements)
-        buffer.seek(0)
+            # Build PDF
+            doc.build(elements)
+            buffer.seek(0)
 
-        return send_file(
-            buffer,
-            as_attachment=True,
-            download_name=f"sales_report_{date_str}.pdf",
-            mimetype='application/pdf'
-        )
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=f"sales_report_{date_str}.pdf",
+                mimetype='application/pdf'
+            )
+        except Exception as e:
+            logger.error(f"Error generating daily sales PDF: {str(e)}")
+            db.session.rollback()
+            return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 
 
 class CustomerDebtReportResource(Resource):
     @role_required('ceo')
     def get(self, customer_email):
-        # Use raw SQL to fetch sales as strings to avoid numeric type conversion issues
-        sales_result = db.session.execute(text(f"SELECT id, seller_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale WHERE customer_name = '{customer_email}' AND remaining_amount::numeric > 0")).fetchall()
+        try:
+            # Use raw SQL to fetch sales as strings to avoid numeric type conversion issues
+            sales_result = db.session.execute(text(f"SELECT id, seller_id, stock_name, fruit_name, qty::text, unit_price::text, amount::text, paid_amount::text, remaining_amount::text, customer_name, date, created_at FROM sale WHERE customer_name = '{customer_email}' AND remaining_amount::numeric > 0")).fetchall()
 
-        # Convert to dict-like objects for compatibility
-        sales = []
-        for row in sales_result:
-            sale_dict = {
-                'id': row[0],
-                'seller_id': row[1],
-                'stock_name': row[2],
-                'fruit_name': row[3],
-                'qty': row[4],
-                'unit_price': row[5],
-                'amount': row[6],
-                'paid_amount': row[7],
-                'remaining_amount': row[8],
-                'customer_name': row[9],
-                'date': row[10],
-                'created_at': row[11]
-            }
-            sales.append(type('SaleObj', (), sale_dict)())
+            # Convert to dict-like objects for compatibility
+            sales = []
+            for row in sales_result:
+                sale_dict = {
+                    'id': row[0],
+                    'seller_id': row[1],
+                    'stock_name': row[2],
+                    'fruit_name': row[3],
+                    'qty': row[4],
+                    'unit_price': row[5],
+                    'amount': row[6],
+                    'paid_amount': row[7],
+                    'remaining_amount': row[8],
+                    'customer_name': row[9],
+                    'date': row[10],
+                    'created_at': row[11]
+                }
+                sales.append(type('SaleObj', (), sale_dict)())
 
-        if not sales:
-            return make_response_data(success=False, message=f"No outstanding debts found for {customer_email}.", status_code=404)
+            if not sales:
+                return make_response_data(success=False, message=f"No outstanding debts found for {customer_email}.", status_code=404)
 
-        # Create PDF buffer
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        styles = getSampleStyleSheet()
-        elements = []
+            # Create PDF buffer
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            styles = getSampleStyleSheet()
+            elements = []
 
-        # Title
-        title = Paragraph(f"Customer Debt Report - {customer_email}", styles['Title'])
-        elements.append(title)
-        elements.append(Spacer(1, 12))
+            # Title
+            title = Paragraph(f"Customer Debt Report - {customer_email}", styles['Title'])
+            elements.append(title)
+            elements.append(Spacer(1, 12))
 
-        # Summary - use safe_float to handle string values
-        from utils.helpers import safe_float
-        total_debt = sum(safe_float(sale.remaining_amount) for sale in sales)
-        total_amount = sum(safe_float(sale.amount) for sale in sales)
-        total_paid = total_amount - total_debt
-        summary_text = f"Total Amount: KES {total_amount:,.2f} | Total Paid: KES {total_paid:,.2f} | Outstanding Debt: KES {total_debt:,.2f}"
-        summary = Paragraph(summary_text, styles['Normal'])
-        elements.append(summary)
-        elements.append(Spacer(1, 12))
+            # Summary - use safe_float to handle string values
+            from utils.helpers import safe_float
+            total_debt = sum(safe_float(sale.remaining_amount) for sale in sales)
+            total_amount = sum(safe_float(sale.amount) for sale in sales)
+            total_paid = total_amount - total_debt
+            summary_text = f"Total Amount: KES {total_amount:,.2f} | Total Paid: KES {total_paid:,.2f} | Outstanding Debt: KES {total_debt:,.2f}"
+            summary = Paragraph(summary_text, styles['Normal'])
+            elements.append(summary)
+            elements.append(Spacer(1, 12))
 
-        # Table data
-        data = [['Date', 'Stock Name', 'Fruit Name', 'Qty', 'Unit Price', 'Amount', 'Paid Amount', 'Remaining Amount']]
-        for sale in sales:
-            # Handle date - it could be a string or datetime object
-            date_str = sale.date
-            if hasattr(sale.date, 'strftime'):
-                date_str = sale.date.strftime('%Y-%m-%d')
-            elif isinstance(sale.date, str):
-                # Already a string, use as-is
-                pass
-            else:
-                date_str = str(sale.date)
-            
-            data.append([
-                date_str,
-                sale.stock_name,
-                sale.fruit_name,
-                f"{safe_float(sale.qty):.2f}",
-                f'KES {safe_float(sale.unit_price):,.2f}',
-                f'KES {safe_float(sale.amount):,.2f}',
-                f'KES {safe_float(sale.paid_amount):,.2f}',
-                f'KES {safe_float(sale.remaining_amount):,.2f}'
-            ])
+            # Table data
+            data = [['Date', 'Stock Name', 'Fruit Name', 'Qty', 'Unit Price', 'Amount', 'Paid Amount', 'Remaining Amount']]
+            for sale in sales:
+                # Handle date - it could be a string or datetime object
+                sale_date_str = sale.date
+                if hasattr(sale.date, 'strftime'):
+                    sale_date_str = sale.date.strftime('%Y-%m-%d')
+                elif isinstance(sale.date, str):
+                    # Already a string, use as-is
+                    pass
+                else:
+                    sale_date_str = str(sale.date)
+                
+                data.append([
+                    sale_date_str,
+                    sale.stock_name,
+                    sale.fruit_name,
+                    f"{safe_float(sale.qty):.2f}",
+                    f'KES {safe_float(sale.unit_price):,.2f}',
+                    f'KES {safe_float(sale.amount):,.2f}',
+                    f'KES {safe_float(sale.paid_amount):,.2f}',
+                    f'KES {safe_float(sale.remaining_amount):,.2f}'
+                ])
 
-        # Create table
-        table = Table(data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 14),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
+            # Create table
+            table = Table(data)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 14),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
 
-        elements.append(table)
+            elements.append(table)
 
-        # Build PDF
-        doc.build(elements)
-        buffer.seek(0)
+            # Build PDF
+            doc.build(elements)
+            buffer.seek(0)
 
-        return send_file(
-            buffer,
-            as_attachment=True,
-            download_name=f"debt_report_{customer_email.replace('@', '_')}.pdf",
-            mimetype='application/pdf'
-        )
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=f"debt_report_{customer_email.replace('@', '_')}.pdf",
+                mimetype='application/pdf'
+            )
+        except Exception as e:
+            logger.error(f"Error generating customer debt PDF: {str(e)}")
+            db.session.rollback()
+            return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 

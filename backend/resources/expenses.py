@@ -85,13 +85,13 @@ class DriverExpenseReportResource(Resource):
         year = request.args.get('year')
         month = request.args.get('month')
 
-        # Fetch all expenses for the driver
-        expenses = DriverExpense.query.filter_by(driver_email=driver_email).all()
-        expense_data = [e.to_dict() for e in expenses]
-
-        pdf_generator = DriverExpensePDFGenerator()
-
         try:
+            # Fetch all expenses for the driver
+            expenses = DriverExpense.query.filter_by(driver_email=driver_email).all()
+            expense_data = [e.to_dict() for e in expenses]
+
+            pdf_generator = DriverExpensePDFGenerator()
+
             if report_type == 'daily':
                 if not date:
                     from datetime import date as today_date
@@ -144,4 +144,6 @@ class DriverExpenseReportResource(Resource):
                 return make_response_data(success=False, message="Invalid report type. Use 'daily' or 'monthly'", status_code=400)
 
         except Exception as e:
+            logger = logging.getLogger('expenses')
+            logger.error(f"Error generating driver expense report: {str(e)}", exc_info=True)
             return make_response_data(success=False, message=f"Error generating report: {str(e)}", status_code=500)
