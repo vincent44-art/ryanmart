@@ -692,6 +692,41 @@ const ReportsTabAnalytics = () => {
   const monthlySummaries = calculateMonthlySummaries();
   const weeklySummaries = calculateWeeklySummaries();
 
+  // Handle PDF download
+  const handleDownloadPDF = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        alert('Authentication required. Please log in to download reports.');
+        return;
+      }
+
+      const response = await fetch('/api/reports/weekly/pdf', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `weekly-reports-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF. Please try again.');
+    }
+  };
+
   // Chart colors
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF7C7C'];
 
@@ -704,6 +739,14 @@ const ReportsTabAnalytics = () => {
           <p className="text-muted">Comprehensive analysis of your business performance</p>
         </div>
         <div className="d-flex gap-2">
+          <button
+            className="btn btn-primary"
+            onClick={handleDownloadPDF}
+            disabled={loading}
+          >
+            <i className="bi bi-download me-2"></i>
+            Download Weekly Reports PDF
+          </button>
           <select
             className="form-select"
             value={selectedPeriod}
