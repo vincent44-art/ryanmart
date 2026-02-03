@@ -352,6 +352,166 @@ const ReportsTabAnalytics = () => {
 
 
 
+  // Calculate weekly summaries
+  const calculateWeeklySummaries = () => {
+    const weeklyData = {};
+    const getWeekKey = (dateStr) => {
+      if (!dateStr) return null;
+      const d = new Date(dateStr);
+      if (isNaN(d)) return null;
+      const year = d.getFullYear();
+      // Get the first day of the year
+      const firstDayOfYear = new Date(year, 0, 1);
+      // Calculate the day of the year
+      const dayOfYear = Math.floor((d - firstDayOfYear) / (24 * 60 * 60 * 1000)) + 1;
+      // Calculate the week number
+      const weekNumber = Math.ceil(dayOfYear / 7);
+      return `${year}-W${String(weekNumber).padStart(2, '0')}`;
+    };
+
+    // Process purchases
+    if (Array.isArray(data.purchases)) {
+      data.purchases.forEach(purchase => {
+        const week = getWeekKey(purchase.date);
+        if (!week) return;
+        if (!weeklyData[week]) {
+          weeklyData[week] = {
+            week,
+            salesTotal: 0,
+            purchasesTotal: 0,
+            expensesTotal: 0,
+            salariesTotal: 0,
+            carExpensesTotal: 0,
+            fruitProfits: {}
+          };
+        }
+        weeklyData[week].purchasesTotal += parseFloat(purchase.totalAmount || purchase.amount || 0);
+      });
+    }
+
+    // Process sales
+    if (Array.isArray(data.sales)) {
+      data.sales.forEach(sale => {
+        const week = getWeekKey(sale.date || sale.sale_date);
+        if (!week) return;
+
+        if (!weeklyData[week]) {
+          weeklyData[week] = {
+            week,
+            salesTotal: 0,
+            purchasesTotal: 0,
+            expensesTotal: 0,
+            salariesTotal: 0,
+            carExpensesTotal: 0,
+            fruitProfits: {}
+          };
+        }
+        weeklyData[week].salesTotal += parseFloat(sale.amount || 0);
+
+        // Track fruit profits for this week
+        const fruitType = (sale.fruit_name || sale.fruit_type || sale.fruitType || sale.fruit || '').toLowerCase().trim();
+        if (fruitType) {
+          if (!weeklyData[week].fruitProfits[fruitType]) {
+            weeklyData[week].fruitProfits[fruitType] = { revenue: 0, cost: 0 };
+          }
+          weeklyData[week].fruitProfits[fruitType].revenue += parseFloat(sale.amount || 0);
+        }
+      });
+    }
+
+    // Process other expenses
+    if (Array.isArray(data.otherExpenses)) {
+      data.otherExpenses.forEach(expense => {
+        const week = getWeekKey(expense.date);
+        if (!week) return;
+
+        if (!weeklyData[week]) {
+          weeklyData[week] = {
+            week,
+            salesTotal: 0,
+            purchasesTotal: 0,
+            expensesTotal: 0,
+            salariesTotal: 0,
+            carExpensesTotal: 0,
+            fruitProfits: {}
+          };
+        }
+        weeklyData[week].expensesTotal += parseFloat(expense.amount || 0);
+      });
+    }
+
+    // Process salaries
+    if (Array.isArray(data.salaries)) {
+      data.salaries.forEach(salary => {
+        const week = getWeekKey(salary.date);
+        if (!week) return;
+
+        if (!weeklyData[week]) {
+          weeklyData[week] = {
+            week,
+            salesTotal: 0,
+            purchasesTotal: 0,
+            expensesTotal: 0,
+            salariesTotal: 0,
+            carExpensesTotal: 0,
+            fruitProfits: {}
+          };
+        }
+        weeklyData[week].salariesTotal += parseFloat(salary.amount || 0);
+      });
+    }
+
+    // Process car expenses
+    if (Array.isArray(data.carExpenses)) {
+      data.carExpenses.forEach(expense => {
+        const week = getWeekKey(expense.date);
+        if (!week) return;
+
+        if (!weeklyData[week]) {
+          weeklyData[week] = {
+            week,
+            salesTotal: 0,
+            purchasesTotal: 0,
+            expensesTotal: 0,
+            salariesTotal: 0,
+            carExpensesTotal: 0,
+            fruitProfits: {}
+          };
+        }
+        weeklyData[week].carExpensesTotal += parseFloat(expense.amount || 0);
+      });
+    }
+
+    // Calculate profit/loss and best fruit for each week
+    const result = Object.values(weeklyData).map(item => {
+      const profitLoss = item.salesTotal - item.purchasesTotal - item.expensesTotal - item.salariesTotal - item.carExpensesTotal;
+
+      // Find best fruit for this week
+      let bestFruit = null;
+      let bestProfit = -Infinity;
+
+      Object.entries(item.fruitProfits).forEach(([fruitType, profits]) => {
+        const fruitProfit = profits.revenue - profits.cost;
+        if (fruitProfit > bestProfit) {
+          bestProfit = fruitProfit;
+          bestFruit = {
+            name: fruitType,
+            profit: fruitProfit,
+            revenue: profits.revenue
+          };
+        }
+      });
+
+      return {
+        ...item,
+        profitLoss,
+        bestFruit
+      };
+    });
+
+    return result.sort((a, b) => b.week.localeCompare(a.week));
+  };
+
   // Calculate monthly summaries
   const calculateMonthlySummaries = () => {
     console.log('Purchases data:', data.purchases); // Debug log
@@ -530,6 +690,7 @@ const ReportsTabAnalytics = () => {
   const fruitProfitability = calculateFruitProfitability();
   const expenseBreakdown = calculateExpenseBreakdown();
   const monthlySummaries = calculateMonthlySummaries();
+  const weeklySummaries = calculateWeeklySummaries();
 
   // Chart colors
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF7C7C'];
@@ -832,6 +993,65 @@ const ReportsTabAnalytics = () => {
                         <Activity className="text-warning" size={20} />
                       ) : (
                         <TrendingDown className="text-danger" size={20} />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Weekly Reports Table */}
+      <div className="card border-0 shadow-sm mt-4">
+        <div className="card-header bg-white">
+          <h5 className="mb-0">Weekly Reports & Best Fruit Performance</h5>
+        </div>
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Week</th>
+                  <th>Total Purchases</th>
+                  <th>Total Sales</th>
+                  <th>Total Expenses</th>
+                  <th>Total Salaries</th>
+                  <th>Total Car Expenses</th>
+                  <th>Profit / Loss</th>
+                  <th>Best Fruit</th>
+                  <th>Fruit Profit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {weeklySummaries.map((item) => (
+                  <tr key={item.week}>
+                    <td>{item.week}</td>
+                    <td>{formatCurrency(item.purchasesTotal)}</td>
+                    <td>{formatCurrency(item.salesTotal)}</td>
+                    <td>{formatCurrency(item.expensesTotal)}</td>
+                    <td>{formatCurrency(item.salariesTotal)}</td>
+                    <td>{formatCurrency(item.carExpensesTotal)}</td>
+                    <td className={item.profitLoss >= 0 ? 'text-success' : 'text-danger'}>
+                      {formatCurrency(item.profitLoss)}
+                    </td>
+                    <td>
+                      {item.bestFruit ? (
+                        <span className="badge bg-success">
+                          {item.bestFruit.name.charAt(0).toUpperCase() + item.bestFruit.name.slice(1)}
+                        </span>
+                      ) : (
+                        <span className="text-muted">No data</span>
+                      )}
+                    </td>
+                    <td>
+                      {item.bestFruit ? (
+                        <span className="text-success fw-bold">
+                          {formatCurrency(item.bestFruit.profit)}
+                        </span>
+                      ) : (
+                        <span className="text-muted">-</span>
                       )}
                     </td>
                   </tr>
