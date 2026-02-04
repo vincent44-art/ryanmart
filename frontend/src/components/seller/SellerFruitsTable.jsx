@@ -28,11 +28,28 @@ const SellerFruitsTable = ({
     customer_name: true
   });
 
+  // Ensure sellerFruits is always an array
+  const safeSellerFruits = useMemo(() => {
+    if (Array.isArray(sellerFruits)) {
+      return sellerFruits;
+    }
+    if (sellerFruits === null || sellerFruits === undefined) {
+      return [];
+    }
+    // If it's an object with data property, try to extract it
+    if (typeof sellerFruits === 'object' && sellerFruits.data && Array.isArray(sellerFruits.data)) {
+      return sellerFruits.data;
+    }
+    // Otherwise return empty array
+    console.warn('sellerFruits is not an array:', sellerFruits);
+    return [];
+  }, [sellerFruits]);
+
   // Get unique fruit types for filter dropdown
   const uniqueFruitTypes = useMemo(() => {
-    const fruits = [...new Set(sellerFruits.map(fruit => fruit.fruit_name))];
+    const fruits = [...new Set(safeSellerFruits.map(fruit => fruit.fruit_name))];
     return fruits.sort();
-  }, [sellerFruits]);
+  }, [safeSellerFruits]);
 
   // Check if any filters are applied
   const hasFiltersApplied = useMemo(() => {
@@ -41,7 +58,7 @@ const SellerFruitsTable = ({
 
   // Filter and sort data
   const filteredAndSortedData = useMemo(() => {
-    let filtered = sellerFruits.filter(fruit => {
+    let filtered = safeSellerFruits.filter(fruit => {
       const matchesSearch = searchTerm === '' ||
         Object.values(fruit).some(value =>
           value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
@@ -83,7 +100,7 @@ const SellerFruitsTable = ({
     }
     
     return filtered;
-  }, [sellerFruits, searchTerm, sortConfig, filterDateFrom, filterDateTo, filterFruitType]);
+  }, [safeSellerFruits, searchTerm, sortConfig, filterDateFrom, filterDateTo, filterFruitType]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
@@ -309,7 +326,7 @@ const SellerFruitsTable = ({
                         </button>
                       </div>
                     ) : (
-                      sellerFruits.length === 0 ? "No sales data available" : "No data matches the current filters"
+                      safeSellerFruits.length === 0 ? "No sales data available" : "No data matches the current filters"
                     )}
                   </td>
                 </tr>
