@@ -21,6 +21,7 @@ from .clear_all import ClearAllDataResource
 from .profile_image import ProfileImageUploadResource
 from .seller_fruits import SellerFruitListResource, SellerFruitResource
 from .sales import SaleListResource, SaleResource, ClearSalesResource, SaleSummaryResource
+from .spolige import SpoligeResource, SpoligeItemResource, ClearSpoligeResource
 
 
 class CurrentStockResource(Resource):
