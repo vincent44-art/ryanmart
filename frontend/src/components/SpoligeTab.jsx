@@ -55,17 +55,21 @@ const SpoligeTab = (props) => {
   const loadSpolige = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await fetchSpolige();
       if (result.success) {
-        setSpoligeRecords(result.data);
+        // Ensure data is always an array
+        const data = Array.isArray(result.data) ? result.data : [];
+        setSpoligeRecords(data);
       } else {
         setError(result.error || 'Failed to load spolige records');
+        setSpoligeRecords([]); // Set to empty array on error
       }
     } catch (err) {
       setError('An unexpected error occurred');
       console.error('Error loading spolige:', err);
+      setSpoligeRecords([]); // Set to empty array on error
     } finally {
       setLoading(false);
     }
