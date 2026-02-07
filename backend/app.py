@@ -251,7 +251,6 @@ def create_app(config_class=Config):
         StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource,
         StockTrackingCombinedPDFResource
     )
-    from resources.spolige import SpoligeResource, SpoligeItemResource, ClearSpoligeResource
     from utils.pdf_generator import DriverExpensePDFGenerator
 
     # Add additional API resources with /api prefix (not registered via blueprint)
@@ -300,9 +299,6 @@ def create_app(config_class=Config):
     api.add_resource(InventoryResource, '/api/inventory/<int:inv_id>')
     api.add_resource(ClearInventoryResource, '/api/inventory/clear')
     api.add_resource(StockMovementListResource, '/api/stock-movements')
-    api.add_resource(SpoligeResource, '/api/spolige')
-    api.add_resource(SpoligeItemResource, '/api/spolige/<int:spolige_id>')
-    api.add_resource(ClearSpoligeResource, '/api/spolige/clear')
 
     # =====================================================================
     # HEALTH CHECK & DEBUG ROUTES
