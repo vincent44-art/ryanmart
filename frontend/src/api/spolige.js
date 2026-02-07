@@ -3,13 +3,43 @@
  * Manages spoilage/spolige records for fruits
  */
 
-const API_BASE = '/api';
+// Import API base URL from services - use absolute backend URL
+import { API_BASE_URL } from '../services/api.js';
+
+// Get the backend URL (with fallback)
+const getBackendUrl = () => {
+  // Try to get from environment variable first
+  const envUrl = process.env.REACT_APP_API_BASE_URL;
+  if (envUrl) return envUrl;
+  
+  // In production, use the correct backend URL
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://ryanmart-bacckend.onrender.com';
+  }
+  
+  // Development fallback
+  return 'http://localhost:5000';
+};
+
+const API_BASE = getBackendUrl();
 
 /**
  * Get the authentication token from localStorage
  */
 const getToken = () => {
   return localStorage.getItem('access_token') || localStorage.getItem('token');
+};
+
+/**
+ * Check if response looks like HTML (error page)
+ */
+const looksLikeHtml = (data) => {
+  if (typeof data !== 'string') return false;
+  const trimmed = data.trim();
+  return trimmed.startsWith('<!DOCTYPE') ||
+         trimmed.startsWith('<!doctype') ||
+         trimmed.startsWith('<html') ||
+         trimmed.startsWith('<!html');
 };
 
 /**
@@ -20,6 +50,7 @@ const apiRequest = async (endpoint, options = {}) => {
   
   const headers = {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` }),
     ...options.headers,
   };
@@ -42,9 +73,13 @@ const apiRequest = async (endpoint, options = {}) => {
       throw new Error('Invalid JSON response from server');
     }
   } else {
-    // Non-JSON response (likely HTML error page)
+    // Non-JSON response (likely HTML error page from frontend)
     const text = await response.text();
     console.error('Non-JSON response received:', text.substring(0, 500));
+    
+    if (looksLikeHtml(text)) {
+      throw new Error('API request failed - received HTML instead of JSON. Check backend URL configuration.');
+    }
     
     // Try to extract error info from the response
     if (response.status === 404) {
