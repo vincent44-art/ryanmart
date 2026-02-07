@@ -29,10 +29,39 @@ const apiRequest = async (endpoint, options = {}) => {
     headers,
   });
 
-  const data = await response.json();
+  // Check content type to determine if response is JSON
+  const contentType = response.headers.get('content-type');
+  let data;
+  
+  if (contentType && contentType.includes('application/json')) {
+    try {
+      data = await response.json();
+    } catch (e) {
+      // If JSON parsing fails, create a structured error
+      console.error('Error parsing JSON response:', e);
+      throw new Error('Invalid JSON response from server');
+    }
+  } else {
+    // Non-JSON response (likely HTML error page)
+    const text = await response.text();
+    console.error('Non-JSON response received:', text.substring(0, 500));
+    
+    // Try to extract error info from the response
+    if (response.status === 404) {
+      throw new Error('API endpoint not found (404)');
+    } else if (response.status === 500) {
+      throw new Error('Server error (500): Internal server error');
+    } else if (response.status === 401) {
+      throw new Error('Unauthorized: Please log in again');
+    } else if (response.status === 403) {
+      throw new Error('Forbidden: You do not have permission');
+    } else {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
+    throw new Error(data?.message || `API request failed with status ${response.status}`);
   }
 
   return { data };
