@@ -251,6 +251,7 @@ def create_app(config_class=Config):
         StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource,
         StockTrackingCombinedPDFResource
     )
+    from resources.spolige import SpoligeResource, SpoligeItemResource, ClearSpoligeResource
     from utils.pdf_generator import DriverExpensePDFGenerator
 
     # Add additional API resources with /api prefix (not registered via blueprint)
@@ -299,6 +300,9 @@ def create_app(config_class=Config):
     api.add_resource(InventoryResource, '/api/inventory/<int:inv_id>')
     api.add_resource(ClearInventoryResource, '/api/inventory/clear')
     api.add_resource(StockMovementListResource, '/api/stock-movements')
+    api.add_resource(SpoligeResource, '/api/spolige')
+    api.add_resource(SpoligeItemResource, '/api/spolige/<int:spolige_id>')
+    api.add_resource(ClearSpoligeResource, '/api/spolige/clear')
 
     # =====================================================================
     # HEALTH CHECK & DEBUG ROUTES
@@ -752,6 +756,296 @@ def create_app(config_class=Config):
         except Exception as e:
             current_app.logger.exception('DB connectivity test failed')
             return jsonify({'ok': False, 'error': str(e)}), 500
+
+    # =====================================================================
+    # SPOLIGE DIRECT ROUTES (FALLBACK - bypasses Flask-RESTful)
+    # These ensure spolige endpoints work even if Flask-RESTful has routing issues
+    # =====================================================================
+    @app.route('/api/spolige', methods=['GET', 'POST', 'OPTIONS'])
+    def spolige_handler():
+        """
+        Direct Flask handler for /api/spolige endpoint.
+        This is a fallback in case Flask-RESTful routing fails.
+        """
+        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from models.spolige import Spolige
+        from models.user import User
+        from datetime import datetime
+        
+        # Handle CORS preflight
+        if request.method == 'OPTIONS':
+            resp = make_response('', 204)
+            origin = request.headers.get('Origin', '')
+            if allowed_origins == ['*'] or origin in allowed_origins:
+                resp.headers['Access-Control-Allow-Origin'] = origin or allowed_origins[0] if allowed_origins else '*'
+                resp.headers['Access-Control-Allow-Credentials'] = 'true'
+                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+                resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+            return resp
+        
+        try:
+            # Verify authentication
+            identity = get_jwt_identity()
+            if not identity:
+                return jsonify({
+                    'success': False,
+                    'message': 'Missing access token',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+            
+            current_user = User.query.get(identity)
+            if not current_user:
+                return jsonify({
+                    'success': False,
+                    'message': 'User not found',
+                    'error': 'user_not_found',
+                    'status_code': 401
+                }), 401
+            
+            # Handle GET request - fetch all spolige records
+            if request.method == 'GET':
+                app.logger.info("Fetching spolige records (direct handler)")
+                records = Spolige.query.order_by(Spolige.date.desc()).all()
+                data = [record.to_dict() for record in records]
+                return jsonify({
+                    'success': True,
+                    'data': data,
+                    'message': 'Spolige records fetched successfully.'
+                })
+            
+            # Handle POST request - create new spolige record
+            if request.method == 'POST':
+                app.logger.info("Creating spolige record (direct handler)")
+                data = request.get_json() or {}
+                
+                # Parse date
+                try:
+                    spolige_date = datetime.strptime(data.get('date', ''), '%Y-%m-%d').date()
+                except (ValueError, TypeError):
+                    return jsonify({
+                        'success': False,
+                        'message': 'Invalid date format. Use YYYY-MM-DD.',
+                        'error': 'invalid_date_format',
+                        'status_code': 400
+                    }), 400
+                
+                spolige = Spolige(
+                    fruit_name=data.get('fruit_name'),
+                    quantity=float(data.get('quantity', 0)),
+                    stage=data.get('stage', 'partial'),
+                    amount_per_kg=float(data.get('amount_per_kg', 0)),
+                    total_amount=float(data.get('total_amount', 0)),
+                    description=data.get('description'),
+                    date=spolige_date
+                )
+                db.session.add(spolige)
+                db.session.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'data': spolige.to_dict(),
+                    'message': 'Spolige record added successfully.'
+                }), 201
+                
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Spolige handler error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error: {str(e)}',
+                'error': 'internal_error'
+            }), 500
+
+    @app.route('/api/spolige/<int:spolige_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+    def spolige_item_handler(spolige_id):
+        """
+        Direct Flask handler for /api/spolige/<id> endpoint.
+        This is a fallback in case Flask-RESTful routing fails.
+        """
+        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from models.spolige import Spolige
+        from models.user import User
+        from datetime import datetime
+        
+        # Handle CORS preflight
+        if request.method == 'OPTIONS':
+            resp = make_response('', 204)
+            origin = request.headers.get('Origin', '')
+            if allowed_origins == ['*'] or origin in allowed_origins:
+                resp.headers['Access-Control-Allow-Origin'] = origin or allowed_origins[0] if allowed_origins else '*'
+                resp.headers['Access-Control-Allow-Credentials'] = 'true'
+                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+                resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+            return resp
+        
+        try:
+            # Verify authentication
+            identity = get_jwt_identity()
+            if not identity:
+                return jsonify({
+                    'success': False,
+                    'message': 'Missing access token',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+            
+            current_user = User.query.get(identity)
+            if not current_user:
+                return jsonify({
+                    'success': False,
+                    'message': 'User not found',
+                    'error': 'user_not_found',
+                    'status_code': 401
+                }), 401
+            
+            spolige = Spolige.query.get(spolige_id)
+            if not spolige:
+                return jsonify({
+                    'success': False,
+                    'message': 'Spolige record not found.',
+                    'error': 'not_found',
+                    'status_code': 404
+                }), 404
+            
+            # Handle GET request
+            if request.method == 'GET':
+                return jsonify({
+                    'success': True,
+                    'data': spolige.to_dict(),
+                    'message': 'Spolige record fetched successfully.'
+                })
+            
+            # Handle PUT request - update spolige record
+            if request.method == 'PUT':
+                data = request.get_json() or {}
+                
+                if 'fruit_name' in data:
+                    spolige.fruit_name = data['fruit_name']
+                if 'quantity' in data:
+                    spolige.quantity = float(data['quantity'])
+                if 'stage' in data:
+                    spolige.stage = data['stage']
+                if 'amount_per_kg' in data:
+                    spolige.amount_per_kg = float(data['amount_per_kg'])
+                if 'total_amount' in data:
+                    spolige.total_amount = float(data['total_amount'])
+                if 'description' in data:
+                    spolige.description = data['description']
+                if 'date' in data:
+                    try:
+                        spolige.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+                    except ValueError:
+                        return jsonify({
+                            'success': False,
+                            'message': 'Invalid date format. Use YYYY-MM-DD.',
+                            'error': 'invalid_date_format',
+                            'status_code': 400
+                        }), 400
+                
+                db.session.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'data': spolige.to_dict(),
+                    'message': 'Spolige record updated successfully.'
+                })
+            
+            # Handle DELETE request
+            if request.method == 'DELETE':
+                db.session.delete(spolige)
+                db.session.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Spolige record deleted successfully.'
+                })
+                
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Spolige item handler error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error: {str(e)}',
+                'error': 'internal_error'
+            }), 500
+
+    @app.route('/api/spolige/clear', methods=['DELETE', 'OPTIONS'])
+    def spolige_clear_handler():
+        """
+        Direct Flask handler for /api/spolige/clear endpoint.
+        This is a fallback in case Flask-RESTful routing fails.
+        """
+        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from models.spolige import Spolige
+        from models.user import User
+        
+        # Handle CORS preflight
+        if request.method == 'OPTIONS':
+            resp = make_response('', 204)
+            origin = request.headers.get('Origin', '')
+            if allowed_origins == ['*'] or origin in allowed_origins:
+                resp.headers['Access-Control-Allow-Origin'] = origin or allowed_origins[0] if allowed_origins else '*'
+                resp.headers['Access-Control-Allow-Credentials'] = 'true'
+                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+                resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+            return resp
+        
+        try:
+            # Verify authentication
+            identity = get_jwt_identity()
+            if not identity:
+                return jsonify({
+                    'success': False,
+                    'message': 'Missing access token',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+            
+            current_user = User.query.get(identity)
+            if not current_user:
+                return jsonify({
+                    'success': False,
+                    'message': 'User not found',
+                    'error': 'user_not_found',
+                    'status_code': 401
+                }), 401
+            
+            # Check role (CEO/Admin only)
+            allowed_roles = ['ceo', 'admin']
+            if current_user.role not in allowed_roles and not any(r in str(current_user.role) for r in allowed_roles):
+                return jsonify({
+                    'success': False,
+                    'message': 'Insufficient permissions',
+                    'error': 'forbidden',
+                    'status_code': 403
+                }), 403
+            
+            count = Spolige.query.count()
+            if count == 0:
+                return jsonify({
+                    'success': False,
+                    'message': 'No spolige records to clear.',
+                    'error': 'empty',
+                    'status_code': 400
+                }), 400
+            
+            Spolige.query.delete()
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Successfully cleared {count} spolige record(s).'
+            })
+                
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Spolige clear handler error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error: {str(e)}',
+                'error': 'internal_error'
+            }), 500
 
     # =====================================================================
     # STATIC FILES & REACT SPA
