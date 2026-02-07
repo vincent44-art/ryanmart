@@ -14,6 +14,7 @@ import PerformanceOverview from '../components/PerformanceOverview';
 import AIAssistanceTab from '../components/AIAssistanceTab';
 import ClearDataModal from '../components/ClearDataModal';
 import AccountTab from '../components/AccountTab'; // Import AccountTab component
+import SpoligeTab from '../components/SpoligeTab';
 
 const Dashboard = () => {
   const { user, token, logout } = useAuth();
@@ -97,6 +98,8 @@ const Dashboard = () => {
         return <UserManagementTab data={data?.users} />;
       case 'ai-assistance':
         return <AIAssistanceTab />;
+      case 'spolige':
+        return <SpoligeTab />;
       default:
         return (
           <>
@@ -139,7 +142,8 @@ const Dashboard = () => {
     { id: 'car-expenses', icon: 'bi-car-front', label: 'Car Expenses' },
     { id: 'other-expenses', icon: 'bi-receipt', label: 'Other Expenses' },
     { id: 'users', icon: 'bi-people', label: 'Users' },
-    { id: 'ai-assistance', icon: 'bi-robot', label: 'AI Assistance' }
+    { id: 'ai-assistance', icon: 'bi-robot', label: 'AI Assistance' },
+    { id: 'spolige', icon: 'bi-exclamation-triangle', label: 'Spoilage Tracker' }
   ];
 
   return (
