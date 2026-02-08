@@ -471,6 +471,9 @@ const SpoligeTab = (props) => {
                         <span className={`badge ${getStageBadgeClass(record.stage)}`}>
                           {getStageLabel(record.stage)}
                         </span>
+                        {record.source === 'automatic' && (
+                          <span className="badge bg-info ms-1">Auto</span>
+                        )}
                       </td>
                       <td>{formatCurrency(record.amount_per_kg)}</td>
                       <td className="text-danger fw-bold">{formatCurrency(record.total_amount)}</td>
