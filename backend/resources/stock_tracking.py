@@ -7,6 +7,7 @@ from models.driver import DriverExpense
 from models.stock_movement import StockMovement
 from models.inventory import Inventory
 from models.purchases import Purchase
+from models.spolige import Spolige
 from utils.helpers import make_response_data
 from utils.decorators import role_required
 from datetime import datetime, timedelta
@@ -103,6 +104,22 @@ class StockTrackingListResource(Resource):
                 record.quantity_out = data.get('quantityOut')
                 record.spoilage = data.get('spoilage')
                 record.total_stock_cost = data.get('totalStockCost')
+
+                # Automatically create spolige record if spoilage > 0
+                if data.get('spoilage') and safe_float(data['spoilage']) > 0:
+                    spolige_quantity = safe_float(data['spoilage'])
+                    spolige = Spolige(
+                        fruit_name=record.fruit_type,
+                        quantity=spolige_quantity,
+                        stage='fully_spoiled',
+                        amount_per_kg=record.amount_per_kg,
+                        total_amount=spolige_quantity * record.amount_per_kg,
+                        description=f'Automatic record from stock out: {record.stock_name}',
+                        date=date_out,
+                        stock_tracking_id=record.id,
+                        source='automatic'
+                    )
+                    db.session.add(spolige)
 
                 db.session.commit()
                 return make_response_data(data=record.to_dict(), message="Stock tracking record updated for stock out.", status_code=200)

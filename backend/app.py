@@ -763,11 +763,11 @@ def create_app(config_class=Config):
         Direct Flask handler for /api/spolige endpoint.
         This is a fallback in case Flask-RESTful routing fails.
         """
-        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
         from models.spolige import Spolige
         from models.user import User
         from datetime import datetime
-        
+
         # Handle CORS preflight
         if request.method == 'OPTIONS':
             resp = make_response('', 204)
@@ -778,15 +778,26 @@ def create_app(config_class=Config):
                 resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
                 resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
             return resp
-        
+
         try:
-            # Verify authentication
+            # Verify JWT token first
+            try:
+                verify_jwt_in_request()
+            except Exception as jwt_error:
+                return jsonify({
+                    'success': False,
+                    'message': 'Authentication required. Please log in again.',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+
+            # Get authenticated user identity
             identity = get_jwt_identity()
             if not identity:
                 return jsonify({
                     'success': False,
-                    'message': 'Missing access token',
-                    'error': 'authorization_required',
+                    'message': 'Invalid token',
+                    'error': 'invalid_token',
                     'status_code': 401
                 }), 401
             
@@ -859,11 +870,11 @@ def create_app(config_class=Config):
         Direct Flask handler for /api/spolige/<id> endpoint.
         This is a fallback in case Flask-RESTful routing fails.
         """
-        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
         from models.spolige import Spolige
         from models.user import User
         from datetime import datetime
-        
+
         # Handle CORS preflight
         if request.method == 'OPTIONS':
             resp = make_response('', 204)
@@ -874,15 +885,26 @@ def create_app(config_class=Config):
                 resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
                 resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
             return resp
-        
+
         try:
-            # Verify authentication
+            # Verify JWT token first
+            try:
+                verify_jwt_in_request()
+            except Exception as jwt_error:
+                return jsonify({
+                    'success': False,
+                    'message': 'Authentication required. Please log in again.',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+
+            # Get authenticated user identity
             identity = get_jwt_identity()
             if not identity:
                 return jsonify({
                     'success': False,
-                    'message': 'Missing access token',
-                    'error': 'authorization_required',
+                    'message': 'Invalid token',
+                    'error': 'invalid_token',
                     'status_code': 401
                 }), 401
             
@@ -972,10 +994,10 @@ def create_app(config_class=Config):
         Direct Flask handler for /api/spolige/clear endpoint.
         This is a fallback in case Flask-RESTful routing fails.
         """
-        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
         from models.spolige import Spolige
         from models.user import User
-        
+
         # Handle CORS preflight
         if request.method == 'OPTIONS':
             resp = make_response('', 204)
@@ -986,15 +1008,26 @@ def create_app(config_class=Config):
                 resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
                 resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
             return resp
-        
+
         try:
-            # Verify authentication
+            # Verify JWT token first
+            try:
+                verify_jwt_in_request()
+            except Exception as jwt_error:
+                return jsonify({
+                    'success': False,
+                    'message': 'Authentication required. Please log in again.',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+
+            # Get authenticated user identity
             identity = get_jwt_identity()
             if not identity:
                 return jsonify({
                     'success': False,
-                    'message': 'Missing access token',
-                    'error': 'authorization_required',
+                    'message': 'Invalid token',
+                    'error': 'invalid_token',
                     'status_code': 401
                 }), 401
             
