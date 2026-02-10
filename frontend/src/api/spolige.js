@@ -107,7 +107,7 @@ const apiRequest = async (endpoint, options = {}) => {
  */
 export const fetchSpolige = async () => {
   try {
-    const result = await apiRequest('/spolige');
+    const result = await apiRequest('/api/spolige');
     return {
       success: true,
       data: result.data?.data || result.data || [],
@@ -127,7 +127,7 @@ export const fetchSpolige = async () => {
  */
 export const createSpolige = async (spoligeData) => {
   try {
-    const result = await apiRequest('/spolige', {
+    const result = await apiRequest('/api/spolige', {
       method: 'POST',
       body: JSON.stringify(spoligeData),
     });
@@ -149,7 +149,7 @@ export const createSpolige = async (spoligeData) => {
  */
 export const updateSpolige = async (id, spoligeData) => {
   try {
-    const result = await apiRequest(`/spolige/${id}`, {
+    const result = await apiRequest(`/api/spolige/${id}`, {
       method: 'PUT',
       body: JSON.stringify(spoligeData),
     });
@@ -171,7 +171,7 @@ export const updateSpolige = async (id, spoligeData) => {
  */
 export const deleteSpolige = async (id) => {
   try {
-    const result = await apiRequest(`/spolige/${id}`, {
+    const result = await apiRequest(`/api/spolige/${id}`, {
       method: 'DELETE',
     });
     return {
@@ -192,7 +192,7 @@ export const deleteSpolige = async (id) => {
  */
 export const clearAllSpolige = async () => {
   try {
-    const result = await apiRequest('/spolige/clear', {
+    const result = await apiRequest('/api/spolige/clear', {
       method: 'DELETE',
     });
     return {
