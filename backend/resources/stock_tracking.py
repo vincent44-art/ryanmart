@@ -175,6 +175,14 @@ class ClearStockTrackingResource(Resource):
         db.session.commit()
         return make_response_data(message=f"Successfully cleared {num_deleted} stock tracking records.")
 
+class StockTrackingResource(Resource):
+    @role_required('ceo')
+    def delete(self, record_id):
+        record = StockTracking.query.get_or_404(record_id)
+        db.session.delete(record)
+        db.session.commit()
+        return make_response_data(message=f"Stock tracking record {record_id} deleted successfully.")
+
 
 def generate_stock_pdf(stock_record):
     """Generate PDF for a stock tracking record"""

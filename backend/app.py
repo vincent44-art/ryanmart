@@ -247,7 +247,7 @@ def create_app(config_class=Config):
     from resources.seller_fruits_bulk import SellerFruitBulkResource
     from resources.stock_tracking import (
         StockTrackingAggregatedResource, StockTrackingListResource,
-        ClearStockTrackingResource, StockTrackingPDFResource,
+        ClearStockTrackingResource, StockTrackingResource, StockTrackingPDFResource,
         StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource,
         StockTrackingCombinedPDFResource
     )
@@ -291,6 +291,7 @@ def create_app(config_class=Config):
     api.add_resource(SellerFruitBulkResource, '/api/seller-fruits/bulk')
     api.add_resource(StockTrackingAggregatedResource, '/api/stock-tracking/aggregated')
     api.add_resource(StockTrackingListResource, '/api/stock-tracking')
+    api.add_resource(StockTrackingResource, '/api/stock-tracking/<int:record_id>')
     api.add_resource(ClearStockTrackingResource, '/api/stock-tracking/clear')
     api.add_resource(StockTrackingPDFResource, '/api/stock-tracking/pdf/<int:record_id>')
     api.add_resource(StockTrackingGroupPDFResource, '/api/stock-tracking/pdf/group')
@@ -501,6 +502,85 @@ def create_app(config_class=Config):
         except Exception as e:
             db.session.rollback()
             app.logger.error(f"Stock tracking handler error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': f'Error: {str(e)}',
+                'error': 'internal_error'
+            }), 500
+
+    @app.route('/api/stock-tracking/<int:record_id>', methods=['DELETE', 'OPTIONS'])
+    def stock_tracking_delete_handler(record_id):
+        """
+        Direct Flask handler for DELETE /api/stock-tracking/<record_id> endpoint.
+        This is a fallback in case Flask-RESTful routing fails.
+        """
+        from flask_jwt_extended import jwt_required, get_jwt_identity
+        from models.stock_tracking import StockTracking
+        from models.user import User
+        
+        # Handle CORS preflight
+        if request.method == 'OPTIONS':
+            resp = make_response('', 204)
+            origin = request.headers.get('Origin', '')
+            if allowed_origins == ['*'] or origin in allowed_origins:
+                resp.headers['Access-Control-Allow-Origin'] = origin or allowed_origins[0] if allowed_origins else '*'
+                resp.headers['Access-Control-Allow-Credentials'] = 'true'
+                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+                resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+            return resp
+        
+        try:
+            # Verify authentication
+            identity = get_jwt_identity()
+            if not identity:
+                return jsonify({
+                    'success': False,
+                    'message': 'Missing access token',
+                    'error': 'authorization_required',
+                    'status_code': 401
+                }), 401
+            
+            current_user = User.query.get(identity)
+            if not current_user:
+                return jsonify({
+                    'success': False,
+                    'message': 'User not found',
+                    'error': 'user_not_found',
+                    'status_code': 401
+                }), 401
+            
+            # Check role for DELETE (only ceo can delete)
+            allowed_roles = ['ceo', 'admin']
+            if current_user.role not in allowed_roles and not any(r in str(current_user.role) for r in allowed_roles):
+                return jsonify({
+                    'success': False,
+                    'message': 'Insufficient permissions. Only CEO can delete stock records.',
+                    'error': 'forbidden',
+                    'status_code': 403
+                }), 403
+            
+            # Handle DELETE request
+            record = StockTracking.query.get(record_id)
+            if not record:
+                return jsonify({
+                    'success': False,
+                    'message': f'Stock tracking record {record_id} not found.',
+                    'error': 'not_found',
+                    'status_code': 404
+                }), 404
+            
+            stock_name = record.stock_name
+            db.session.delete(record)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Stock tracking record "{stock_name}" (ID: {record_id}) deleted successfully.'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Stock tracking delete handler error: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': f'Error: {str(e)}',
