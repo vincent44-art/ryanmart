@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { fetchStockTracking, fetchStockTrackingAggregated, fetchSales, deleteStockTracking } from '../api/stockTracking';
 
 const StockTrackerTab = ({ userRole }) => {
+  console.log('StockTrackerTab userRole:', userRole);
+
   const [data, setData] = useState({
     inventory: [],
     stockMovements: [],
@@ -303,7 +305,7 @@ const StockTrackerTab = ({ userRole }) => {
                       <th>Quantity Out</th>
                       <th>Spoilage</th>
                       <th>Total Stock Cost</th>
-                      {userRole === 'ceo' && <th>Actions</th>}
+                      {String(userRole).toLowerCase() === 'ceo' && <th>Actions</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -327,10 +329,23 @@ const StockTrackerTab = ({ userRole }) => {
                             <td>{rec.quantityOut}</td>
                             <td>{rec.spoilage}</td>
                             <td>{rec.totalStockCost}</td>
+                            {String(userRole).toLowerCase() === 'ceo' && (
+                              <td>
+                                <button
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleDeleteStock(rec.id, rec.stockName)}
+                                  title="Delete this stock record"
+                                  style={{ minWidth: '80px' }}
+                                >
+                                  <i className="bi bi-trash me-1"></i>
+                                  Delete
+                                </button>
+                              </td>
+                            )}
                           </tr>
                           {rec.dateOut && (
                             <tr>
-                              <td colSpan={userRole === 'ceo' ? "17" : "16"} className="text-center">
+                              <td colSpan={String(userRole).toLowerCase() === 'ceo' ? "17" : "16"} className="text-center">
                                 <button
                                   className="btn btn-sm btn-success me-2"
                                   onClick={() => handleDownloadPDF(rec.id)}
@@ -361,7 +376,7 @@ const StockTrackerTab = ({ userRole }) => {
                         </React.Fragment>
                       ))
                     ) : (
-                      <tr><td colSpan={userRole === 'ceo' ? "17" : "16"} className="text-center text-muted">No stock tracking records yet</td></tr>
+                      <tr><td colSpan={String(userRole).toLowerCase() === 'ceo' ? "17" : "16"} className="text-center text-muted">No stock tracking records yet</td></tr>
                     )}
                   </tbody>
                 </table>
