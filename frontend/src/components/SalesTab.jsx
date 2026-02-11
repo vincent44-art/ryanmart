@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Trash2, AlertCircle } from 'lucide-react';
 
 // Use relative paths for all API calls — backend determined by REACT_APP_API_BASE_URL env var
 // IMPORTANT: Ensure BASE_URL includes /api suffix since backend routes are prefixed with /api
@@ -97,6 +97,36 @@ const SalesTab = () => {
     }
   };
 
+  // Delete handler
+  const handleDeleteSale = async (saleId, stockName, fruitName) => {
+    if (!window.confirm(`Are you sure you want to delete this sale?\n\nStock: ${stockName}\nFruit: ${fruitName}\n\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${BASE_URL}/sales/${saleId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Remove the deleted sale from state
+        setSales(prevSales => prevSales.filter(sale => sale.id !== saleId));
+        alert('Sale deleted successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to delete sale: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+      alert('Error deleting sale. Please try again.');
+    }
+  };
+
   return (
     <div className="container-fluid py-3">
       <div className="card card-custom">
@@ -153,6 +183,7 @@ const SalesTab = () => {
                             <th>Amount</th>
                             <th>Customer Name</th>
                             <th>Seller Email</th>
+                            <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -165,6 +196,16 @@ const SalesTab = () => {
                               <td className="fw-bold">{formatKenyanCurrency(sale.amount)}</td>
                               <td>{sale.customer_name || 'N/A'}</td>
                               <td>{sale.seller_email || 'N/A'}</td>
+                              <td>
+                                <button
+                                  className="btn btn-outline-danger btn-sm"
+                                  onClick={() => handleDeleteSale(sale.id, sale.stock_name, sale.fruit_name)}
+                                  title="Delete Sale"
+                                  style={{ padding: '0.25rem 0.5rem' }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </td>
                             </tr>
                           ))}
                         </tbody>

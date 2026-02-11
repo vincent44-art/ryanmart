@@ -18,6 +18,15 @@ export const updateSale = async (saleId, saleData) => {
   }
 };
 
+export const deleteSale = async (saleId) => {
+  try {
+    const response = await api.delete(`/api/sales/${saleId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getCustomerDebts = async () => {
   try {
     const response = await api.get('/api/sales/debts');
