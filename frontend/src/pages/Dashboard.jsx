@@ -85,7 +85,7 @@ const Dashboard = () => {
       case 'sales':
         return <SalesTab data={data?.sales} />;
       case 'stock-tracker':
-        return <StockTrackerTab />;
+        return <StockTrackerTab userRole={user?.role} />;
       case 'reports':
         return <ReportsTab />;
       case 'salaries':

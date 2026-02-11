@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchStockTracking, fetchStockTrackingAggregated, fetchSales } from '../api/stockTracking';
+import { fetchStockTracking, fetchStockTrackingAggregated, fetchSales, deleteStockTracking } from '../api/stockTracking';
 
-const StockTrackerTab = () => {
+const StockTrackerTab = ({ userRole }) => {
   const [data, setData] = useState({
     inventory: [],
     stockMovements: [],
@@ -245,6 +245,28 @@ const StockTrackerTab = () => {
     }
   };
 
+  const handleDeleteStock = async (recordId, stockName) => {
+    if (!window.confirm(`Are you sure you want to delete the stock record "${stockName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+      await deleteStockTracking(recordId, token);
+
+      // Remove the deleted record from the local state
+      setData(prevData => ({
+        ...prevData,
+        stockTracking: prevData.stockTracking.filter(record => record.id !== recordId)
+      }));
+
+      alert('Stock record deleted successfully.');
+    } catch (error) {
+      console.error('Delete stock error:', error);
+      alert('Failed to delete stock record. Please try again.');
+    }
+  };
+
   return (
     <div className="container-fluid py-4">
       {/* Stock Tracking Records */}
@@ -281,6 +303,7 @@ const StockTrackerTab = () => {
                       <th>Quantity Out</th>
                       <th>Spoilage</th>
                       <th>Total Stock Cost</th>
+                      {userRole === 'ceo' && <th>Actions</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -307,7 +330,7 @@ const StockTrackerTab = () => {
                           </tr>
                           {rec.dateOut && (
                             <tr>
-                              <td colSpan="16" className="text-center">
+                              <td colSpan={userRole === 'ceo' ? "17" : "16"} className="text-center">
                                 <button
                                   className="btn btn-sm btn-success me-2"
                                   onClick={() => handleDownloadPDF(rec.id)}
@@ -338,7 +361,7 @@ const StockTrackerTab = () => {
                         </React.Fragment>
                       ))
                     ) : (
-                      <tr><td colSpan="16" className="text-center text-muted">No stock tracking records yet</td></tr>
+                      <tr><td colSpan={userRole === 'ceo' ? "17" : "16"} className="text-center text-muted">No stock tracking records yet</td></tr>
                     )}
                   </tbody>
                 </table>

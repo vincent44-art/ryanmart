@@ -228,3 +228,40 @@ export const fetchSales = async (token) => {
   }
 };
 
+export const deleteStockTracking = async (recordId, token) => {
+  if (!token) {
+    throw new Error('Authentication token is required');
+  }
+
+  const endpoint = `/api/stock-tracking/${recordId}`;
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
+  try {
+    const response = await fetch(fullUrl, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    // Check content type to avoid parsing HTML as JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Delete stock tracking error: Expected JSON but got:', text.substring(0, 200));
+      throw new Error('Server returned non-JSON response. Check API endpoint.');
+    }
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete stock tracking record');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Delete stock tracking error:', error);
+    throw error;
+  }
+};
+
