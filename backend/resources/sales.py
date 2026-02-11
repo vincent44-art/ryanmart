@@ -218,12 +218,25 @@ class SaleResource(Resource):
     @role_required('ceo', 'seller')
     def delete(self, sale_id):
         current_user = get_current_user()
-        sale = Sale.query.filter_by(id=sale_id, seller_id=current_user.id if current_user.role == 'seller' else None).first_or_404()
+        
+        # Find the sale - CEO can delete any sale, seller can only delete their own
+        if current_user.role == 'seller':
+            sale = Sale.query.filter_by(id=sale_id, seller_id=current_user.id).first()
+        else:
+            sale = Sale.query.filter_by(id=sale_id).first()
+        
+        if not sale:
+            return make_response_data(
+                success=False,
+                message='Sale not found or you do not have permission to delete it',
+                status_code=404
+            ), 404
 
+        sale_id_deleted = sale.id
         db.session.delete(sale)
         db.session.commit()
 
-        return make_response_data(True, 200, 'Sale deleted successfully', {'id': sale_id})
+        return make_response_data(True, 200, 'Sale deleted successfully', {'id': sale_id_deleted})
 
 
 class SaleSummaryResource(Resource):

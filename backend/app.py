@@ -275,7 +275,8 @@ def create_app(config_class=Config):
     api.add_resource(ITIncidentsResource, '/api/it/incidents')
     api.add_resource(SaleListResource, '/api/sales')
     api.add_resource(SaleByEmailResource, '/api/sales/email/<string:email>')
-    api.add_resource(SaleResource, '/api/sales/<int:sale_id>')
+    # SaleResource is registered in resources/__init__.py via api_bp
+    # api.add_resource(SaleResource, '/api/sales/<int:sale_id>')  # Duplicate - removed
     api.add_resource(SaleSummaryResource, '/api/sales/summary')
     api.add_resource(ClearSalesResource, '/api/sales/clear')
     api.add_resource(CustomerDebtResource, '/api/sales/debts')
