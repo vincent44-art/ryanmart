@@ -202,3 +202,9 @@ class UserPaymentResource(Resource):
         user.is_paid = data['is_paid']
         db.session.commit()
         return make_response_data(data=user.to_dict(), message=f"User payment status marked as {'paid' if data['is_paid'] else 'unpaid'}.")
+
+class UsersForSalaryResource(Resource):
+    @role_required('ceo')
+    def get(self):
+        users = User.query.filter(User.salary > 0).order_by(User.id).all()
+        return make_response_data(data=[user.to_dict() for user in users], message="Users with salaries fetched.")
