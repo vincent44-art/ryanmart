@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import jwt_required
 from models.user import db, User, UserRole
 from utils.decorators import role_required
 from utils.helpers import make_response_data
