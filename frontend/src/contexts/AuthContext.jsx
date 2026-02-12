@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-// import api from '../services/api';
-import api from '../services/api';
+import api from '../api/api';
 
 
 
@@ -49,17 +48,21 @@ const verifyAuth = async () => {
 
   const login = async (email, password) => {
   try {
+    console.log('Login attempt for:', email);
     // Use relative path so axios baseURL is respected
     const response = await api.post('/api/auth/login', { email, password });
+    console.log('Login response:', response.data);
+    
     const resData = response?.data?.data || response?.data;
 
     if (!resData || !resData.access_token || !resData.user) {
-      throw new Error("Invalid response format");
+      console.error('Invalid login response format:', resData);
+      throw new Error("Invalid response format from server");
     }
 
     // Save token FIRST
     localStorage.setItem('access_token', resData.access_token);
-    api.defaults.headers.Authorization = `Bearer ${resData.access_token}`; // <-- Add this
+    api.defaults.headers.Authorization = `Bearer ${resData.access_token}`;
     setUser(resData.user);
 
     toast.success('Login successful');
@@ -67,8 +70,13 @@ const verifyAuth = async () => {
     // Check if first login - return flag for redirect handling
     return { success: true, isFirstLogin: resData.user.is_first_login };
   } catch (error) {
-    console.error('Login error:', error);
-    const errorMsg = error.response?.data?.message || 'Login failed';
+    console.error('Login error details:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      headers: error.response?.headers
+    });
+    const errorMsg = error.response?.data?.message || error.message || 'Login failed';
     toast.error(errorMsg);
     return { success: false, error: errorMsg };
   }

@@ -81,6 +81,7 @@ api.interceptors.response.use(
     if (error instanceof SyntaxError && error.message.includes('Unexpected token') ||
         error.message?.includes('JSON.parse')) {
       console.error('JSON parsing error - likely received HTML instead of JSON:', error.message);
+      console.error('Full error object:', error);
       toast.error('Server error: Received invalid response from server');
       return Promise.reject({
         status: 500,
@@ -90,13 +91,15 @@ api.interceptors.response.use(
       });
     }
 
-    // Handle network errors (CORS, server down, etc.)
+    // Handle network errors (CORS, server down, DNS failure, etc.)
     if (!error.response && (error.code === 'ERR_NETWORK' || error.message.includes('Network Error'))) {
       console.error('Network error:', error.message);
+      console.error('Error code:', error.code);
+      console.error('Full error:', error);
       toast.error('Network error: Cannot connect to server. Please check your connection.');
       return Promise.reject({
         status: 0,
-        message: 'Network error: Cannot connect to server.',
+        message: 'Network error: Cannot connect to server. Check if backend is running.',
         isNetworkError: true
       });
     }

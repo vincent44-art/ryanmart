@@ -35,8 +35,24 @@ const Login = () => {
         }
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setError('An unexpected error occurred');
+      console.error('Login error details:', {
+        message: error.message,
+        status: error.status,
+        response: error.response?.data,
+        isNetworkError: error.isNetworkError,
+        isHtmlError: error.isHtmlError
+      });
+      
+      // Show more specific error message
+      if (error.isNetworkError) {
+        setError('Cannot connect to server. Please check your connection and try again.');
+      } else if (error.isHtmlError) {
+        setError('Server error: Received invalid response. Please try again later.');
+      } else if (error.message) {
+        setError(error.message);
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

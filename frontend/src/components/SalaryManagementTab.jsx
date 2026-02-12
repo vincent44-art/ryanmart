@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSalaries, fetchUsers, deleteSalary, createSalary, toggleSalaryStatus } from './apiHelpers';
+import { fetchSalaries, fetchUsersForSalary, deleteSalary, createSalary, toggleSalaryStatus } from './apiHelpers';
 import SalaryFormModal from './SalaryFormModal';
 
 const SalaryManagementTab = ({ data }) => {
@@ -12,6 +12,21 @@ const SalaryManagementTab = ({ data }) => {
 
   // Fetch all data on component mount
   useEffect(() => {
+    // Always fetch users for the dropdown
+    const loadUsers = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const usersRes = await fetchUsersForSalary(token);
+        console.log('Loaded users:', usersRes.data);
+        const usersData = usersRes.data?.data || [];
+        setUsers(usersData);
+      } catch (err) {
+        console.error('Failed to load users:', err);
+        // Don't show error to user, just log it
+      }
+    };
+    loadUsers();
+    
     // If data is passed as prop, use it, otherwise fetch all salaries from DB
     if (Array.isArray(data)) {
       setSalaries(data);
@@ -20,17 +35,11 @@ const SalaryManagementTab = ({ data }) => {
       const loadData = async () => {
         try {
           const token = localStorage.getItem('access_token');
-          const [salariesRes, usersRes] = await Promise.all([
-            fetchSalaries(token),
-            fetchUsers(token)
-          ]);
-          console.log('Loaded users:', usersRes.data);
+          const salariesRes = await fetchSalaries(token);
           console.log('Loaded salaries:', salariesRes.data);
-          const usersData = usersRes.data?.data || [];
           setSalaries(salariesRes.data?.data || []);
-          setUsers(usersData);
         } catch (err) {
-          console.error('Failed to load data:', err);
+          console.error('Failed to load salaries:', err);
           setError('Failed to load data. Please try again.');
         } finally {
           setLoading(false);
