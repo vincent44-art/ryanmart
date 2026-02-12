@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from flask_restful import Api, Resource
 
 # Import all resource classes
-from .user import UserListResource, UserResource, UserSalaryResource, UserPaymentResource
+from .user import UserListResource, UserResource, UserSalaryResource, UserPaymentResource, UsersForSalaryResource
 from .inventory import InventoryListResource, InventoryResource, ClearInventoryResource
 
 from .purchases import (

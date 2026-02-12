@@ -233,7 +233,7 @@ def create_app(config_class=Config):
     # Note: Most routes are registered in resources/__init__.py via api_bp blueprint
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
     from resources.expenses import CarExpensesResource
-    from resources.user import UserListResource
+    from resources.user import UserListResource, UsersForSalaryResource
     from resources.profile_image import ProfileImageUploadResource
     from resources.inventory import InventoryListResource, InventoryResource, ClearInventoryResource
     from resources.stock import StockMovementListResource
@@ -267,6 +267,7 @@ def create_app(config_class=Config):
     api.add_resource(SalaryPaymentToggleStatusResource, '/api/salary-payments/<int:payment_id>/toggle-status')
     api.add_resource(CarExpensesResource, '/api/car-expenses', '/api/car-expenses/<int:expense_id>')
     api.add_resource(UserListResource, '/api/users')
+    api.add_resource(UsersForSalaryResource, '/api/users/for-salary')
     api.add_resource(ProfileImageUploadResource, '/api/profile-image')
     api.add_resource(ITEventsResource, '/api/it/events')
     api.add_resource(ITEventResource, '/api/it/events/<string:event_id>')

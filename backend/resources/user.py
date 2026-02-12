@@ -22,6 +22,13 @@ class UserListResource(Resource):
         users = User.query.order_by(User.id).all()
         return make_response_data(data=[user.to_dict() for user in users], message="All users fetched.")
 
+class UsersForSalaryResource(Resource):
+    """Resource to fetch users for salary dropdown - accessible by any authenticated user."""
+    @jwt_required()
+    def get(self):
+        users = User.query.filter_by(is_active=True).order_by(User.name).all()
+        return make_response_data(data=[user.to_dict() for user in users], message="Users fetched for salary.")
+
     @role_required('ceo')
     def post(self):
         data = parser.parse_args()
