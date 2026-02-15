@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, FloatingLabel } from 'react-bootstrap';
 
-const SalaryFormModal = ({ show, onClose, onSave, users }) => {
+const SalaryFormModal = ({ show, onClose, onSave, users = [] }) => {
   const [form, setForm] = useState({
     user_id: '',
     description: '',
@@ -38,16 +38,22 @@ const SalaryFormModal = ({ show, onClose, onSave, users }) => {
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
-
-          <FloatingLabel controlId="description" label="Description" className="mb-3">
-            <Form.Control
-              type="text"
-              name="description"
-              placeholder="Description (optional)"
-              value={form.description}
+          <FloatingLabel controlId="user_id" label="Select Employee" className="mb-3">
+            <Form.Select
+              name="user_id"
+              value={form.user_id}
               onChange={handleChange}
-            />
+              required
+            >
+              <option value="">Choose an employee...</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.email})
+                </option>
+              ))}
+            </Form.Select>
           </FloatingLabel>
+
           <FloatingLabel controlId="amount" label="Salary Amount (KES)" className="mb-3">
             <Form.Control
               type="number"
@@ -58,6 +64,17 @@ const SalaryFormModal = ({ show, onClose, onSave, users }) => {
               required
             />
           </FloatingLabel>
+
+          <FloatingLabel controlId="description" label="Description" className="mb-3">
+            <Form.Control
+              type="text"
+              name="description"
+              placeholder="Description (optional)"
+              value={form.description}
+              onChange={handleChange}
+            />
+          </FloatingLabel>
+          
           <div className="d-flex justify-content-end">
             <button type="button" className="btn btn-outline-secondary me-2" onClick={onClose}>
               Cancel
