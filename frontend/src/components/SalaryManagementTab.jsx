@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchSalaries, fetchUsersForSalary, deleteSalary, createSalary, toggleSalaryStatus } from './apiHelpers';
+import { fetchSalaries, fetchUsersForSalary, fetchUsers, deleteSalary, createSalary, toggleSalaryStatus } from './apiHelpers';
 import SalaryFormModal from './SalaryFormModal';
 
 const SalaryManagementTab = ({ data }) => {
@@ -12,14 +12,33 @@ const SalaryManagementTab = ({ data }) => {
 
   // Fetch all data on component mount
   useEffect(() => {
-    // Always fetch users for the dropdown
+    // Always fetch users for the dropdown - try salary-specific endpoint first, then fallback to all users
     const loadUsers = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        const usersRes = await fetchUsersForSalary(token);
-        console.log('Loaded users:', usersRes.data);
-        const usersData = usersRes.data?.data || [];
-        setUsers(usersData);
+        // Try the salary-specific endpoint first
+        try {
+          const usersRes = await fetchUsersForSalary();
+          console.log('Loaded users (salary):', usersRes.data);
+          const usersData = usersRes.data?.data || [];
+          if (usersData.length > 0) {
+            setUsers(usersData);
+            return;
+          }
+        } catch (salaryErr) {
+          console.log('Salary users endpoint failed, trying all users:', salaryErr);
+        }
+        
+        // Fallback: try to get all users
+        try {
+          const allUsersRes = await fetchUsers();
+          console.log('Loaded users (all):', allUsersRes.data);
+          const usersData = allUsersRes.data?.data || [];
+          setUsers(usersData);
+        } catch (allUsersErr) {
+          console.error('Failed to load any users:', allUsersErr);
+          // Don't show error, just set empty array
+          setUsers([]);
+        }
       } catch (err) {
         console.error('Failed to load users:', err);
         // Don't show error to user, just log it
@@ -34,8 +53,7 @@ const SalaryManagementTab = ({ data }) => {
     } else {
       const loadData = async () => {
         try {
-          const token = localStorage.getItem('access_token');
-          const salariesRes = await fetchSalaries(token);
+          const salariesRes = await fetchSalaries();
           console.log('Loaded salaries:', salariesRes.data);
           setSalaries(salariesRes.data?.data || []);
         } catch (err) {

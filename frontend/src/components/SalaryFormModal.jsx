@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Modal, Form, FloatingLabel } from 'react-bootstrap';
 
 const SalaryFormModal = ({ show, onClose, onSave, users = [] }) => {
+  // Ensure users is always an array
+  const userList = Array.isArray(users) ? users : [];
+  
   const [form, setForm] = useState({
     user_id: '',
     description: '',
@@ -46,11 +49,15 @@ const SalaryFormModal = ({ show, onClose, onSave, users = [] }) => {
               required
             >
               <option value="">Choose an employee...</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.email})
-                </option>
-              ))}
+              {userList.length > 0 ? (
+                userList.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name} ({user.email})
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No employees available</option>
+              )}
             </Form.Select>
           </FloatingLabel>
 
