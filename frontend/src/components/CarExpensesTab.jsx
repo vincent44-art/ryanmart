@@ -86,6 +86,7 @@ const CarExpensesTab = (props) => {
     type: '',
     description: '',
     amount: '',
+    spolige: '',
     date: new Date().toISOString().split('T')[0]
   });
 
@@ -162,6 +163,7 @@ const CarExpensesTab = (props) => {
           type: '',
           description: '',
           amount: '',
+          spolige: '',
           date: new Date().toISOString().split('T')[0]
         });
         setShowForm(false);
@@ -320,6 +322,16 @@ const CarExpensesTab = (props) => {
                   />
                 </div>
                 <div className="col-md-6 mb-3">
+                  <label className="form-label">Spolige</label>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    value={formData.spolige}
+                    onChange={(e) => setFormData({ ...formData, spolige: e.target.value })} 
+                    placeholder="Spolige (spoilage info)"
+                  />
+                </div>
+                <div className="col-md-6 mb-3">
                   <label className="form-label">Date</label>
                   <input 
                     type="date" 
@@ -378,6 +390,7 @@ const CarExpensesTab = (props) => {
                     <th>Car Name</th>
                     <th>Car Number Plate</th>
                     <th>Stock Name</th>
+                    <th>Spolige</th>
                     <th>Amount (KES)</th>
                     <th>Date</th>
                     <th>Driver</th>
@@ -392,6 +405,7 @@ const CarExpensesTab = (props) => {
                       <td>{exp.car_name || exp.carType || '-'}</td>
                       <td>{exp.car_number_plate || '-'}</td>
                       <td>{exp.stock_name || '-'}</td>
+                      <td>{exp.spolige || '-'}</td>
                       <td>{formatCurrency(exp.amount)}</td>
                       <td>{exp.date ? new Date(exp.date).toLocaleDateString() : '-'}</td>
                       <td>{exp.driver_email || exp.driverEmail || '-'}</td>

@@ -23,7 +23,8 @@ const DriverDashboard = () => {
     date: new Date().toISOString().split('T')[0],
     car_name: '',
     car_number_plate: '',
-    stock_name: ''
+    stock_name: '',
+    spolige: ''
   });
 
   // Helper function to check if response is HTML
@@ -120,7 +121,8 @@ const DriverDashboard = () => {
         date: formData.date,
         car_name: formData.car_name,
         car_number_plate: formData.car_number_plate,
-        stock_name: formData.stock_name
+        stock_name: formData.stock_name,
+        spolige: formData.spolige
       };
       const addedExpense = await addDriverExpense(newExpense);
       setCarExpenses(prev => [...prev, addedExpense]);
@@ -132,7 +134,8 @@ const DriverDashboard = () => {
         date: new Date().toISOString().split('T')[0],
         car_name: '',
         car_number_plate: '',
-        stock_name: ''
+        stock_name: '',
+        spolige: ''
       });
     } catch (err) {
       setError('Failed to add expense. Please try again.');
@@ -223,6 +226,16 @@ const DriverDashboard = () => {
                   />
                   </div>
                   <div className="mb-3">
+                    <label className="form-label">Spolige</label>
+                    <input
+                      type="text"
+                      placeholder="Spolige (spoilage info)"
+                      value={formData.spolige}
+                      onChange={e => setFormData({ ...formData, spolige: e.target.value })}
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="mb-3">
                     <label className="form-label">Amount (KES)</label>
                     <input
                       type="number"
@@ -274,6 +287,7 @@ const DriverDashboard = () => {
                           <th>Car Name</th>
                           <th>Car Number Plate</th>
                           <th>Stock Name</th>
+                          <th>Spolige</th>
                           <th>Amount (KES)</th>
                           <th>Date</th>
                         </tr>
@@ -286,6 +300,7 @@ const DriverDashboard = () => {
                             <td>{expense.car_name || '-'}</td>
                             <td>{expense.car_number_plate || '-'}</td>
                             <td>{expense.stock_name || '-'}</td>
+                            <td>{expense.spolige || '-'}</td>
                             <td>{expense.amount}</td>
                             <td>{expense.date ? new Date(expense.date).toLocaleDateString() : '-'}</td>
                           </tr>

@@ -10,6 +10,7 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
     buyerName: '',
     amountPerKg: '',
     amount: '',
+    spolige: '',
     date: new Date().toISOString().split('T')[0]
   });
 
@@ -67,6 +68,7 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
           buyerName: '',
           amountPerKg: '',
           amount: '',
+          spolige: '',
           date: new Date().toISOString().split('T')[0]
         });
         onClose();
@@ -203,6 +205,18 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
                 value={formData.date}
                 onChange={handleChange}
                 required
+              />
+            </FloatingLabel>
+          </div>
+
+          <div className="mb-3">
+            <FloatingLabel controlId="spolige" label="Spolige (Spoilage)">
+              <Form.Control
+                type="text"
+                name="spolige"
+                value={formData.spolige}
+                onChange={handleChange}
+                placeholder="Spolige (spoilage info)"
               />
             </FloatingLabel>
           </div>
