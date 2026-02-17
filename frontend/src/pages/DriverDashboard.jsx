@@ -24,7 +24,8 @@ const DriverDashboard = () => {
     car_name: '',
     car_number_plate: '',
     stock_name: '',
-    spolige: ''
+    spolige_fruit_type: '',
+    spolige_amount: ''
   });
 
   // Helper function to check if response is HTML
