@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { addStockTracking, fetchStockTracking } from '../api/stockTracking';
 import { fetchOtherExpenses } from '../api/otherExpenses';
+import { createSpolige } from '../api/spolige';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
 
@@ -209,6 +210,22 @@ const StoreKeeperDashboard = () => {
       const res = await addStockTracking(record, token);
       // Update the records state with the updated record
       setRecords((prev) => prev.map(r => r.id === res.data.id ? res.data : r));
+      
+      // If there's spoilage, create a spolige record with store_stage
+      if (stockOut.spoilage && parseFloat(stockOut.spoilage) > 0) {
+        const spoligeData = {
+          fruit_name: stockInRecord.fruitType || stockInRecord.stockName || 'Unknown',
+          quantity: parseFloat(stockOut.spoilage),
+          stage: 'store_stage',
+          amount_per_kg: parseFloat(stockInRecord.amountPerKg) || 0,
+          total_amount: parseFloat(stockOut.spoilage) * (parseFloat(stockInRecord.amountPerKg) || 0),
+          description: `From Store Stock Out: ${stockInRecord.stockName}`,
+          date: stockOut.dateOut
+        };
+        
+        await createSpolige(spoligeData);
+      }
+      
       setStockOut(initialStockOut);
     } catch (e) {}
   };

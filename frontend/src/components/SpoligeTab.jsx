@@ -12,7 +12,7 @@ const SpoligeTab = (props) => {
   const [formData, setFormData] = useState({
     fruit_name: '',
     quantity: '',
-    stage: 'partial',
+    stage: 'purchaser_stage',
     amount_per_kg: '',
     total_amount: '',
     description: '',
@@ -42,13 +42,12 @@ const SpoligeTab = (props) => {
     'Other'
   ];
 
-  // Spoilage stages
+  // Spoilage stages - supply chain stages
   const spoilageStages = [
-    { value: 'fresh', label: 'Fresh' },
-    { value: 'slight_damage', label: 'Slight Damage' },
-    { value: 'partial', label: 'Partial Spoilage' },
-    { value: 'mostly_spoiled', label: 'Mostly Spoiled' },
-    { value: 'fully_spoiled', label: 'Fully Spoiled' }
+    { value: 'purchaser_stage', label: 'Purchaser Stage' },
+    { value: 'driver_stage', label: 'Driver Stage' },
+    { value: 'seller_stage', label: 'Seller Stage' },
+    { value: 'store_stage', label: 'Store Stage' }
   ];
 
   // Load spolige records
@@ -109,11 +108,10 @@ const SpoligeTab = (props) => {
 
   const getStageBadgeClass = (stage) => {
     switch (stage) {
-      case 'fresh': return 'bg-success';
-      case 'slight_damage': return 'bg-info';
-      case 'partial': return 'bg-warning';
-      case 'mostly_spoiled': return 'bg-orange';
-      case 'fully_spoiled': return 'bg-danger';
+      case 'purchaser_stage': return 'bg-primary';
+      case 'driver_stage': return 'bg-info';
+      case 'seller_stage': return 'bg-warning';
+      case 'store_stage': return 'bg-success';
       default: return 'bg-secondary';
     }
   };
@@ -163,7 +161,7 @@ const SpoligeTab = (props) => {
     setFormData({
       fruit_name: record.fruit_name || '',
       quantity: record.quantity || '',
-      stage: record.stage || 'partial',
+      stage: record.stage || 'purchaser_stage',
       amount_per_kg: record.amount_per_kg || '',
       total_amount: record.total_amount || '',
       description: record.description || '',
@@ -213,7 +211,7 @@ const SpoligeTab = (props) => {
     setFormData({
       fruit_name: '',
       quantity: '',
-      stage: 'partial',
+      stage: 'purchaser_stage',
       amount_per_kg: '',
       total_amount: '',
       description: '',

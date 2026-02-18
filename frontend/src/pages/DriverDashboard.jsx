@@ -6,6 +6,7 @@ import {
   addDriverExpense
 } from '../api/driver';
 import { fetchOtherExpenses } from '../api/otherExpenses';
+import { createSpolige } from '../api/spolige';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
 
@@ -127,6 +128,24 @@ const DriverDashboard = () => {
       };
       const addedExpense = await addDriverExpense(newExpense);
       setCarExpenses(prev => [...prev, addedExpense]);
+      
+      // If there's spolige info, create a spolige record with driver_stage
+      if (formData.spolige && formData.spolige.trim()) {
+        // Parse spolige string (format: "fruit_name:quantity:amount_per_kg" or just a description)
+        const spoligeParts = formData.spolige.split(':');
+        const spoligeData = {
+          fruit_name: spoligeParts[0]?.trim() || formData.stock_name || 'Unknown',
+          quantity: parseFloat(spoligeParts[1]) || 1,
+          stage: 'driver_stage',
+          amount_per_kg: parseFloat(spoligeParts[2]) || 0,
+          total_amount: (parseFloat(spoligeParts[1]) || 1) * (parseFloat(spoligeParts[2]) || 0),
+          description: spoligeParts.length > 3 ? spoligeParts.slice(3).join(':') : formData.description || 'From Driver Expense',
+          date: formData.date
+        };
+        
+        await createSpolige(spoligeData);
+      }
+      
       // Reset form
       setFormData({
         type: 'fuel',

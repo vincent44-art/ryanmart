@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Trash2, Plus } from 'lucide-react';
 import api, { safeApiCall } from '../services/api';
+import { createSpolige } from '../api/spolige';
 
 // =====================================================================
 // API FUNCTIONS - Use safeApiCall for error handling
@@ -155,6 +156,23 @@ const CarExpensesTab = (props) => {
       
       if (result.success && result.data) {
         setExpenses([...expenses, result.data]);
+        
+        // If there's spolige info, create a spolige record with driver_stage
+        if (formData.spolige && formData.spolige.trim()) {
+          // Parse spolige string (format: "fruit_name:quantity:amount_per_kg" or just a description)
+          const spoligeParts = formData.spolige.split(':');
+          const spoligeData = {
+            fruit_name: spoligeParts[0]?.trim() || 'Unknown',
+            quantity: parseFloat(spoligeParts[1]) || 1,
+            stage: 'driver_stage',
+            amount_per_kg: parseFloat(spoligeParts[2]) || 0,
+            total_amount: (parseFloat(spoligeParts[1]) || 1) * (parseFloat(spoligeParts[2]) || 0),
+            description: spoligeParts.length > 3 ? spoligeParts.slice(3).join(':') : formData.description || 'From Car Expense',
+            date: formData.date
+          };
+          
+          await createSpolige(spoligeData);
+        }
         
         // Reset form
         setFormData({

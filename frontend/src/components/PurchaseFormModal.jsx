@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Form, FloatingLabel } from 'react-bootstrap';
+import { createSpolige } from '../api/spolige';
 
 const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
   const [formData, setFormData] = useState({
@@ -59,6 +60,24 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
       if (response.ok) {
         const newPurchase = await response.json();
         onAddPurchase(newPurchase.data || newPurchase);
+        
+        // If there's spolige info, create a spolige record with purchaser_stage
+        if (formData.spolige && formData.spolige.trim()) {
+          // Parse spolige string (format: "fruit_name:quantity:amount_per_kg" or just a description)
+          const spoligeParts = formData.spolige.split(':');
+          const spoligeData = {
+            fruit_name: spoligeParts[0]?.trim() || formData.fruitType || 'Unknown',
+            quantity: parseFloat(spoligeParts[1]) || parseFloat(formData.quantity) || 1,
+            stage: 'purchaser_stage',
+            amount_per_kg: parseFloat(spoligeParts[2]) || parseFloat(formData.amountPerKg) || 0,
+            total_amount: (parseFloat(spoligeParts[1]) || parseFloat(formData.quantity) || 1) * (parseFloat(spoligeParts[2]) || parseFloat(formData.amountPerKg) || 0),
+            description: spoligeParts.length > 3 ? spoligeParts.slice(3).join(':') : `From Purchase: ${formData.buyerName}`,
+            date: formData.date
+          };
+          
+          await createSpolige(spoligeData);
+        }
+        
         // Reset form
         setFormData({
           employeeName: '',
