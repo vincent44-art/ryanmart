@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Form, FloatingLabel } from 'react-bootstrap';
 import { createSpolige } from '../api/spolige';
 
@@ -12,8 +12,24 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
     amountPerKg: '',
     amount: '',
     spolige: '',
+    spoligeQty: '',
+    spoligeAmountPerKg: '',
+    spoligeTotal: '',
     date: new Date().toISOString().split('T')[0]
   });
+
+  // Auto-calculate spolige total amount
+  useEffect(() => {
+    const spoligeQty = parseFloat(formData.spoligeQty) || 0;
+    const spoligeAmountPerKg = parseFloat(formData.spoligeAmountPerKg) || 0;
+    if (spoligeQty > 0 && spoligeAmountPerKg > 0) {
+      const total = spoligeQty * spoligeAmountPerKg;
+      setFormData(prev => ({
+        ...prev,
+        spoligeTotal: total.toFixed(2)
+      }));
+    }
+  }, [formData.spoligeQty, formData.spoligeAmountPerKg]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,16 +78,19 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
         onAddPurchase(newPurchase.data || newPurchase);
         
         // If there's spolige info, create a spolige record with purchaser_stage
-        if (formData.spolige && formData.spolige.trim()) {
-          // Parse spolige string (format: "fruit_name:quantity:amount_per_kg" or just a description)
-          const spoligeParts = formData.spolige.split(':');
+        if ((formData.spoligeQty && parseFloat(formData.spoligeQty) > 0) || 
+            (formData.spoligeAmountPerKg && parseFloat(formData.spoligeAmountPerKg) > 0) ||
+            (formData.spolige && formData.spolige.trim())) {
+          const spoligeQty = parseFloat(formData.spoligeQty) || parseFloat(formData.quantity) || 1;
+          const spoligeAmtPerKg = parseFloat(formData.spoligeAmountPerKg) || parseFloat(formData.amountPerKg) || 0;
+          const spoligeTotal = parseFloat(formData.spoligeTotal) || (spoligeQty * spoligeAmtPerKg);
           const spoligeData = {
-            fruit_name: spoligeParts[0]?.trim() || formData.fruitType || 'Unknown',
-            quantity: parseFloat(spoligeParts[1]) || parseFloat(formData.quantity) || 1,
+            fruit_name: formData.fruitType || 'Unknown',
+            quantity: spoligeQty,
             stage: 'purchaser_stage',
-            amount_per_kg: parseFloat(spoligeParts[2]) || parseFloat(formData.amountPerKg) || 0,
-            total_amount: (parseFloat(spoligeParts[1]) || parseFloat(formData.quantity) || 1) * (parseFloat(spoligeParts[2]) || parseFloat(formData.amountPerKg) || 0),
-            description: spoligeParts.length > 3 ? spoligeParts.slice(3).join(':') : `From Purchase: ${formData.buyerName}`,
+            amount_per_kg: spoligeAmtPerKg,
+            total_amount: spoligeTotal,
+            description: formData.spolige || `From Purchase: ${formData.buyerName}`,
             date: formData.date
           };
           
@@ -88,6 +107,9 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
           amountPerKg: '',
           amount: '',
           spolige: '',
+          spoligeQty: '',
+          spoligeAmountPerKg: '',
+          spoligeTotal: '',
           date: new Date().toISOString().split('T')[0]
         });
         onClose();
@@ -238,6 +260,53 @@ const PurchaseFormModal = ({ show, onClose, onAddPurchase }) => {
                 placeholder="Spolige (spoilage info)"
               />
             </FloatingLabel>
+          </div>
+
+          {/* Spolige Details Section */}
+          <div className="card bg-light mb-3">
+            <div className="card-body">
+              <h6 className="card-title mb-3">Spolige Details (for Spoilage Tracker)</h6>
+              <div className="row">
+                <div className="col-md-4 mb-3">
+                  <FloatingLabel controlId="spoligeQty" label="Spolige Quantity (KG)">
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      name="spoligeQty"
+                      value={formData.spoligeQty}
+                      onChange={handleChange}
+                      placeholder="Spolige Qty (KG)"
+                    />
+                  </FloatingLabel>
+                </div>
+                <div className="col-md-4 mb-3">
+                  <FloatingLabel controlId="spoligeAmountPerKg" label="Amount per KG (KES)">
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      name="spoligeAmountPerKg"
+                      value={formData.spoligeAmountPerKg}
+                      onChange={handleChange}
+                      placeholder="Amount per KG"
+                    />
+                  </FloatingLabel>
+                </div>
+                <div className="col-md-4 mb-3">
+                  <FloatingLabel controlId="spoligeTotal" label="Total Spolige Amount (KES)">
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      name="spoligeTotal"
+                      value={formData.spoligeTotal}
+                      placeholder="Auto-calculated"
+                      readOnly
+                    />
+                  </FloatingLabel>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="d-flex justify-content-end">

@@ -88,8 +88,24 @@ const CarExpensesTab = (props) => {
     description: '',
     amount: '',
     spolige: '',
+    spoligeQty: '',
+    spoligeAmountPerKg: '',
+    spoligeTotal: '',
     date: new Date().toISOString().split('T')[0]
   });
+
+  // Auto-calculate spolige total amount
+  useEffect(() => {
+    const spoligeQty = parseFloat(formData.spoligeQty) || 0;
+    const spoligeAmountPerKg = parseFloat(formData.spoligeAmountPerKg) || 0;
+    if (spoligeQty > 0 && spoligeAmountPerKg > 0) {
+      const total = spoligeQty * spoligeAmountPerKg;
+      setFormData(prev => ({
+        ...prev,
+        spoligeTotal: total.toFixed(2)
+      }));
+    }
+  }, [formData.spoligeQty, formData.spoligeAmountPerKg]);
 
   // Load expenses - either from props or fetch from API
   const loadExpenses = useCallback(async () => {
@@ -158,16 +174,19 @@ const CarExpensesTab = (props) => {
         setExpenses([...expenses, result.data]);
         
         // If there's spolige info, create a spolige record with driver_stage
-        if (formData.spolige && formData.spolige.trim()) {
-          // Parse spolige string (format: "fruit_name:quantity:amount_per_kg" or just a description)
-          const spoligeParts = formData.spolige.split(':');
+        if ((formData.spoligeQty && parseFloat(formData.spoligeQty) > 0) || 
+            (formData.spoligeAmountPerKg && parseFloat(formData.spoligeAmountPerKg) > 0) ||
+            (formData.spolige && formData.spolige.trim())) {
+          const spoligeQty = parseFloat(formData.spoligeQty) || 1;
+          const spoligeAmtPerKg = parseFloat(formData.spoligeAmountPerKg) || 0;
+          const spoligeTotal = parseFloat(formData.spoligeTotal) || (spoligeQty * spoligeAmtPerKg);
           const spoligeData = {
-            fruit_name: spoligeParts[0]?.trim() || 'Unknown',
-            quantity: parseFloat(spoligeParts[1]) || 1,
+            fruit_name: formData.spolige || 'Unknown',
+            quantity: spoligeQty,
             stage: 'driver_stage',
-            amount_per_kg: parseFloat(spoligeParts[2]) || 0,
-            total_amount: (parseFloat(spoligeParts[1]) || 1) * (parseFloat(spoligeParts[2]) || 0),
-            description: spoligeParts.length > 3 ? spoligeParts.slice(3).join(':') : formData.description || 'From Car Expense',
+            amount_per_kg: spoligeAmtPerKg,
+            total_amount: spoligeTotal,
+            description: formData.description || 'From Car Expense',
             date: formData.date
           };
           
@@ -182,6 +201,9 @@ const CarExpensesTab = (props) => {
           description: '',
           amount: '',
           spolige: '',
+          spoligeQty: '',
+          spoligeAmountPerKg: '',
+          spoligeTotal: '',
           date: new Date().toISOString().split('T')[0]
         });
         setShowForm(false);
@@ -358,6 +380,50 @@ const CarExpensesTab = (props) => {
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })} 
                     required 
                   />
+                </div>
+              </div>
+
+              {/* Spolige Details Section */}
+              <div className="card bg-light mb-3">
+                <div className="card-body">
+                  <h6 className="card-title mb-3">Spolige Details (for Spoilage Tracker)</h6>
+                  <div className="row">
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Spolige Quantity (KG)</label>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        className="form-control" 
+                        value={formData.spoligeQty}
+                        onChange={(e) => setFormData({ ...formData, spoligeQty: e.target.value })} 
+                        placeholder="Spolige Qty (KG)"
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Amount per KG (KES)</label>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        className="form-control" 
+                        value={formData.spoligeAmountPerKg}
+                        onChange={(e) => setFormData({ ...formData, spoligeAmountPerKg: e.target.value })} 
+                        placeholder="Amount per KG"
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Total Spolige Amount (KES)</label>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        className="form-control" 
+                        value={formData.spoligeTotal}
+                        placeholder="Auto-calculated"
+                        readOnly
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="d-flex gap-2">
