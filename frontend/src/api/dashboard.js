@@ -97,7 +97,9 @@ switch (user.role) {
           companyPerformance: d.companyPerformance || {},
           sellerFruits: d.sellerFruits || [],
           purchases: d.purchases || [],
-          salaries: d.salaries || []
+          salaries: d.salaries || [],
+          spolige: d.spolige || [],
+          spoligeStats: d.spoligeStats || {}
         };
       }
       setData(transformed);

@@ -99,7 +99,7 @@ const Dashboard = () => {
       case 'ai-assistance':
         return <AIAssistanceTab />;
       case 'spolige':
-        return <SpoligeTab />;
+        return <SpoligeTab data={data?.spolige} spoligeStats={data?.spoligeStats} />;
       default:
         return (
           <>

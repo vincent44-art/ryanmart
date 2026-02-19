@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Trash2, Plus, Edit2, X } from 'lucide-react';
 import { fetchSpolige, createSpolige, updateSpolige, deleteSpolige, clearAllSpolige } from '../api/spolige';
 
-const SpoligeTab = (props) => {
+const SpoligeTab = ({ data: propData, spoligeStats: propSpoligeStats }) => {
   const [spoligeRecords, setSpoligeRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,6 +56,13 @@ const SpoligeTab = (props) => {
     setError(null);
 
     try {
+      // Use prop data if available, otherwise fetch from API
+      if (propData && Array.isArray(propData) && propData.length > 0) {
+        setSpoligeRecords(propData);
+        setLoading(false);
+        return;
+      }
+      
       const result = await fetchSpolige();
       if (result.success) {
         // Ensure data is always an array
@@ -72,7 +79,7 @@ const SpoligeTab = (props) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [propData]);
 
   useEffect(() => {
     loadSpolige();
