@@ -298,11 +298,11 @@ const StoreKeeperDashboard = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Amount per Kg</label>
-                  <input type="number" className="form-control" name="amountPerKg" value={stockIn.amountPerKg} onChange={handleStockInChange} required />
+                  <input type="number" className="form-control" name="amountPerKg" value={stockIn.amountPerKg} onChange={handleStockInChange} disabled />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Total Amount</label>
-                  <input type="number" className="form-control" name="totalAmount" value={stockIn.totalAmount} readOnly />
+                  <input type="number" className="form-control" name="totalAmount" value={stockIn.totalAmount} readOnly disabled />
                 </div>
 
                 <button type="submit" className="btn btn-success w-100">Submit Stock In</button>
