@@ -307,7 +307,6 @@ const DriverDashboard = () => {
                           <th>Car Name</th>
                           <th>Car Number Plate</th>
                           <th>Stock Name</th>
-                          <th>Spolige</th>
                           <th>Amount (KES)</th>
                           <th>Date</th>
                         </tr>
@@ -320,7 +319,6 @@ const DriverDashboard = () => {
                             <td>{expense.car_name || '-'}</td>
                             <td>{expense.car_number_plate || '-'}</td>
                             <td>{expense.stock_name || '-'}</td>
-                            <td>{expense.spolige || '-'}</td>
                             <td>{expense.amount}</td>
                             <td>{expense.date ? new Date(expense.date).toLocaleDateString() : '-'}</td>
                           </tr>

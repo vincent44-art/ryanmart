@@ -493,7 +493,6 @@ const PurchaserDashboard = () => {
                       <th>Quantity</th>
                       <th>Unit</th>
                       <th>Farmer</th>
-                      <th>Spolige</th>
                       <th>Amount per KG</th>
                       <th>Total Amount</th>
                     </tr>
@@ -529,7 +528,6 @@ const PurchaserDashboard = () => {
                               <td>{purchase.quantity}</td>
                               <td>{purchase.unit}</td>
                               <td>{purchase.buyerName}</td>
-                              <td>{purchase.spolige || '-'}</td>
                               <td>{formatCurrency(purchase.amountPerKg)}</td>
                               <td className="fw-bold text-success">{formatCurrency(purchase.amount)}</td>
                             </tr>
