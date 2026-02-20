@@ -175,7 +175,6 @@ const PurchasesTab = (props) => {
                     <th>Farmer</th>
                     <th>Amount per KG</th>
                     <th>Total Amount</th>
-                    <th>Spolige</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -190,7 +189,6 @@ const PurchasesTab = (props) => {
                       <td>{purchase.buyerName}</td>
                       <td>{formatCurrency(purchase.amountPerKg)}</td>
                       <td className="fw-bold text-success">{formatCurrency(purchase.amount)}</td>
-                      <td>{purchase.spolige || '-'}</td>
                       <td>
                         <button
                           className="btn btn-sm btn-outline-danger"

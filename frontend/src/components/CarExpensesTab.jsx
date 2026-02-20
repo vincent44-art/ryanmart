@@ -477,7 +477,6 @@ const CarExpensesTab = (props) => {
                     <th>Amount (KES)</th>
                     <th>Date</th>
                     <th>Driver</th>
-                    <th>Spolige</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -492,7 +491,6 @@ const CarExpensesTab = (props) => {
                       <td>{formatCurrency(exp.amount)}</td>
                       <td>{exp.date ? new Date(exp.date).toLocaleDateString() : '-'}</td>
                       <td>{exp.driver_email || exp.driverEmail || '-'}</td>
-                      <td>{exp.spolige || '-'}</td>
                       <td>
                         <button 
                           className="btn btn-sm btn-outline-danger" 

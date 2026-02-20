@@ -21,25 +21,19 @@ const SpoligeTab = ({ data: propData, spoligeStats: propSpoligeStats }) => {
 
   // Common fruit types
   const fruitTypes = [
-    'Mango',
-    'Avocado',
-    'Banana',
-    'Apple',
-    'Orange',
-    'Lemon',
-    'Pineapple',
-    'Papaya',
-    'Passion Fruit',
-    'Grapes',
-    'Watermelon',
-    'Guava',
-    'Peach',
-    'Pear',
-    'Plum',
-    'Cherry',
-    'Kiwi',
-    'Dragon Fruit',
-    'Other'
+  'Sweet banana',
+    'Kampala',
+    'Cavendish',
+    'Plantain',
+    'Matoke',
+    'American sweet potatoes',
+    'White sweet potatoes',
+    'Red sweet potatoes',
+    'Local Avocados',
+    'Hass Avocados',
+    'Oranges',
+    'Pixie',
+    'Lemons'
   ];
 
   // Spoilage stages - supply chain stages
