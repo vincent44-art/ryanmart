@@ -8,6 +8,7 @@ import SellerFruitsTable from '../components/seller/SellerFruitsTable';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
 import { fetchStockTracking } from '../api/stockTracking';
+import { createSpolige } from '../api/spolige';
 import { fetchSales } from '../components/apiHelpers';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -476,6 +477,53 @@ const SellerDashboard = () => {
     fetchSellerExpenses();
   };
 
+  // Spoilage form state
+  const [showSpoligeForm, setShowSpoligeForm] = useState(false);
+  const [spoligeFormData, setSpoligeFormData] = useState({
+    spolige_fruit_type: '',
+    spolige_amount: '',
+    spolige_qty: '',
+    date: new Date().toISOString().split('T')[0]
+  });
+
+  // Handle spoilage form change
+  const handleSpoligeChange = (e) => {
+    const { name, value } = e.target;
+    setSpoligeFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle spoilage form submit
+  const handleSpoligeSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Allow adding spolige with any of the fields filled
+      if (spoligeFormData.spolige_fruit_type || spoligeFormData.spolige_amount || spoligeFormData.spolige_qty) {
+        const spoligeData = {
+          fruit_name: spoligeFormData.spolige_fruit_type,
+          quantity: parseFloat(spoligeFormData.spolige_qty),
+          stage: 'seller_stage',
+          amount_per_kg: parseFloat(spoligeFormData.spolige_amount) / parseFloat(spoligeFormData.spolige_qty),
+          total_amount: parseFloat(spoligeFormData.spolige_amount),
+          description: `Spoilage from Seller Dashboard`,
+          date: spoligeFormData.date
+        };
+        
+        await createSpolige(spoligeData);
+        alert('Spoilage record added successfully!');
+        setSpoligeFormData({
+          spolige_fruit_type: '',
+          spolige_amount: '',
+          spolige_qty: '',
+          date: new Date().toISOString().split('T')[0]
+        });
+        setShowSpoligeForm(false);
+      }
+    } catch (err) {
+      console.error('Error adding spolige:', err);
+      alert('Failed to add spoilage record.');
+    }
+  };
+
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-end mb-3">
@@ -500,6 +548,92 @@ const SellerDashboard = () => {
           <div className="mt-3">
             <OtherExpensesTable expenses={sellerExpenses} onExpenseDeleted={fetchSellerExpenses} />
           </div>
+          <hr />
+          
+          {/* Spoilage Form - Collapsible */}
+          <div className="mb-3">
+            <button 
+              type="button" 
+              className="btn btn-outline-warning btn-sm w-100"
+              onClick={() => setShowSpoligeForm(!showSpoligeForm)}
+            >
+              <i className={`bi ${showSpoligeForm ? 'bi-chevron-up' : 'bi-chevron-down'} me-2`}></i>
+              {showSpoligeForm ? 'Hide Spoilage Form' : 'Add Spoilage'}
+            </button>
+          </div>
+          
+          {showSpoligeForm && (
+            <div className="card card-body bg-light border-warning mb-3">
+              <h6 className="text-warning mb-3"><i className="bi bi-exclamation-triangle me-2"></i>Spoilage Details</h6>
+              <form onSubmit={handleSpoligeSubmit}>
+                <div className="row">
+                  <div className="col-md-6 mb-2">
+                    <label className="form-label">Fruit Type</label>
+                    <select
+                      className="form-control"
+                      name="spolige_fruit_type"
+                      value={spoligeFormData.spolige_fruit_type}
+                      onChange={handleSpoligeChange}
+                    >
+                      <option value="">Select Fruit</option>
+                      <option value="Sweet banana">Sweet banana</option>
+                      <option value="Kampala">Kampala</option>
+                      <option value="Cavendish">Cavendish</option>
+                      <option value="Plantain">Plantain</option>
+                      <option value="Matoke">Matoke</option>
+                      <option value="American sweet potatoes">American sweet potatoes</option>
+                      <option value="White sweet potatoes">White sweet potatoes</option>
+                      <option value="Red sweet potatoes">Red sweet potatoes</option>
+                      <option value="Local Avocados">Local Avocados</option>
+                      <option value="Hass Avocados">Hass Avocados</option>
+                      <option value="Oranges">Oranges</option>
+                      <option value="Pixie">Pixie</option>
+                      <option value="Lemons">Lemons</option>
+                    </select>
+                  </div>
+                  <div className="col-md-6 mb-2">
+                    <label className="form-label">Amount (KES)</label>
+                    <input
+                      type="number"
+                      placeholder="Amount"
+                      className="form-control"
+                      name="spolige_amount"
+                      value={spoligeFormData.spolige_amount}
+                      onChange={handleSpoligeChange}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="col-md-6 mb-2">
+                    <label className="form-label">Qty (KG)</label>
+                    <input
+                      type="number"
+                      placeholder="Quantity in KG"
+                      className="form-control"
+                      name="spolige_qty"
+                      value={spoligeFormData.spolige_qty}
+                      onChange={handleSpoligeChange}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="col-md-6 mb-2">
+                    <label className="form-label">Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="date"
+                      value={spoligeFormData.date}
+                      onChange={handleSpoligeChange}
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-warning">
+                  <i className="bi bi-plus-circle me-2"></i>Add Spoilage
+                </button>
+              </form>
+            </div>
+          )}
           <hr />
           {/* SaleForm removed */}
         </div>

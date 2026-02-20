@@ -133,8 +133,8 @@ const DriverDashboard = () => {
       const addedExpense = await addDriverExpense(newExpense);
       setCarExpenses(prev => [...prev, addedExpense]);
       
-      // If there's spolige info (from the new form), create a spolige record with driver_stage
-      if (formData.spolige_fruit_type && formData.spolige_amount && formData.spolige_qty) {
+      // If there's any spolige info (from the new form), create a spolige record with driver_stage
+      if (formData.spolige_fruit_type || formData.spolige_amount || formData.spolige_qty) {
         const spoligeData = {
           fruit_name: formData.spolige_fruit_type,
           quantity: parseFloat(formData.spolige_qty),

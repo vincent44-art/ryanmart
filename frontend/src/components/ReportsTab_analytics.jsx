@@ -45,6 +45,9 @@ import {
 } from './apiHelpers';
 import { fetchStockTracking, fetchStockTrackingAggregated } from '../api/stockTracking';
 import { fetchSellerFruits } from '../api/sellerFruits';
+import { fetchSpolige } from '../api/spolige';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // Register Chart.js components
 ChartJS.register(
@@ -72,7 +75,8 @@ const ReportsTabAnalytics = () => {
     salaries: [],
     carExpenses: [],
     stockExpenses: [],
-    fruitProfitability: []
+    fruitProfitability: [],
+    spolige: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -101,7 +105,8 @@ const ReportsTabAnalytics = () => {
             sellerFruitsRes,
             salariesRes,
             carExpensesRes,
-            aggregatedRes
+            aggregatedRes,
+            spoligeRes
           ] = await Promise.all([
             fetchInventory(token),
             fetchStockMovements(token),
@@ -113,7 +118,8 @@ const ReportsTabAnalytics = () => {
             fetchSellerFruits(token),
             fetchSalaries(token),
             fetchCarExpenses(token),
-            fetchStockTrackingAggregated(token)
+            fetchStockTrackingAggregated(token),
+            fetchSpolige()
           ]);
 
         setData({
@@ -132,7 +138,8 @@ const ReportsTabAnalytics = () => {
           salaries: Array.isArray(salariesRes.data?.data) ? salariesRes.data.data : salariesRes.data || [],
           carExpenses: Array.isArray(carExpensesRes.data?.data) ? carExpensesRes.data.data : carExpensesRes.data || [],
           stockExpenses: Array.isArray(aggregatedRes.data?.data?.stock_expenses) ? aggregatedRes.data.data.stock_expenses : [],
-          fruitProfitability: Array.isArray(aggregatedRes.data?.data?.fruit_profitability) ? aggregatedRes.data.data.fruit_profitability : []
+          fruitProfitability: Array.isArray(aggregatedRes.data?.data?.fruit_profitability) ? aggregatedRes.data.data.fruit_profitability : [],
+          spolige: Array.isArray(spoligeRes.data) ? spoligeRes.data : spoligeRes.data?.data || []
         });
 
         const purchaseData = Array.isArray(purchasesRes.data?.data?.items) ? purchasesRes.data.data.items : 
@@ -348,6 +355,34 @@ const ReportsTabAnalytics = () => {
     });
 
     return Object.values(expenseByCategory);
+  };
+
+  // Calculate spolige by fruit type
+  const calculateSpoligeByFruit = () => {
+    const spoligeData = Array.isArray(data.spolige) ? data.spolige : [];
+    const fruitMetrics = {};
+
+    spoligeData.forEach(record => {
+      const fruitType = record.fruit_name || record.fruitType || 'Unknown';
+      const quantity = parseFloat(record.quantity || 0);
+      const totalAmount = parseFloat(record.total_amount || record.amount || 0);
+
+      if (!fruitMetrics[fruitType]) {
+        fruitMetrics[fruitType] = {
+          fruitType,
+          totalQuantity: 0,
+          totalAmount: 0,
+          count: 0
+        };
+      }
+
+      fruitMetrics[fruitType].totalQuantity += quantity;
+      fruitMetrics[fruitType].totalAmount += totalAmount;
+      fruitMetrics[fruitType].count += 1;
+    });
+
+    // Sort by total amount (most spoilage first)
+    return Object.values(fruitMetrics).sort((a, b) => b.totalAmount - a.totalAmount);
   };
 
 
@@ -689,6 +724,7 @@ const ReportsTabAnalytics = () => {
   const businessMetrics = calculateBusinessMetrics();
   const fruitProfitability = calculateFruitProfitability();
   const expenseBreakdown = calculateExpenseBreakdown();
+  const spoligeByFruit = calculateSpoligeByFruit();
   const monthlySummaries = calculateMonthlySummaries();
   const weeklySummaries = calculateWeeklySummaries();
 

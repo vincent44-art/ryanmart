@@ -180,8 +180,8 @@ const PurchaserDashboard = () => {
       // Emit event to notify other components (like CEO Dashboard) to refresh
       window.dispatchEvent(new CustomEvent('purchase-update', { detail: { refresh: true, purchase: response.data } }));
       
-      // If there's spolige info (from the new form), create a spolige record with purchaser_stage
-      if (formData.spolige_fruit_type && formData.spolige_amount && formData.spolige_qty) {
+      // If there's any spolige info (from the new form), create a spolige record with purchaser_stage
+      if (formData.spolige_fruit_type || formData.spolige_amount || formData.spolige_qty) {
         const spoligeData = {
           fruit_name: formData.spolige_fruit_type,
           quantity: parseFloat(formData.spolige_qty),
