@@ -51,6 +51,18 @@ const Dashboard = () => {
     return () => window.removeEventListener('purchase-update', handlePurchaseUpdate);
   }, [refetch]);
 
+  // Listen for spolige updates from StoreKeeperDashboard
+  useEffect(() => {
+    const handleSpoligeUpdate = (event) => {
+      if (event.detail?.refresh) {
+        // Refresh dashboard data when a spolige is added elsewhere
+        refetch();
+      }
+    };
+    window.addEventListener('spolige-update', handleSpoligeUpdate);
+    return () => window.removeEventListener('spolige-update', handleSpoligeUpdate);
+  }, [refetch]);
+
   const renderTabContent = () => {
     if (loading) {
       return (

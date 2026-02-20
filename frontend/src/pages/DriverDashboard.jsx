@@ -9,6 +9,7 @@ import { fetchOtherExpenses } from '../api/otherExpenses';
 import { createSpolige } from '../api/spolige';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
+import SpoligeTab from '../components/SpoligeTab';
 
 const DriverDashboard = () => {
   const { user, logout } = useAuth();
@@ -351,6 +352,7 @@ const DriverDashboard = () => {
             <OtherExpenseForm onExpenseAdded={handleOtherExpenseAdded} />
             <OtherExpensesTable expenses={otherExpenses} onExpenseDeleted={handleOtherExpenseDeleted} />
           </div>
+
           <div className="col-md-6 mb-4">
             <div className="card fruit-card shadow-lg fade-in">
               <div className="card-header bg-gradient text-white">
@@ -389,6 +391,17 @@ const DriverDashboard = () => {
                     </table>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Spolige Tab Section */}
+        <div className="row">
+          <div className="col-12">
+            <div className="card fruit-card shadow-lg fade-in">
+              <div className="card-body">
+                <SpoligeTab />
               </div>
             </div>
           </div>

@@ -11,6 +11,7 @@ import { fetchOtherExpenses } from '../api/otherExpenses';
 import { createSpolige } from '../api/spolige';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
+import SpoligeTab from '../components/SpoligeTab';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -602,6 +603,17 @@ const PurchaserDashboard = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Spolige Tab Section */}
+      <div className="row mt-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <SpoligeTab />
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { fetchOtherExpenses } from '../api/otherExpenses';
 import { createSpolige } from '../api/spolige';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
+import SpoligeTab from '../components/SpoligeTab';
 
 const initialStockIn = {
   stockName: '',
@@ -16,7 +17,7 @@ const initialStockIn = {
 };
 
 const initialStockOut = {
-  stockInId: '', // Link to Stock In record
+  stockInId: '',
   dateOut: '',
   gradientUsed: '',
   gradientAmountUsed: '',
@@ -32,6 +33,15 @@ const StoreKeeperDashboard = () => {
   const [stockOut, setStockOut] = useState(initialStockOut);
   const [records, setRecords] = useState([]);
   const [otherExpenses, setOtherExpenses] = useState([]);
+  
+  const [showSpoligeForm, setShowSpoligeForm] = useState(false);
+  
+  const [spoligeFormData, setSpoligeFormData] = useState({
+    spolige_fruit_type: '',
+    spolige_amount: '',
+    spolige_qty: '',
+    date: new Date().toISOString().split('T')[0]
+  });
 
   const handleDownloadPDF = async (recordId) => {
     try {
@@ -91,7 +101,6 @@ const StoreKeeperDashboard = () => {
     }
   };
 
-  // Fetch all stock records and other expenses on mount
   useEffect(() => {
     const load = async () => {
       try {
@@ -108,14 +117,11 @@ const StoreKeeperDashboard = () => {
     load();
   }, []);
 
-
-
   useEffect(() => {
     const totalGradientCost = parseFloat(stockOut.gradientAmountUsed || 0) * parseFloat(stockOut.gradientCostPerUnit || 0);
     setStockOut((prev) => ({ ...prev, totalGradientCost: totalGradientCost ? totalGradientCost.toFixed(2) : '' }));
   }, [stockOut.gradientAmountUsed, stockOut.gradientCostPerUnit]);
 
-  // Auto-calculate totalAmount for Stock In
   useEffect(() => {
     const quantity = parseFloat(stockIn.quantityIn || 0);
     const amountPerKg = parseFloat(stockIn.amountPerKg || 0);
@@ -123,7 +129,6 @@ const StoreKeeperDashboard = () => {
     setStockIn((prev) => ({ ...prev, totalAmount: total ? total.toFixed(2) : '' }));
   }, [stockIn.quantityIn, stockIn.amountPerKg]);
 
-  // Auto-calculate spoilage: spoilage = quantityIn - quantityOut
   useEffect(() => {
     if (stockOut.stockInId && stockOut.quantityOut !== '') {
       const stockInRecord = records.find(r => r.id === parseInt(stockOut.stockInId));
@@ -136,7 +141,6 @@ const StoreKeeperDashboard = () => {
     }
   }, [stockOut.quantityOut, stockOut.stockInId, records]);
 
-  // Auto-calculate duration
   const getDuration = (dateIn, dateOut) => {
     if (dateIn && dateOut) {
       const d1 = new Date(dateIn);
@@ -147,7 +151,6 @@ const StoreKeeperDashboard = () => {
     return '';
   };
 
-  // Auto-calculate total stock cost
   const getTotalStockCost = (totalGradientCost) => {
     const tgc = parseFloat(totalGradientCost || 0);
     return tgc.toFixed(2);
@@ -170,7 +173,43 @@ const StoreKeeperDashboard = () => {
     setOtherExpenses(prev => prev.filter(expense => expense.id !== deletedId));
   };
 
-  // Submit Stock In
+  const handleSpoligeChange = (e) => {
+    const { name, value } = e.target;
+    setSpoligeFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSpoligeSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const spoligeData = {
+        fruit_name: spoligeFormData.spolige_fruit_type,
+        quantity: parseFloat(spoligeFormData.spolige_qty),
+        stage: 'store_stage',
+        amount_per_kg: parseFloat(spoligeFormData.spolige_amount) / parseFloat(spoligeFormData.spolige_qty),
+        total_amount: parseFloat(spoligeFormData.spolige_amount),
+        description: 'Manual Spoilage Entry - Store Keeper',
+        date: spoligeFormData.date
+      };
+      
+      await createSpolige(spoligeData);
+      
+      setSpoligeFormData({
+        spolige_fruit_type: '',
+        spolige_amount: '',
+        spolige_qty: '',
+        date: new Date().toISOString().split('T')[0]
+      });
+      setShowSpoligeForm(false);
+      
+      window.dispatchEvent(new CustomEvent('spolige-update', { detail: { refresh: true } }));
+      
+      alert('Spoilage record added successfully!');
+    } catch (err) {
+      console.error('Error adding spolige:', err);
+      alert('Failed to add spoilage record. Please try again.');
+    }
+  };
+
   const handleStockInSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -182,21 +221,18 @@ const StoreKeeperDashboard = () => {
     } catch (e) {}
   };
 
-  // Submit Stock Out
   const handleStockOutSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('access_token');
-      // Find the selected Stock In record
       const stockInRecord = records.find(r => r.id === parseInt(stockOut.stockInId));
       if (!stockInRecord) return;
       const duration = getDuration(stockInRecord.dateIn, stockOut.dateOut);
       const totalStockCost = getTotalStockCost(
         stockOut.totalGradientCost
       );
-      // Prepare data for updating the existing record
       const record = {
-        stockInId: stockOut.stockInId, // Include stockInId to indicate update
+        stockInId: stockOut.stockInId,
         dateOut: stockOut.dateOut,
         duration,
         gradientUsed: stockOut.gradientUsed,
@@ -208,10 +244,8 @@ const StoreKeeperDashboard = () => {
         totalStockCost,
       };
       const res = await addStockTracking(record, token);
-      // Update the records state with the updated record
       setRecords((prev) => prev.map(r => r.id === res.data.id ? res.data : r));
       
-      // If there's spoilage, create a spolige record with store_stage
       if (stockOut.spoilage && parseFloat(stockOut.spoilage) > 0) {
         const spoligeData = {
           fruit_name: stockInRecord.fruitType || stockInRecord.stockName || 'Unknown',
@@ -230,7 +264,6 @@ const StoreKeeperDashboard = () => {
     } catch (e) {}
   };
 
-  // Only show Stock In records that have not been stocked out (no dateOut)
   const recordsArr = Array.isArray(records) ? records : [];
   const availableStockIn = recordsArr.filter(r => !r.dateOut);
 
@@ -242,7 +275,6 @@ const StoreKeeperDashboard = () => {
         </button>
       </div>
       <div className="row">
-        {/* Stock In Form */}
         <div className="col-md-6">
           <div className="card mb-4">
             <div className="card-header bg-primary text-white">Stock In Form</div>
@@ -278,7 +310,102 @@ const StoreKeeperDashboard = () => {
             </div>
           </div>
 
-          {/* Other Expenses Form and Table */}
+          <div className="mb-3">
+            <button 
+              type="button" 
+              className="btn btn-outline-warning btn-sm w-100"
+              onClick={() => setShowSpoligeForm(!showSpoligeForm)}
+            >
+              <i className={`bi ${showSpoligeForm ? 'bi-chevron-up' : 'bi-chevron-down'} me-2`}></i>
+              {showSpoligeForm ? 'Hide Spoilage Form' : 'Add Spoilage'}
+            </button>
+          </div>
+          
+          {showSpoligeForm && (
+            <div className="card mb-4">
+              <div className="card-header bg-warning text-dark">
+                <h5 className="mb-0"><i className="bi bi-exclamation-triangle me-2"></i>Spoilage Details</h5>
+              </div>
+              <div className="card-body bg-light border-warning">
+                <form onSubmit={handleSpoligeSubmit}>
+                  <div className="row">
+                    <div className="col-md-6 mb-2">
+                      <label className="form-label">Fruit Type</label>
+                      <select
+                        className="form-control"
+                        name="spolige_fruit_type"
+                        value={spoligeFormData.spolige_fruit_type}
+                        onChange={handleSpoligeChange}
+                        required
+                      >
+                        <option value="">Select Fruit</option>
+                        <option value="Sweet banana">Sweet banana</option>
+                        <option value="Kampala">Kampala</option>
+                        <option value="Cavendish">Cavendish</option>
+                        <option value="Plantain">Plantain</option>
+                        <option value="Matoke">Matoke</option>
+                        <option value="American sweet potatoes">American sweet potatoes</option>
+                        <option value="White sweet potatoes">White sweet potatoes</option>
+                        <option value="Red sweet potatoes">Red sweet potatoes</option>
+                        <option value="Local Avocados">Local Avocados</option>
+                        <option value="Hass Avocados">Hass Avocados</option>
+                        <option value="Oranges">Oranges</option>
+                        <option value="Pixie">Pixie</option>
+                        <option value="Lemons">Lemons</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6 mb-2">
+                      <label className="form-label">Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="date"
+                        value={spoligeFormData.date}
+                        onChange={handleSpoligeChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6 mb-2">
+                      <label className="form-label">Amount (KES)</label>
+                      <input
+                        type="number"
+                        placeholder="Amount"
+                        className="form-control"
+                        name="spolige_amount"
+                        value={spoligeFormData.spolige_amount}
+                        onChange={handleSpoligeChange}
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6 mb-2">
+                      <label className="form-label">Qty (KG)</label>
+                      <input
+                        type="number"
+                        placeholder="Quantity in KG"
+                        className="form-control"
+                        name="spolige_qty"
+                        value={spoligeFormData.spolige_qty}
+                        onChange={handleSpoligeChange}
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    type="submit" 
+                    className="btn btn-warning mt-2"
+                  >
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Record Spoilage
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
           <div className="card">
             <div className="card-header bg-warning text-dark">
               <h5 className="mb-0">Other Expenses Management</h5>
@@ -290,7 +417,7 @@ const StoreKeeperDashboard = () => {
             </div>
           </div>
         </div>
-        {/* Stock Out Form */}
+        
         <div className="col-md-6">
           <div className="card mb-4">
             <div className="card-header bg-info text-white">Stock Out Form</div>
@@ -345,7 +472,7 @@ const StoreKeeperDashboard = () => {
           </div>
         </div>
       </div>
-      {/* Table remains unchanged */}
+      
       <div className="row">
         <div className="col-12">
           <div className="card">
@@ -422,6 +549,16 @@ const StoreKeeperDashboard = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="row mt-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <SpoligeTab />
             </div>
           </div>
         </div>
