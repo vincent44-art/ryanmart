@@ -31,9 +31,14 @@ const PurchaserDashboard = () => {
     buyerName: '', // changed from farmerName
     amountPerKg: '',
     amount: '',
-    spolige: '',
+    spolige_fruit_type: '',
+    spolige_amount: '',
+    spolige_qty: '',
     date: new Date().toISOString().split('T')[0]
   });
+
+  // State for showing/hiding spoilage form
+  const [showSpoligeForm, setShowSpoligeForm] = useState(false);
 
   // Calculate total amount when quantity or pricePerUnit changes
   useEffect(() => {
@@ -175,17 +180,15 @@ const PurchaserDashboard = () => {
       // Emit event to notify other components (like CEO Dashboard) to refresh
       window.dispatchEvent(new CustomEvent('purchase-update', { detail: { refresh: true, purchase: response.data } }));
       
-      // If there's spolige info, create a spolige record with purchaser_stage
-      if (formData.spolige && formData.spolige.trim()) {
-        // Parse spolige string (format: "fruit_name:quantity:amount_per_kg" or just a description)
-        const spoligeParts = formData.spolige.split(':');
+      // If there's spolige info (from the new form), create a spolige record with purchaser_stage
+      if (formData.spolige_fruit_type && formData.spolige_amount && formData.spolige_qty) {
         const spoligeData = {
-          fruit_name: spoligeParts[0]?.trim() || formData.fruitType || 'Unknown',
-          quantity: parseFloat(spoligeParts[1]) || parseFloat(formData.quantity) || 1,
+          fruit_name: formData.spolige_fruit_type,
+          quantity: parseFloat(formData.spolige_qty),
           stage: 'purchaser_stage',
-          amount_per_kg: parseFloat(spoligeParts[2]) || parseFloat(formData.amountPerKg) || 0,
-          total_amount: (parseFloat(spoligeParts[1]) || parseFloat(formData.quantity) || 1) * (parseFloat(spoligeParts[2]) || parseFloat(formData.amountPerKg) || 0),
-          description: spoligeParts.length > 3 ? spoligeParts.slice(3).join(':') : `From Purchase: ${formData.buyerName}`,
+          amount_per_kg: parseFloat(formData.spolige_amount) / parseFloat(formData.spolige_qty),
+          total_amount: parseFloat(formData.spolige_amount),
+          description: `Spoilage from Purchase - ${formData.buyerName || 'Purchase record'}`,
           date: formData.date
         };
         
@@ -200,9 +203,12 @@ const PurchaserDashboard = () => {
         buyerName: '', // changed from farmerName
         amountPerKg: '',
         amount: '',
-        spolige: '',
+        spolige_fruit_type: '',
+        spolige_amount: '',
+        spolige_qty: '',
         date: new Date().toISOString().split('T')[0]
       });
+      setShowSpoligeForm(false);
     } catch (err) {
       setError('Failed to add purchase. Please try again.');
       console.error('Error adding purchase:', err);
@@ -417,18 +423,75 @@ const PurchaserDashboard = () => {
                   </div>
                 </div>
                 
+                {/* Spoilage Form - Collapsible */}
                 <div className="mb-3">
-                  <label className="form-label">Spolige</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="spolige"
-                    value={formData.spolige}
-                    onChange={handleChange}
-                    placeholder="Spolige (spoilage info)"
-                    disabled={loading}
-                  />
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-warning btn-sm w-100"
+                    onClick={() => setShowSpoligeForm(!showSpoligeForm)}
+                  >
+                    <i className={`bi ${showSpoligeForm ? 'bi-chevron-up' : 'bi-chevron-down'} me-2`}></i>
+                    {showSpoligeForm ? 'Hide Spoilage Form' : 'Add Spoilage'}
+                  </button>
                 </div>
+                
+                {showSpoligeForm && (
+                  <div className="card card-body bg-light border-warning mb-3">
+                    <h6 className="text-warning mb-3"><i className="bi bi-exclamation-triangle me-2"></i>Spoilage Details</h6>
+                    <div className="row">
+                      <div className="col-md-6 mb-2">
+                        <label className="form-label">Fruit Type</label>
+                        <select
+                          className="form-control"
+                          name="spolige_fruit_type"
+                          value={formData.spolige_fruit_type}
+                          onChange={handleChange}
+                        >
+                          <option value="">Select Fruit</option>
+                          <option value="Sweet banana">Sweet banana</option>
+                          <option value="Kampala">Kampala</option>
+                          <option value="Cavendish">Cavendish</option>
+                          <option value="Plantain">Plantain</option>
+                          <option value="Matoke">Matoke</option>
+                          <option value="American sweet potatoes">American sweet potatoes</option>
+                          <option value="White sweet potatoes">White sweet potatoes</option>
+                          <option value="Red sweet potatoes">Red sweet potatoes</option>
+                          <option value="Local Avocados">Local Avocados</option>
+                          <option value="Hass Avocados">Hass Avocados</option>
+                          <option value="Oranges">Oranges</option>
+                          <option value="Pixie">Pixie</option>
+                          <option value="Lemons">Lemons</option>
+                        </select>
+                      </div>
+                      <div className="col-md-6 mb-2">
+                        <label className="form-label">Amount (KES)</label>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          className="form-control"
+                          name="spolige_amount"
+                          value={formData.spolige_amount}
+                          onChange={handleChange}
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                      <div className="col-md-6 mb-2">
+                        <label className="form-label">Qty (KG)</label>
+                        <input
+                          type="number"
+                          placeholder="Quantity in KG"
+                          className="form-control"
+                          name="spolige_qty"
+                          value={formData.spolige_qty}
+                          onChange={handleChange}
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 <button 
                   type="submit" 
