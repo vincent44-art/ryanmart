@@ -9,7 +9,6 @@ import { fetchOtherExpenses } from '../api/otherExpenses';
 import { createSpolige } from '../api/spolige';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
-import SpoligeTab from '../components/SpoligeTab';
 
 const DriverDashboard = () => {
   const { user, logout } = useAuth();
@@ -316,6 +315,45 @@ const DriverDashboard = () => {
                           />
                         </div>
                       </div>
+                      <div className="mt-2">
+                        <button 
+                          type="button" 
+                          className="btn btn-warning w-100"
+                          onClick={async () => {
+                            if (!formData.spolige_fruit_type || !formData.spolige_amount || !formData.spolige_qty) {
+                              alert('Please fill in all spoilage fields');
+                              return;
+                            }
+                            try {
+                              const spoligeData = {
+                                fruit_name: formData.spolige_fruit_type,
+                                quantity: parseFloat(formData.spolige_qty),
+                                stage: 'driver_stage',
+                                amount_per_kg: parseFloat(formData.spolige_amount) / parseFloat(formData.spolige_qty),
+                                total_amount: parseFloat(formData.spolige_amount),
+                                description: `Spoilage from Driver Expense - ${formData.description || 'Car expense'}`,
+                                date: formData.date
+                              };
+                              await createSpolige(spoligeData);
+                              // Notify CEO dashboard to refresh
+                              window.dispatchEvent(new CustomEvent('spolige-update', { detail: { refresh: true } }));
+                              alert('Spoilage record submitted successfully!');
+                              setFormData(prev => ({
+                                ...prev,
+                                spolige_fruit_type: '',
+                                spolige_amount: '',
+                                spolige_qty: ''
+                              }));
+                            } catch (err) {
+                              console.error('Error submitting spolige:', err);
+                              alert('Failed to submit spoilage record');
+                            }
+                          }}
+                        >
+                          <i className="bi bi-check-circle me-2"></i>
+                          Submit Spoilage
+                        </button>
+                      </div>
                     </div>
                   )}
                   <div className="mb-3">
@@ -397,15 +435,6 @@ const DriverDashboard = () => {
         </div>
 
         {/* Spolige Tab Section */}
-        <div className="row">
-          <div className="col-12">
-            <div className="card fruit-card shadow-lg fade-in">
-              <div className="card-body">
-                <SpoligeTab />
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
