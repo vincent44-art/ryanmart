@@ -5,7 +5,6 @@ import { fetchOtherExpenses } from '../api/otherExpenses';
 import { createSpolige } from '../api/spolige';
 import OtherExpenseForm from '../components/OtherExpenseForm';
 import OtherExpensesTable from '../components/OtherExpensesTable';
-import SpoligeTab from '../components/SpoligeTab';
 
 const initialStockIn = {
   stockName: '',
@@ -555,13 +554,6 @@ const StoreKeeperDashboard = () => {
       </div>
       
       <div className="row mt-4">
-        <div className="col-12">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <SpoligeTab />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
