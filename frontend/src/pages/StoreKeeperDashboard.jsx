@@ -213,7 +213,12 @@ const StoreKeeperDashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('access_token');
-      const record = { ...stockIn };
+      // Ensure amountPerKg and totalAmount are properly converted to numbers (default to 0 if empty)
+      const record = { 
+        ...stockIn,
+        amountPerKg: stockIn.amountPerKg ? parseFloat(stockIn.amountPerKg) : 0,
+        totalAmount: stockIn.totalAmount ? parseFloat(stockIn.totalAmount) : 0
+      };
       const res = await addStockTracking(record, token);
       setRecords((prev) => ([...(Array.isArray(prev) ? prev : []), res.data]));
       setStockIn(initialStockIn);
@@ -297,7 +302,7 @@ const StoreKeeperDashboard = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Amount per Kg</label>
-                  <input type="number" className="form-control" name="amountPerKg" value={stockIn.amountPerKg} onChange={handleStockInChange} disabled />
+                  <input type="number" className="form-control" name="amountPerKg" value={stockIn.amountPerKg} onChange={handleStockInChange} step="0.01" min="0" required />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Total Amount</label>
