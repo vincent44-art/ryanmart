@@ -11,7 +11,7 @@ const initialStockIn = {
   dateIn: '',
   fruitType: '',
   quantityIn: '',
-  amountPerKg: '',
+  amountPerKg: '0',
   totalAmount: '',
 };
 
@@ -302,7 +302,7 @@ const StoreKeeperDashboard = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Amount per Kg</label>
-                  <input type="number" className="form-control" name="amountPerKg" value={stockIn.amountPerKg} onChange={handleStockInChange} step="0.01" min="0" required />
+                  <input type="number" className="form-control" name="amountPerKg" value={stockIn.amountPerKg} onChange={handleStockInChange} step="0.01" min="0" disabled />
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Total Amount</label>
