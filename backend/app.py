@@ -232,7 +232,7 @@ def create_app(config_class=Config):
     # Import and register resources directly on the main Api
     # Note: Most routes are registered in resources/__init__.py via api_bp blueprint
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
-    from resources.expenses import CarExpensesResource
+from resources.expenses_fixed import CarExpensesResource
     from resources.user import UserListResource, UsersForSalaryResource
     from resources.profile_image import ProfileImageUploadResource
     from resources.inventory import InventoryListResource, InventoryResource, ClearInventoryResource

@@ -2,13 +2,14 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 from flask import request, send_file
 import io
+import logging
 from extensions import db
 from models.other_expense import OtherExpense
 from models.driver import DriverExpense
 from utils.helpers import make_response_data, get_current_user
 from utils.pdf_generator import DriverExpensePDFGenerator
+from sqlalchemy import text
 from datetime import datetime
-import logging
 
 class OtherExpensesResource(Resource):
     @jwt_required()
@@ -19,8 +20,6 @@ class OtherExpensesResource(Resource):
 class CarExpensesResource(Resource):
     @jwt_required()
     def get(self):
-        from sqlalchemy import text
-        
         def safe_float(value, default=0.0):
             """Safely convert a value to float, handling strings and None"""
             if value is None:
@@ -38,10 +37,11 @@ class CarExpensesResource(Resource):
         
         logger = logging.getLogger('car_expenses')
         try:
-            # Use raw SQL like purchases.py to avoid PostgreSQL NUMERIC serialization issues - FIXED: Removed spolige
+            # Use raw SQL like purchases.py to avoid PostgreSQL NUMERIC serialization issues
+            # FIXED: SELECT all columns to match dict row indices
             expenses_result = db.session.execute(text("""
                 SELECT id, driver_email, amount::text, category, type, description, 
-                       date, car_number_plate, car_name, stock_name 
+                       date, car_number_plate, car_name, stock_name, spolige
                 FROM driver_expenses ORDER BY date DESC
             """)).fetchall()
             
@@ -58,7 +58,8 @@ class CarExpensesResource(Resource):
                     'date': row[6].isoformat() if row[6] else None,
                     'car_number_plate': row[7],
                     'car_name': row[8],
-                    'stock_name': row[9]
+                    'stock_name': row[9],
+                    'spolige': row[10],
                 }
                 expenses_data.append(expense_dict)
             
@@ -112,7 +113,7 @@ class CarExpensesResource(Resource):
             "type": expense.type,
             "description": expense.description,
             "date": expense.date.isoformat() if expense.date else None,
-            "car_number_plate": expense.car_number_plate,
+            "car_number_plate": expense.car_name,
             "car_name": expense.car_name,
             "stock_name": expense.stock_name,
             "spolige": expense.spolige
@@ -201,4 +202,4 @@ class DriverExpenseReportResource(Resource):
         except Exception as e:
             logger = logging.getLogger('expenses')
             logger.error(f"Error generating driver expense report: {str(e)}", exc_info=True)
-            return make_response_data(success=False, message=f"Error generating report: {str(e)}", status_code=500)
+            return make_response_data(success=False, message="Error generating report: {str(e)}", status_code=500)
