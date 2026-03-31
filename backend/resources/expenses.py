@@ -19,30 +19,50 @@ class CarExpensesResource(Resource):
     @jwt_required()
     def get(self):
         import logging
+        from sqlalchemy import text
+        def safe_float(value, default=0.0):
+            """Safely convert a value to float, handling strings and None"""
+            if value is None:
+                return default
+            if isinstance(value, (int, float)):
+                return float(value)
+            if isinstance(value, str):
+                try:
+                    import re
+                    match = re.search(r'(\d+(\.\d+)?)', value)
+                    return float(match.group(1)) if match else default
+                except (ValueError, TypeError):
+                    return default
+            return default
+        
         logger = logging.getLogger('car_expenses')
         try:
-            expenses = DriverExpense.query.order_by(DriverExpense.date.desc()).all()
+            # Use raw SQL like purchases.py to avoid PostgreSQL NUMERIC serialization issues
+            expenses_result = db.session.execute(text("""
+                SELECT id, driver_email, amount::text, category, type, description, 
+                       date, car_number_plate, car_name, stock_name, spolige 
+                FROM driver_expenses ORDER BY date DESC
+            """)).fetchall()
+            
+            # Convert to dicts with safe float conversion
             expenses_data = []
-            for e in expenses:
-                try:
-                    expenses_data.append(e.to_dict())
-                except Exception as e_error:
-                    logger.error(f"Error serializing expense {e.id}: {str(e_error)}")
-                    # Fallback dict
-                    expenses_data.append({
-                        "id": getattr(e, 'id', None),
-                        "driver_email": getattr(e, 'driver_email', None),
-                        "amount": getattr(e, 'amount', None),
-                        "category": getattr(e, 'category', None),
-                        "type": getattr(e, 'type', None),
-                        "description": getattr(e, 'description', None),
-                        "date": getattr(e, 'date', None) and str(getattr(e, 'date', None)),
-                        "car_number_plate": getattr(e, 'car_number_plate', None),
-                        "car_name": getattr(e, 'car_name', None),
-                        "stock_name": getattr(e, 'stock_name', None),
-                        "spolige": getattr(e, 'spolige', None),
-                        "_error": "serialization_failed"
-                    })
+            for row in expenses_result:
+                expense_dict = {
+                    'id': row[0],
+                    'driver_email': row[1],
+                    'amount': safe_float(row[2]),
+                    'category': row[3],
+                    'type': row[4],
+                    'description': row[5],
+                    'date': row[6].isoformat() if row[6] else None,
+                    'car_number_plate': row[7],
+                    'car_name': row[8],
+                    'stock_name': row[9],
+                    'spolige': row[10]
+                }
+                expenses_data.append(expense_dict)
+            
+            logger.info(f"Car expenses fetched successfully: {len(expenses_data)} records")
             return make_response_data(data=expenses_data, message="Car expenses fetched successfully.")
         except Exception as e:
             logger.error(f"Error fetching car expenses: {str(e)}", exc_info=True)
