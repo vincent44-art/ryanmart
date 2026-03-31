@@ -232,76 +232,76 @@ def create_app(config_class=Config):
     # Import and register resources directly on the main Api
     # Note: Most routes are registered in resources/__init__.py via api_bp blueprint
     from resources.salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
-from resources.expenses_fixed import CarExpensesResource
+    from resources.expenses_fixed import CarExpensesResource
     from resources.user import UserListResource, UsersForSalaryResource
-    from resources.profile_image import ProfileImageUploadResource
-    from resources.inventory import InventoryListResource, InventoryResource, ClearInventoryResource
-    from resources.stock import StockMovementListResource
-    from resources.it_events import ITEventsResource, ITEventResource, ITAcknowledgeAlertsResource
-    from resources.it_alerts import ITAlertsResource, ITIncidentsResource
-    from resources.sales import SaleListResource, SaleByEmailResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
-    from resources.purchases import DailyPurchasesReportResource, PurchaseByEmailResource
-    from resources.ai_assistance import AIAssistanceResource
-    from resources.receipts import ReceiptResource
-    from resources.seller_fruits import SellerFruitListResource, SellerFruitResource
-    from resources.seller_fruits_bulk import SellerFruitBulkResource
-    from resources.stock_tracking import (
-        StockTrackingAggregatedResource, StockTrackingListResource,
-        ClearStockTrackingResource, StockTrackingResource, StockTrackingPDFResource,
-        StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource,
-        StockTrackingCombinedPDFResource
-    )
-    from utils.pdf_generator import DriverExpensePDFGenerator
+from resources.profile_image import ProfileImageUploadResource
+from resources.inventory import InventoryListResource, InventoryResource, ClearInventoryResource
+from resources.stock import StockMovementListResource
+from resources.it_events import ITEventsResource, ITEventResource, ITAcknowledgeAlertsResource
+from resources.it_alerts import ITAlertsResource, ITIncidentsResource
+from resources.sales import SaleListResource, SaleByEmailResource, SaleResource, SaleSummaryResource, DailySalesReportResource, ClearSalesResource, CustomerDebtResource, CustomerDebtReportResource
+from resources.purchases import DailyPurchasesReportResource, PurchaseByEmailResource
+from resources.ai_assistance import AIAssistanceResource
+from resources.receipts import ReceiptResource
+from resources.seller_fruits import SellerFruitListResource, SellerFruitResource
+from resources.seller_fruits_bulk import SellerFruitBulkResource
+from resources.stock_tracking import (
+    StockTrackingAggregatedResource, StockTrackingListResource,
+    ClearStockTrackingResource, StockTrackingResource, StockTrackingPDFResource,
+    StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource,
+    StockTrackingCombinedPDFResource
+)
+from utils.pdf_generator import DriverExpensePDFGenerator
 
-    # Add additional API resources with /api prefix (not registered via blueprint)
-    # Note: Most routes are registered in resources/__init__.py via api_bp
-    api.add_resource(LoginResource, '/api/auth/login')
-    api.add_resource(RefreshResource, '/api/auth/refresh')
-    api.add_resource(MeResource, '/api/auth/me')
-    api.add_resource(ChangePasswordResource, '/api/auth/change-password')
-    api.add_resource(CurrentStockResource, '/api/current-stock')
-    # OtherExpensesResource is registered in resources/__init__.py via api_bp
-    # CEODashboardResource is registered in resources/__init__.py via api_bp
-    # SalariesResource is registered in resources/__init__.py via api_bp
-    api.add_resource(SalaryResource, '/api/salaries/<int:salary_id>')
-    api.add_resource(SalaryPaymentToggleStatusResource, '/api/salary-payments/<int:payment_id>/toggle-status')
-    api.add_resource(CarExpensesResource, '/api/car-expenses', '/api/car-expenses/<int:expense_id>')
-    api.add_resource(UserListResource, '/api/users')
-    api.add_resource(UsersForSalaryResource, '/api/users/for-salary')
-    api.add_resource(ProfileImageUploadResource, '/api/profile-image')
-    api.add_resource(ITEventsResource, '/api/it/events')
-    api.add_resource(ITEventResource, '/api/it/events/<string:event_id>')
-    api.add_resource(ITAcknowledgeAlertsResource, '/api/it/alerts/acknowledge')
-    api.add_resource(ITAlertsResource, '/api/it/alerts')
-    api.add_resource(ITIncidentsResource, '/api/it/incidents')
-    api.add_resource(SaleListResource, '/api/sales')
-    api.add_resource(SaleByEmailResource, '/api/sales/email/<string:email>')
-    # SaleResource is registered in resources/__init__.py via api_bp
-    # api.add_resource(SaleResource, '/api/sales/<int:sale_id>')  # Duplicate - removed
-    api.add_resource(SaleSummaryResource, '/api/sales/summary')
-    api.add_resource(ClearSalesResource, '/api/sales/clear')
-    api.add_resource(CustomerDebtResource, '/api/sales/debts')
-    api.add_resource(DailySalesReportResource, '/api/sales/report/<string:date_str>')
-    api.add_resource(CustomerDebtReportResource, '/api/sales/debts/<string:customer_email>/report')
-    api.add_resource(DailyPurchasesReportResource, '/api/purchases/report/<string:date_str>')
-    api.add_resource(PurchaseByEmailResource, '/api/purchases/by-email')
-    api.add_resource(AIAssistanceResource, '/api/ai-assistance')
-    api.add_resource(ReceiptResource, '/api/receipts', '/api/receipts/<string:receipt_num>')
-    api.add_resource(SellerFruitListResource, '/api/seller-fruits')
-    api.add_resource(SellerFruitResource, '/api/seller-fruits/<int:fruit_id>')
-    api.add_resource(SellerFruitBulkResource, '/api/seller-fruits/bulk')
-    api.add_resource(StockTrackingAggregatedResource, '/api/stock-tracking/aggregated')
-    api.add_resource(StockTrackingListResource, '/api/stock-tracking')
-    api.add_resource(StockTrackingResource, '/api/stock-tracking/<int:record_id>')
-    api.add_resource(ClearStockTrackingResource, '/api/stock-tracking/clear')
-    api.add_resource(StockTrackingPDFResource, '/api/stock-tracking/pdf/<int:record_id>')
-    api.add_resource(StockTrackingGroupPDFResource, '/api/stock-tracking/pdf/group')
-    api.add_resource(StockTrackingUnmovedPDFResource, '/api/stock-tracking/pdf/unmoved')
-    api.add_resource(StockTrackingCombinedPDFResource, '/api/stock-tracking/pdf/combined')
-    api.add_resource(InventoryListResource, '/api/inventory')
-    api.add_resource(InventoryResource, '/api/inventory/<int:inv_id>')
-    api.add_resource(ClearInventoryResource, '/api/inventory/clear')
-    api.add_resource(StockMovementListResource, '/api/stock-movements')
+# Add additional API resources with /api prefix (not registered via blueprint)
+# Note: Most routes are registered in resources/__init__.py via api_bp
+api.add_resource(LoginResource, '/api/auth/login')
+api.add_resource(RefreshResource, '/api/auth/refresh')
+api.add_resource(MeResource, '/api/auth/me')
+api.add_resource(ChangePasswordResource, '/api/auth/change-password')
+api.add_resource(CurrentStockResource, '/api/current-stock')
+# OtherExpensesResource is registered in resources/__init__.py via api_bp
+# CEODashboardResource is registered in resources/__init__.py via api_bp
+# SalariesResource is registered in resources/__init__.py via api_bp
+api.add_resource(SalaryResource, '/api/salaries/<int:salary_id>')
+api.add_resource(SalaryPaymentToggleStatusResource, '/api/salary-payments/<int:payment_id>/toggle-status')
+api.add_resource(CarExpensesResource, '/api/car-expenses', '/api/car-expenses/<int:expense_id>')
+api.add_resource(UserListResource, '/api/users')
+api.add_resource(UsersForSalaryResource, '/api/users/for-salary')
+api.add_resource(ProfileImageUploadResource, '/api/profile-image')
+api.add_resource(ITEventsResource, '/api/it/events')
+api.add_resource(ITEventResource, '/api/it/events/<string:event_id>')
+api.add_resource(ITAcknowledgeAlertsResource, '/api/it/alerts/acknowledge')
+api.add_resource(ITAlertsResource, '/api/it/alerts')
+api.add_resource(ITIncidentsResource, '/api/it/incidents')
+api.add_resource(SaleListResource, '/api/sales')
+api.add_resource(SaleByEmailResource, '/api/sales/email/<string:email>')
+# SaleResource is registered in resources/__init__.py via api_bp
+# api.add_resource(SaleResource, '/api/sales/<int:sale_id>')  # Duplicate - removed
+api.add_resource(SaleSummaryResource, '/api/sales/summary')
+api.add_resource(ClearSalesResource, '/api/sales/clear')
+api.add_resource(CustomerDebtResource, '/api/sales/debts')
+api.add_resource(DailySalesReportResource, '/api/sales/report/<string:date_str>')
+api.add_resource(CustomerDebtReportResource, '/api/sales/debts/<string:customer_email>/report')
+api.add_resource(DailyPurchasesReportResource, '/api/purchases/report/<string:date_str>')
+api.add_resource(PurchaseByEmailResource, '/api/purchases/by-email')
+api.add_resource(AIAssistanceResource, '/api/ai-assistance')
+api.add_resource(ReceiptResource, '/api/receipts', '/api/receipts/<string:receipt_num>')
+api.add_resource(SellerFruitListResource, '/api/seller-fruits')
+api.add_resource(SellerFruitResource, '/api/seller-fruits/<int:fruit_id>')
+api.add_resource(SellerFruitBulkResource, '/api/seller-fruits/bulk')
+api.add_resource(StockTrackingAggregatedResource, '/api/stock-tracking/aggregated')
+api.add_resource(StockTrackingListResource, '/api/stock-tracking')
+api.add_resource(StockTrackingResource, '/api/stock-tracking/<int:record_id>')
+api.add_resource(ClearStockTrackingResource, '/api/stock-tracking/clear')
+api.add_resource(StockTrackingPDFResource, '/api/stock-tracking/pdf/<int:record_id>')
+api.add_resource(StockTrackingGroupPDFResource, '/api/stock-tracking/pdf/group')
+api.add_resource(StockTrackingUnmovedPDFResource, '/api/stock-tracking/pdf/unmoved')
+api.add_resource(StockTrackingCombinedPDFResource, '/api/stock-tracking/pdf/combined')
+api.add_resource(InventoryListResource, '/api/inventory')
+api.add_resource(InventoryResource, '/api/inventory/<int:inv_id>')
+api.add_resource(ClearInventoryResource, '/api/inventory/clear')
+api.add_resource(StockMovementListResource, '/api/stock-movements')
 
     # =====================================================================
     # HEALTH CHECK & DEBUG ROUTES
