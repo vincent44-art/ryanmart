@@ -37,7 +37,8 @@ def get_driver_expenses(driver_email):
                 "date": e.date.isoformat() if e.date else None,
                 "car_name": e.car_name,
                 "car_number_plate": e.car_number_plate,
-                "stock_name": e.stock_name
+                "stock_name": e.stock_name,
+                "spolige": e.spolige
             } for e in expenses
         ]
         return jsonify(result), 200
@@ -67,7 +68,8 @@ def add_driver_expense():
         date=date_obj,
         car_name=data.get("car_name"),
         car_number_plate=data.get("car_number_plate"),
-        stock_name=data.get("stock_name")
+        stock_name=data.get("stock_name"),
+        spolige=data.get("spolige")
     )
     db.session.add(expense)
     db.session.commit()
@@ -81,7 +83,8 @@ def add_driver_expense():
         "date": expense.date.isoformat() if expense.date else None,
         "car_name": expense.car_name,
         "car_number_plate": expense.car_number_plate,
-        "stock_name": expense.stock_name
+        "stock_name": expense.stock_name,
+        "spolige": expense.spolige
     }), 201
 
 @drivers_bp.route('/expenses/<expense_id>', methods=['PATCH', 'DELETE'])
@@ -100,6 +103,7 @@ def handle_expense(expense_id):
         expense.car_name = data.get("car_name", expense.car_name)
         expense.car_number_plate = data.get("car_number_plate", expense.car_number_plate)
         expense.stock_name = data.get("stock_name", expense.stock_name)
+        expense.spolige = data.get("spolige", expense.spolige)
         db.session.commit()
         return jsonify({
             "id": expense.id,
@@ -111,7 +115,8 @@ def handle_expense(expense_id):
             "date": expense.date.isoformat() if expense.date else None,
             "car_name": expense.car_name,
             "car_number_plate": expense.car_number_plate,
-            "stock_name": expense.stock_name
+            "stock_name": expense.stock_name,
+            "spolige": expense.spolige
         }), 200
     elif request.method == 'DELETE':
         db.session.delete(expense)

@@ -46,7 +46,8 @@ class CarExpensesResource(Resource):
             # New fields for enhanced car expense tracking
             car_number_plate=data.get('car_number_plate'),
             car_name=data.get('car_name'),
-            stock_name=data.get('stock_name')
+            stock_name=data.get('stock_name'),
+            spolige=data.get('spolige')
         )
         db.session.add(expense)
         db.session.commit()
@@ -60,7 +61,8 @@ class CarExpensesResource(Resource):
             "date": expense.date.isoformat() if expense.date else None,
             "car_number_plate": expense.car_number_plate,
             "car_name": expense.car_name,
-            "stock_name": expense.stock_name
+            "stock_name": expense.stock_name,
+            "spolige": expense.spolige
         }, message="Car expense created", status_code=201)
 
     @jwt_required()

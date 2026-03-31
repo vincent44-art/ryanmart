@@ -41,7 +41,7 @@ def check_user_password():
             print("================================\n")
             
             # Test if the known password matches
-            test_password = "Dennis4431!"
+test_password = "delete"
             if user.check_password(test_password):
                 print(f"✅ Password '{test_password}' MATCHES the stored hash!")
             else:

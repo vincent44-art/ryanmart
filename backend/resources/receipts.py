@@ -3,12 +3,21 @@ from flask import request
 from flask_jwt_extended import jwt_required
 from extensions import db
 from models.receipt import Receipt
+from flask_jwt_extended import jwt_required
+from flask import request
 from utils.helpers import make_response_data
+from utils.decorators import role_required
 import json
 from datetime import datetime
 
 class ReceiptResource(Resource):
-    @jwt_required()
+    @role_required('ceo', 'seller', 'purchaser', 'driver', 'storekeeper', 'admin', 'it')
+    def get(self):
+        receipts = Receipt.query.order_by(Receipt.created_at.desc()).all()
+        data = [r.to_dict() for r in receipts]
+        return make_response_data(data=data, message='Receipts fetched successfully.')
+
+    @role_required('ceo', 'seller', 'purchaser', 'driver', 'storekeeper', 'admin', 'it')
     def post(self):
         data = request.get_json()
         receipt = Receipt(
@@ -29,6 +38,11 @@ class ReceiptResource(Resource):
         db.session.commit()
         return make_response_data(data={'id': receipt.id}, message='Receipt saved.')
 
+    def get(self):
+        receipts = Receipt.query.order_by(Receipt.created_at.desc()).all()
+        data = [r.to_dict() for r in receipts]
+        return make_response_data(data=data, message='Receipts fetched successfully.')
+    
     def get(self, receipt_num):
         receipt = Receipt.query.filter_by(receipt_num=receipt_num).first()
         if not receipt:

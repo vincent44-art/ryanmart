@@ -17,6 +17,8 @@ class Purchase(db.Model):
     purchase_date = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     amount_per_kg = db.Column(db.String(50), nullable=False, default='0')
+    # Spolige field for tracking spoilage
+    spolige = db.Column(db.String(256), nullable=True)
 
     def to_dict(self):
         """
@@ -45,6 +47,7 @@ class Purchase(db.Model):
             'amount': self.cost,
             'amountPerKg': self.amount_per_kg,
             'date': self.purchase_date.isoformat() if self.purchase_date else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'spolige': self.spolige
         }
 

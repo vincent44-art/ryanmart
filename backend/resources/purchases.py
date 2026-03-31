@@ -29,6 +29,7 @@ parser.add_argument('buyerName', type=str, required=True)
 parser.add_argument('amount', type=float, required=True)
 parser.add_argument('date', type=str, required=True)
 parser.add_argument('amountPerKg', type=float, required=True)
+parser.add_argument('spolige', type=str, required=False)
 
 
 # --- New Routes ---
@@ -63,7 +64,7 @@ class PurchaseListResource(Resource):
             offset = (page - 1) * per_page
 
             # Fetch paginated purchases
-            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase ORDER BY purchase_date DESC LIMIT {per_page} OFFSET {offset}")).fetchall()
+            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text, spolige FROM purchase ORDER BY purchase_date DESC LIMIT {per_page} OFFSET {offset}")).fetchall()
 
             # Convert to dict-like objects for compatibility
             purchases = []
@@ -89,7 +90,8 @@ class PurchaseListResource(Resource):
                     'amount': row[7],
                     'amountPerKg': row[10],
                     'date': row[8],
-                    'created_at': row[9]
+                    'created_at': row[9],
+                    'spolige': row[11] if len(row) > 11 else None
                 }
                 purchase_obj = type('PurchaseObj', (), purchase_dict)()
                 # Use default argument to capture purchase_obj at definition time
@@ -105,7 +107,8 @@ class PurchaseListResource(Resource):
                     'amount': s.amount,
                     'amountPerKg': s.amountPerKg,
                     'date': s.date.isoformat() if s.date else None,
-                    'created_at': s.created_at.isoformat() if s.created_at else None
+                    'created_at': s.created_at.isoformat() if s.created_at else None,
+                    'spolige': s.spolige
                 }
                 purchases.append(purchase_obj)
 
@@ -158,7 +161,8 @@ class PurchaseListResource(Resource):
                 buyer_name=data['buyerName'],
                 cost=data['amount'],
                 purchase_date=purchase_date,
-                amount_per_kg=data['amountPerKg']
+                amount_per_kg=data['amountPerKg'],
+                spolige=data.get('spolige')
             )
             db.session.add(new_purchase)
             db.session.commit()
@@ -220,7 +224,7 @@ class PurchaseSummaryResource(Resource):
     def get(self):
         # Fetch all purchases using raw SQL to avoid PostgreSQL numeric type issues
         try:
-            purchases_result = db.session.execute(text("SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase")).fetchall()
+            purchases_result = db.session.execute(text("SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text, spolige FROM purchase")).fetchall()
             # Convert to dict-like objects for compatibility
             purchases = []
             for row in purchases_result:
@@ -321,7 +325,7 @@ class PurchaseByEmailResource(Resource):
                 )
 
             # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
-            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchaser_id = {user.id}")).fetchall()
+            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text, spolige FROM purchase WHERE purchaser_id = {user.id}")).fetchall()
 
             # Convert to dict-like objects for compatibility
             purchases = []
@@ -338,7 +342,8 @@ class PurchaseByEmailResource(Resource):
                     'amount': row[7],
                     'amountPerKg': row[10],
                     'date': row[8],
-                    'created_at': row[9]
+                    'created_at': row[9],
+                    'spolige': row[11] if len(row) > 11 else None
                 }
                 purchase_obj = type('PurchaseObj', (), purchase_dict)()
                 # Use default argument to capture purchase_obj at definition time
@@ -354,7 +359,8 @@ class PurchaseByEmailResource(Resource):
                     'amount': s.amount,
                     'amountPerKg': s.amountPerKg,
                     'date': s.date.isoformat() if s.date else None,
-                    'created_at': s.created_at.isoformat() if s.created_at else None
+                    'created_at': s.created_at.isoformat() if s.created_at else None,
+                    'spolige': s.spolige
                 }
                 purchases.append(purchase_obj)
 
@@ -382,7 +388,7 @@ class DailyPurchasesReportResource(Resource):
 
         try:
             # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
-            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchase_date = '{report_date}'")).fetchall()
+            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text, spolige FROM purchase WHERE purchase_date = '{report_date}'")).fetchall()
 
             # Convert to dict-like objects for compatibility
             purchases = []

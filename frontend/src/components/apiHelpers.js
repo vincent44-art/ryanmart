@@ -272,7 +272,7 @@ export const clearAllDataAPI = async () => {
 // Clear purchases data
 export const clearPurchasesDataAPI = async () => {
   try {
-    const response = await api.delete('/api/purchases');
+    const response = await api.delete('/api/purchases/clear');
     return response;
   } catch (error) {
     console.error('Error clearing purchases data:', error);
@@ -283,7 +283,7 @@ export const clearPurchasesDataAPI = async () => {
 // Clear sales data
 export const clearSalesDataAPI = async () => {
   try {
-    const response = await api.delete('/api/sales');
+    const response = await api.delete('/api/sales/clear');
     return response;
   } catch (error) {
     console.error('Error clearing sales data:', error);
@@ -294,7 +294,7 @@ export const clearSalesDataAPI = async () => {
 // Clear inventory data
 export const clearInventoryDataAPI = async () => {
   try {
-    const response = await api.delete('/api/inventory');
+    const response = await api.delete('/api/inventory/clear');
     return response;
   } catch (error) {
     console.error('Error clearing inventory data:', error);
@@ -305,7 +305,7 @@ export const clearInventoryDataAPI = async () => {
 // Clear car expenses data
 export const clearCarExpensesDataAPI = async () => {
   try {
-    const response = await api.delete('/api/car-expenses');
+    const response = await api.delete('/api/car-expenses/clear');
     return response;
   } catch (error) {
     console.error('Error clearing car expenses data:', error);
@@ -316,7 +316,7 @@ export const clearCarExpensesDataAPI = async () => {
 // Clear other expenses data
 export const clearOtherExpensesDataAPI = async () => {
   try {
-    const response = await api.delete('/api/other_expenses');
+    const response = await api.delete('/api/other_expenses/clear');
     return response;
   } catch (error) {
     console.error('Error clearing other expenses data:', error);
@@ -327,7 +327,7 @@ export const clearOtherExpensesDataAPI = async () => {
 // Clear salaries data
 export const clearSalariesDataAPI = async () => {
   try {
-    const response = await api.delete('/api/salaries');
+    const response = await api.delete('/api/salaries/clear');
     return response;
   } catch (error) {
     console.error('Error clearing salaries data:', error);

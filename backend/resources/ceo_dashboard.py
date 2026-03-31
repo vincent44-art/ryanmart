@@ -10,6 +10,7 @@ from models.driver import DriverExpense
 from models.other_expense import OtherExpense
 from models.seller_fruit import SellerFruit
 from models.salary import Salary
+from models.spolige import Spolige
 from utils.helpers import make_response_data
 
 class CEODashboardResource(Resource):
@@ -161,6 +162,24 @@ class CEODashboardResource(Resource):
         salaries = Salary.query.order_by(Salary.date.desc()).all()
         salaries_data = [salary.to_dict() for salary in salaries]
 
+        # Fetch all spolige records for CEO view
+        spolige_records = Spolige.query.order_by(Spolige.date.desc()).all()
+        spolige_data = [record.to_dict() for record in spolige_records]
+        
+        # Calculate spolige statistics
+        total_spolige_quantity = sum(record.quantity for record in spolige_records)
+        total_spolige_amount = sum(record.total_amount for record in spolige_records)
+
+        # Group spolige by stage
+        spolige_by_stage = {}
+        for record in spolige_records:
+            stage = record.stage
+            if stage not in spolige_by_stage:
+                spolige_by_stage[stage] = {'quantity': 0, 'amount': 0, 'count': 0}
+            spolige_by_stage[stage]['quantity'] += record.quantity
+            spolige_by_stage[stage]['amount'] += record.total_amount
+            spolige_by_stage[stage]['count'] += 1
+
         stats = {
             'totalUsers': total_users,
             'totalInventoryItems': total_inventory_items,
@@ -181,5 +200,11 @@ class CEODashboardResource(Resource):
             'companyPerformance': company_performance,
             'sellerFruits': seller_fruits_data,
             'purchases': purchases_data,
-            'salaries': salaries_data
+            'salaries': salaries_data,
+            'spolige': spolige_data,
+            'spoligeStats': {
+                'totalQuantity': total_spolige_quantity,
+                'totalAmount': total_spolige_amount,
+                'byStage': spolige_by_stage
+            }
         }, message='CEO dashboard overview fetched.')
