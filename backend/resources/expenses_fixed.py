@@ -8,6 +8,7 @@ from models.driver import DriverExpense
 from utils.helpers import make_response_data, get_current_user
 from utils.pdf_generator import DriverExpensePDFGenerator
 from datetime import datetime
+import logging
 
 class OtherExpensesResource(Resource):
     @jwt_required()
@@ -18,8 +19,8 @@ class OtherExpensesResource(Resource):
 class CarExpensesResource(Resource):
     @jwt_required()
     def get(self):
-        import logging
         from sqlalchemy import text
+        
         def safe_float(value, default=0.0):
             """Safely convert a value to float, handling strings and None"""
             if value is None:
@@ -37,10 +38,11 @@ class CarExpensesResource(Resource):
         
         logger = logging.getLogger('car_expenses')
         try:
-            # Use raw SQL like purchases.py to avoid PostgreSQL NUMERIC serialization issues
+            # Use raw SQL like purchases.py to avoid PostgreSQL NUMERIC serialization issues - FIXED: Removed spolige
             expenses_result = db.session.execute(text("""
                 SELECT id, driver_email, amount::text, category, type, description, 
-stock_name \n                FROM driver_expenses ORDER BY date DESC
+                       date, car_number_plate, car_name, stock_name 
+                FROM driver_expenses ORDER BY date DESC
             """)).fetchall()
             
             # Convert to dicts with safe float conversion
@@ -56,7 +58,7 @@ stock_name \n                FROM driver_expenses ORDER BY date DESC
                     'date': row[6].isoformat() if row[6] else None,
                     'car_number_plate': row[7],
                     'car_name': row[8],
-'stock_name': row[9];
+                    'stock_name': row[9]
                 }
                 expenses_data.append(expense_dict)
             

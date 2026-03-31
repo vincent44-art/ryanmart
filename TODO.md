@@ -1,25 +1,26 @@
-# TODO.md - Fix 500 Errors Plan Progress
+# Fix 500 Errors: Purchases & Car Expenses APIs (Spolige Column Issue)
 
-**Status**: ✅ Plan approved and in progress
+## STATUS: [IN PROGRESS] ⏳
 
-## Steps:
-
-### 1. [✅ DONE] Create this TODO.md tracking file
-### 2. [✅ DONE] Edit `backend/resources/expenses.py`:
-   - Replace ORM query → raw SQL `amount::text` 
-   - Added `safe_float()` conversion 
-   - Raw SQL executed successfully
-### 3. [ ] Test APIs:
+### 1. [✅] Create TODO.md with plan breakdown
+### 2. [PENDING] 📝 Edit backend/resources/purchases.py
+   - Remove `, spolige` from 4 raw SQL SELECT queries  
+   - Remove spolige row access in dicts (row[11])
+### 3. [PENDING] 📝 Edit backend/resources/expenses.py  
+   - Remove `, spolige` from CarExpensesResource.get SQL
+   - Remove `spolige: row[10]` from expense_dict
+### 4. [PENDING] 🧪 Test APIs locally
+   ```bash
+   curl http://localhost:5000/api/purchases  
+   curl http://localhost:5000/api/car-expenses
    ```
-   curl -H "Authorization: Bearer <token>" https://ryanmart-bacckend.onrender.com/api/car-expenses
-   curl -H "Authorization: Bearer <token>" https://ryanmart-bacckend.onrender.com/api/purchases
-   ```
-### 4. [ ] Backend redeploy to Render
-### 5. [ ] Frontend test:
-   - CarExpensesTab.jsx ✅
-   - PurchasesTab.jsx ✅ 
-   - ReportsTab_analytics.jsx (car-expenses & purchases calls)
-### 6. [ ] Verify no more 500 console errors
-### 7. [✅ COMPLETED] Close task with attempt_completion
+### 5. [PENDING] 🚀 Deploy & Verify Render
+   - git add/commit/push
+   - Check Render logs (no 500s)
+   - Test frontend tabs
+### 6. [LATER] 🔄 Optional: Alembic migration for spolige columns
+   - alembic revision --autogenerate -m "add_spolige_columns" 
+   - Deploy migration
 
-**Next**: Edit backend/resources/expenses.py
+**Completed: 1/6** | **Next: Edit purchases.py**
+
