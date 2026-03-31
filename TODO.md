@@ -1,26 +1,15 @@
-# Fix 500 Errors: Purchases & Car Expenses APIs (Spolige Column Issue)
+# IndentationError Fix Progress
+Current working directory: /home/vincent/ryanmart
 
-## STATUS: [IN PROGRESS] ⏳
+## Steps:
+- [x] 1. Plan approved by user
+- [x] 2. De-indent HEALTH CHECK & DEBUG ROUTES section in backend/app.py (lines ~305-340)
+- [x] 3. Verify syntax: python3 -m py_compile backend/app.py
+- [x] 4. Test locally: cd backend && gunicorn --bind 0.0.0.0:5000 app:app
+- [ ] 5. Commit changes: git add . && git commit -m "Fix IndentationError in app.py"
+- [ ] 6. Push to trigger Render deploy: git push
+- [ ] 7. Verify Render deployment succeeds
+- [ ] 8. Test health endpoint: curl https://your-render-url/api/health
 
-### 1. [✅] Create TODO.md with plan breakdown
-### 2. [PENDING] 📝 Edit backend/resources/purchases.py
-   - Remove `, spolige` from 4 raw SQL SELECT queries  
-   - Remove spolige row access in dicts (row[11])
-### 3. [PENDING] 📝 Edit backend/resources/expenses.py  
-   - Remove `, spolige` from CarExpensesResource.get SQL
-   - Remove `spolige: row[10]` from expense_dict
-### 4. [PENDING] 🧪 Test APIs locally
-   ```bash
-   curl http://localhost:5000/api/purchases  
-   curl http://localhost:5000/api/car-expenses
-   ```
-### 5. [PENDING] 🚀 Deploy & Verify Render
-   - git add/commit/push
-   - Check Render logs (no 500s)
-   - Test frontend tabs
-### 6. [LATER] 🔄 Optional: Alembic migration for spolige columns
-   - alembic revision --autogenerate -m "add_spolige_columns" 
-   - Deploy migration
-
-**Completed: 1/6** | **Next: Edit purchases.py**
+Next step will update this file after each completion.
 
