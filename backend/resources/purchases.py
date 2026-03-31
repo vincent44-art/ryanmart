@@ -180,12 +180,12 @@ class PurchaseResource(Resource):
         data = parser.parse_args()
 
         purchase.supplier_name = data['supplier_name']
-        purchase.fruit_type = data['fruit_type'],
-                purchase.quantity = data['quantity'],
-                purchase.cost = data['cost'],
-                purchase.purchase_date = datetime.strptime(
-                    data['purchase_date'], '%Y-%m-%d'
-                ).date()
+        purchase.fruit_type = data['fruit_type']
+        purchase.quantity = data['quantity']
+        purchase.cost = data['cost']
+        purchase.purchase_date = datetime.strptime(
+            data['purchase_date'], '%Y-%m-%d'
+        ).date()
 
         db.session.commit()
         return make_response_data(
