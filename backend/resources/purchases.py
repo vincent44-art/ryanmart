@@ -46,8 +46,10 @@ def get_ceo_messages():
 class PurchaseListResource(Resource):
     @role_required('ceo', 'purchaser')
     def get(self):
-        current_user = get_current_user()
+        import logging
         logger = logging.getLogger('purchases')
+        current_user = get_current_user()
+        logger.info(f"Fetching purchases for user: {current_user.email if current_user else 'unknown'}")
 
         # Pagination parameters
         from flask import request

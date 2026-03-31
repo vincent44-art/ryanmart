@@ -18,8 +18,41 @@ class OtherExpensesResource(Resource):
 class CarExpensesResource(Resource):
     @jwt_required()
     def get(self):
-        expenses = DriverExpense.query.order_by(DriverExpense.date.desc()).all()
-        return make_response_data(data=[e.to_dict() for e in expenses], message="Car expenses fetched successfully.")
+        import logging
+        logger = logging.getLogger('car_expenses')
+        try:
+            expenses = DriverExpense.query.order_by(DriverExpense.date.desc()).all()
+            expenses_data = []
+            for e in expenses:
+                try:
+                    expenses_data.append(e.to_dict())
+                except Exception as e_error:
+                    logger.error(f"Error serializing expense {e.id}: {str(e_error)}")
+                    # Fallback dict
+                    expenses_data.append({
+                        "id": getattr(e, 'id', None),
+                        "driver_email": getattr(e, 'driver_email', None),
+                        "amount": getattr(e, 'amount', None),
+                        "category": getattr(e, 'category', None),
+                        "type": getattr(e, 'type', None),
+                        "description": getattr(e, 'description', None),
+                        "date": getattr(e, 'date', None) and str(getattr(e, 'date', None)),
+                        "car_number_plate": getattr(e, 'car_number_plate', None),
+                        "car_name": getattr(e, 'car_name', None),
+                        "stock_name": getattr(e, 'stock_name', None),
+                        "spolige": getattr(e, 'spolige', None),
+                        "_error": "serialization_failed"
+                    })
+            return make_response_data(data=expenses_data, message="Car expenses fetched successfully.")
+        except Exception as e:
+            logger.error(f"Error fetching car expenses: {str(e)}", exc_info=True)
+            db.session.rollback()
+            return make_response_data(
+                success=False,
+                data=[],
+                message=f"Failed to fetch car expenses: {str(e)}",
+                status_code=500
+            )
 
     @jwt_required()
     def post(self):
