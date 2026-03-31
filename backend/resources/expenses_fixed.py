@@ -37,29 +37,28 @@ class CarExpensesResource(Resource):
         
         logger = logging.getLogger('car_expenses')
         try:
-            # Use raw SQL like purchases.py to avoid PostgreSQL NUMERIC serialization issues
-            # FIXED: SELECT all columns to match dict row indices
+            # Use result.mappings() for robust column mapping - no index errors
             expenses_result = db.session.execute(text("""
-                SELECT id, driver_email, amount::text, category, type, description, 
-                       date, car_number_plate, car_name, stock_name, spolige
+                SELECT id, driver_email, amount::text as amount_text, category, type, 
+                       description, date, car_number_plate, car_name, stock_name, spolige
                 FROM driver_expenses ORDER BY date DESC
-            """)).fetchall()
+            """)).mappings().all()
             
             # Convert to dicts with safe float conversion
             expenses_data = []
             for row in expenses_result:
                 expense_dict = {
-                    'id': row[0],
-                    'driver_email': row[1],
-                    'amount': safe_float(row[2]),
-                    'category': row[3],
-                    'type': row[4],
-                    'description': row[5],
-                    'date': row[6].isoformat() if row[6] else None,
-                    'car_number_plate': row[7],
-                    'car_name': row[8],
-                    'stock_name': row[9],
-                    'spolige': row[10],
+                    'id': row['id'],
+                    'driver_email': row['driver_email'],
+                    'amount': safe_float(row['amount_text']),
+                    'category': row['category'],
+                    'type': row['type'],
+                    'description': row['description'],
+                    'date': row['date'].isoformat() if row['date'] else None,
+                    'car_number_plate': row['car_number_plate'],
+                    'car_name': row['car_name'],
+                    'stock_name': row['stock_name'],
+                    'spolige': row['spolige'],
                 }
                 expenses_data.append(expense_dict)
             
@@ -113,7 +112,7 @@ class CarExpensesResource(Resource):
             "type": expense.type,
             "description": expense.description,
             "date": expense.date.isoformat() if expense.date else None,
-            "car_number_plate": expense.car_name,
+            "car_number_plate": expense.car_number_plate,
             "car_name": expense.car_name,
             "stock_name": expense.stock_name,
             "spolige": expense.spolige
