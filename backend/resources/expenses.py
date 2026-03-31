@@ -56,7 +56,7 @@ stock_name \n                FROM driver_expenses ORDER BY date DESC
                     'date': row[6].isoformat() if row[6] else None,
                     'car_number_plate': row[7],
                     'car_name': row[8],
-'stock_name': row[9];
+'stock_name': row[9],
                 }
                 expenses_data.append(expense_dict)
             
