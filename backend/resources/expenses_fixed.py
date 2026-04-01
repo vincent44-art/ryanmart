@@ -1,8 +1,9 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from flask import request, send_file
 import io
 import logging
+import re
 from extensions import db
 from models.other_expense import OtherExpense
 from models.driver import DriverExpense
@@ -19,7 +20,10 @@ class OtherExpensesResource(Resource):
 
 class CarExpensesResource(Resource):
     @jwt_required()
-    def get(self):
+    def get(self, expense_id=None):
+        logger = logging.getLogger('car_expenses')
+        logger.info(f"Fetching car expenses (ID: {expense_id})")
+        
         def safe_float(value, default=0.0):
             """Safely convert a value to float, handling strings and None"""
             if value is None:
@@ -28,20 +32,24 @@ class CarExpensesResource(Resource):
                 return float(value)
             if isinstance(value, str):
                 try:
-                    import re
                     match = re.search(r'(\d+(\.\d+)?)', value)
                     return float(match.group(1)) if match else default
                 except (ValueError, TypeError):
                     return default
             return default
         
-        logger = logging.getLogger('car_expenses')
         try:
-            # Use result.mappings() for robust column mapping - no index errors
+            if expense_id:
+                expense = DriverExpense.query.get(expense_id)
+                if not expense:
+                    return make_response_data(success=False, message="Car expense not found.", status_code=404)
+                return make_response_data(data=expense.to_dict(), message="Car expense fetched successfully.")
+            
+            # Use result.mappings() for robust column mapping - handles empty tables
             expenses_result = db.session.execute(text("""
                 SELECT id, driver_email, amount::text as amount_text, category, type, 
                        description, date, car_number_plate, car_name, stock_name, spolige
-                FROM driver_expenses ORDER BY date DESC
+                FROM driver_expenses ORDER BY date DESC NULLS LAST
             """)).mappings().all()
             
             # Convert to dicts with safe float conversion
@@ -76,27 +84,30 @@ class CarExpensesResource(Resource):
 
     @jwt_required()
     def post(self):
-        data = request.get_json()
+        data = request.get_json() or {}
         current_user = get_current_user()
+        
         # Validate amount
         amount = data.get('amount')
-        if amount is None or amount == '' or not isinstance(amount, (int, float)):
-            try:
-                amount = float(amount)
-            except (TypeError, ValueError):
-                return make_response_data(success=False, message="Amount is required and must be a valid number.", status_code=400)
+        if amount is None or amount == '':
+            return make_response_data(success=False, message="Amount is required.", status_code=400)
         try:
-            expense_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+            amount = float(amount)
+        except (TypeError, ValueError):
+            return make_response_data(success=False, message="Amount must be a valid number.", status_code=400)
+        
+        try:
+            expense_date = datetime.strptime(data.get('date', ''), '%Y-%m-%d').date()
         except ValueError:
-            return make_response_data(success=False, message="Invalid date format for date. Use YYYY-MM-DD.", status_code=400)
+            return make_response_data(success=False, message="Invalid date format. Use YYYY-MM-DD.", status_code=400)
+        
         expense = DriverExpense(
             driver_email=current_user.email,
             amount=amount,
-            category=data.get('category'),
+            category=data.get('category', 'fuel'),
             type=data.get('type'),
             description=data.get('description'),
             date=expense_date,
-            # New fields for enhanced car expense tracking
             car_number_plate=data.get('car_number_plate'),
             car_name=data.get('car_name'),
             stock_name=data.get('stock_name'),
@@ -104,19 +115,9 @@ class CarExpensesResource(Resource):
         )
         db.session.add(expense)
         db.session.commit()
-        return make_response_data(data={
-            "id": expense.id,
-            "driver_email": expense.driver_email,
-            "amount": expense.amount,
-            "category": expense.category,
-            "type": expense.type,
-            "description": expense.description,
-            "date": expense.date.isoformat() if expense.date else None,
-            "car_number_plate": expense.car_number_plate,
-            "car_name": expense.car_name,
-            "stock_name": expense.stock_name,
-            "spolige": expense.spolige
-        }, message="Car expense created", status_code=201)
+        logger = logging.getLogger('car_expenses')
+        logger.info(f"Car expense created: ID {expense.id} by {current_user.email}")
+        return make_response_data(data=expense.to_dict(), message="Car expense created", status_code=201)
 
     @jwt_required()
     def delete(self, expense_id):
@@ -134,18 +135,29 @@ class DriverExpenseReportResource(Resource):
         if current_user.email != driver_email and current_user.role != 'ceo':
             return make_response_data(success=False, message="Unauthorized", status_code=403)
 
-        # Get query parameters
-        report_type = request.args.get('type', 'daily')  # daily or monthly
-        date = request.args.get('date')  # YYYY-MM-DD for daily, YYYY-MM for monthly
+        report_type = request.args.get('type', 'daily')
+        date = request.args.get('date')
         year = request.args.get('year')
         month = request.args.get('month')
 
         try:
-            # Fetch all expenses for the driver
             expenses = DriverExpense.query.filter_by(driver_email=driver_email).all()
             expense_data = [e.to_dict() for e in expenses]
 
-            pdf_generator = DriverExpensePDFGenerator()
+            # Conditional PDF generator import
+            pdf_generator = None
+            try:
+                from utils.pdf_generator import DriverExpensePDFGenerator
+                pdf_generator = DriverExpensePDFGenerator()
+            except ImportError as e:
+                logging.getLogger('expenses').warning(f"PDF generator not available: {e}")
+
+            if not pdf_generator:
+                return make_response_data(
+                    success=False, 
+                    message="PDF report generator not available.", 
+                    status_code=501
+                )
 
             if report_type == 'daily':
                 if not date:
@@ -155,50 +167,27 @@ class DriverExpenseReportResource(Resource):
                     report_date = datetime.strptime(date, '%Y-%m-%d').date()
 
                 pdf_content = pdf_generator.generate_daily_report(expense_data, driver_email, report_date)
-
-                # Create a BytesIO object for the response
-                pdf_buffer = io.BytesIO(pdf_content)
-
-                # Generate filename
                 filename = f"driver_expense_report_{driver_email}_{report_date.strftime('%Y%m%d')}.pdf"
-
-                return send_file(
-                    pdf_buffer,
-                    as_attachment=True,
-                    download_name=filename,
-                    mimetype='application/pdf'
-                )
-
             elif report_type == 'monthly':
                 if not year or not month:
-                    return make_response_data(success=False, message="Year and month are required for monthly reports", status_code=400)
-
-                try:
-                    year_int = int(year)
-                    month_int = int(month)
-                    if month_int < 1 or month_int > 12:
-                        return make_response_data(success=False, message="Invalid month (1-12)", status_code=400)
-                except ValueError:
-                    return make_response_data(success=False, message="Invalid year or month format", status_code=400)
-
+                    return make_response_data(success=False, message="Year and month required for monthly reports", status_code=400)
+                year_int = int(year)
+                month_int = int(month)
+                if month_int < 1 or month_int > 12:
+                    return make_response_data(success=False, message="Invalid month (1-12)", status_code=400)
                 pdf_content = pdf_generator.generate_monthly_report(expense_data, driver_email, year_int, month_int)
-
-                # Create a BytesIO object for the response
-                pdf_buffer = io.BytesIO(pdf_content)
-
-                # Generate filename
                 filename = f"driver_expense_report_{driver_email}_{year}_{month:02d}.pdf"
-
-                return send_file(
-                    pdf_buffer,
-                    as_attachment=True,
-                    download_name=filename,
-                    mimetype='application/pdf'
-                )
             else:
                 return make_response_data(success=False, message="Invalid report type. Use 'daily' or 'monthly'", status_code=400)
 
+            pdf_buffer = io.BytesIO(pdf_content)
+            return send_file(
+                pdf_buffer,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/pdf'
+            )
         except Exception as e:
             logger = logging.getLogger('expenses')
             logger.error(f"Error generating driver expense report: {str(e)}", exc_info=True)
-            return make_response_data(success=False, message="Error generating report: {str(e)}", status_code=500)
+            return make_response_data(success=False, message=f"Error generating report: {str(e)}", status_code=500)
