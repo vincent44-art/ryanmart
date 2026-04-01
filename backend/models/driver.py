@@ -19,8 +19,6 @@ class DriverExpense(db.Model):
     car_number_plate = db.Column(db.String(20), nullable=True)
     car_name = db.Column(db.String(100), nullable=True)
     stock_name = db.Column(db.String(100), nullable=True)
-    # Spolige field for tracking spoilage
-    spolige = db.Column(db.String(256), nullable=True)
 
     def to_dict(self):
         return {
@@ -33,8 +31,7 @@ class DriverExpense(db.Model):
             "date": self.date.isoformat() if self.date else None,
             "car_number_plate": self.car_number_plate,
             "car_name": self.car_name,
-            "stock_name": self.stock_name,
-            "spolige": self.spolige
+            "stock_name": self.stock_name
         }
 
 drivers_bp = Blueprint('drivers', __name__, url_prefix='/api/drivers')
@@ -65,7 +62,6 @@ def get_driver_expenses(driver_email):
             "car_number_plate": e.car_number_plate,
             "car_name": e.car_name,
             "stock_name": e.stock_name,
-            "spolige": e.spolige,
             "date": e.date.isoformat() if e.date else None
         } for e in expenses
     ]
@@ -92,7 +88,6 @@ def add_driver_expense():
         car_number_plate=data.get("car_number_plate"),
         car_name=data.get("car_name"),
         stock_name=data.get("stock_name"),
-        spolige=data.get("spolige"),
         date=date_obj
     )
     db.session.add(expense)

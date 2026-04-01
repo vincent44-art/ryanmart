@@ -1,31 +1,20 @@
-# Backend Task Tracker - Syntax Fix
-Current Working Directory: /home/vincent/ryanmart/backend
+## 🚀 Car Expenses 500 Fix Progress (High Priority)
 
-## Approved Plan: Fix IndentationError in app.py (line 259)
+### Status: 🔄 In Progress (Approved Plan)
 
-**Status: PLAN APPROVED → IMPLEMENTATION**
+**Problem:** `column "spolige" does not exist` in driver_expenses table
 
-### Steps:
-- [x] 1. Plan approved by user
-- [x] 2. Create TODO.md tracker ✅ DONE
-- [x] 3. Edit backend/app.py - De-indent imports/api.add_resource block ✅ FIXED IndentationError
-- [ ] 4. Verify syntax: `cd backend && python3 -m py_compile app.py`
-- [ ] 5. Test startup: `cd backend && python3 app.py`
-- [ ] 6. Test Gunicorn: `cd backend && gunicorn --bind 0.0.0.0:5000 app:app`
-- [ ] 7. Test health: `curl http://localhost:5000/api/health`
-- [ ] 8. Update TODO_syntax_fix.md
-- [ ] 9. attempt_completion
-- [ ] 4. Verify syntax: `cd backend && python3 -m py_compile app.py`
-- [ ] 5. Test startup: `cd backend && python3 app.py`
-- [ ] 6. Test Gunicorn: `cd backend && gunicorn --bind 0.0.0.0:5000 app:app`
-- [ ] 7. Test health: `curl http://localhost:5000/api/health`
-- [ ] 8. Update TODO_syntax_fix.md
-- [ ] 9. attempt_completion
+**DB Schema Confirmed:** `check_tables.py` shows NO spolige column
 
-## Next Tasks After Syntax Fix:
-- Fix relative imports (TODO_imports_fix.md - 25 files)
-- Eventlet/Gunicorn worker config (TODO_eventlet_fix.md)
-- CORS production origins
-- API 500 error fixes
+**Approved Plan Steps:**
 
-**Updated:** $(date)
+- ✅ **Step 1:** Create TODO.md tracking
+- ⏳ **Step 2:** `edit_file backend/resources/expenses_fixed.py` - Remove spolige from SQL SELECT, dict, POST
+- ⏳ **Step 3:** `edit_file backend/models/driver.py` - Remove spolige field + to_dict ref
+- ⏳ **Step 4:** `edit_file backend/resources/drivers.py` - Remove blueprint spolige refs
+- ⏳ **Step 5:** Test `curl /api/car-expenses` returns 200
+- ⏳ **Step 6:** Update TODO_car_expenses_500_fix.md + attempt_completion
+
+**Root Cause:** Model added spolige post-migration, no ALTER TABLE
+
+**Note:** Spolige tracked separately in spolige table

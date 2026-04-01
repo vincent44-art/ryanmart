@@ -48,7 +48,7 @@ class CarExpensesResource(Resource):
             # Use result.mappings() for robust column mapping - handles empty tables
             expenses_result = db.session.execute(text("""
                 SELECT id, driver_email, amount::text as amount_text, category, type, 
-                       description, date, car_number_plate, car_name, stock_name, spolige
+                       description, date, car_number_plate, car_name, stock_name
                 FROM driver_expenses ORDER BY date DESC NULLS LAST
             """)).mappings().all()
             
@@ -66,7 +66,6 @@ class CarExpensesResource(Resource):
                     'car_number_plate': row['car_number_plate'],
                     'car_name': row['car_name'],
                     'stock_name': row['stock_name'],
-                    'spolige': row['spolige'],
                 }
                 expenses_data.append(expense_dict)
             
@@ -110,8 +109,7 @@ class CarExpensesResource(Resource):
             date=expense_date,
             car_number_plate=data.get('car_number_plate'),
             car_name=data.get('car_name'),
-            stock_name=data.get('stock_name'),
-            spolige=data.get('spolige')
+            stock_name=data.get('stock_name')
         )
         db.session.add(expense)
         db.session.commit()
