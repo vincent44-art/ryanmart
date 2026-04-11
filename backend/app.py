@@ -17,7 +17,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from dotenv import load_dotenv
-from datetime import timedelta
+from datetime import timedelta, datetime
 from werkzeug.security import generate_password_hash
 
 # Ensure backend package is importable
@@ -139,13 +139,13 @@ def create_app(config_class=Config):
     # Get allowed origins from config, with fallbacks for development
     configured_origins = app.config.get('CORS_ORIGINS', [])
     
-    # Production URLs - MUST match exactly what's deployed
-ryanmart-frontend.onrender.com
-ryanmart-backend.onrender.com
+# Production URLs - MUST match exactly what's deployed
+    PRODUCTION_FRONTEND = "https://ryanmart-frontend.onrender.com"
     DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
     
+    # Define allowed origins - fix undefined variables
+    allowed_origins = []
     if configured_origins:
-        # Use configured origins
         allowed_origins = configured_origins
         app.logger.info(f"Using configured CORS origins: {allowed_origins}")
     else:
