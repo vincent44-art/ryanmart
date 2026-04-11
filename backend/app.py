@@ -125,15 +125,18 @@ def create_app(config_class=Config):
             allowed_origins = DEVELOPMENT_LOCALHOST
     
     app.config['ALLOWED_ORIGINS'] = allowed_origins
-    app.config['CORS_ORIGINS'] = allowed_origins
+app.config['CORS_ORIGINS'] = allowed_origins
     
-    CORS(app, 
-         origins=allowed_origins,
-         supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
-         methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-         expose_headers=["Content-Length", "X-Requested-With"],
-         max_age=86400)
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token"],
+            "expose_headers": ["Content-Length", "X-Requested-With"],
+            "supports_credentials": True,
+            "max_age": 86400
+        }
+    })
     
     app.logger.info(f"CORS initialized with origins: {allowed_origins}")
     
@@ -187,17 +190,18 @@ def create_app(config_class=Config):
             'status_code': 401
         }), 401
     
-    # JWT user lookup
-    @jwt.user_lookup_loader
-    def user_lookup_callback(_jwt_header, jwt_data):
-        identity = jwt_data["sub"]
-        try:
-            user = User.query.get(identity)
-            return user
-        except Exception as e:
-            app.logger.error(f"Error in user_lookup_callback: {str(e)}")
-            return None
-    
+
+        origin = request.headers.get('Origin', '')
+        allowed = current_app.config['ALLOWED_ORIGINS']
+        if origin in allowed:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Max-Age'] = '86400'
+            response.headers['Vary'] = 'Origin'
+        return response
+
     # API Setup
     api = Api(app, catch_all_404s=False)
     
@@ -275,15 +279,18 @@ def create_app(config_class=Config):
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Internal server error', 'status_code': 500}), 500
     
-    # Force CORS headers
+# Force CORS headers - ENHANCED FOR ACAH
     @app.after_request
     def after_request(response):
         if request.path.startswith('/api'):
             origin = request.headers.get('Origin', '')
             allowed = current_app.config['ALLOWED_ORIGINS']
-            if origin in allowed:
-                response.headers['Access-Control-Allow-Origin'] = origin
+            if origin in allowed or not origin:
+                response.headers['Access-Control-Allow-Origin'] = origin or '*'
                 response.headers['Access-Control-Allow-Credentials'] = 'true'
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, X-CSRF-Token'
+                response.headers['Access-Control-Max-Age'] = '86400'
+                response.headers['Vary'] = 'Origin'
         return response
     
     # Serve React SPA
