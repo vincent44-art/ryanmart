@@ -1,15 +1,12 @@
-# RyanMart Backend/Frontend Task Tracker
+# CORS Fix Progress
 
-## Completed
-- [x] Fix ModuleNotFoundError: No module named 'backend' - Fixed absolute imports in backend/app.py to relative imports (from backend.X → from X). Ready for Render redeploy.
-  - Changed 9 import statements leveraging sys.path.insert(0, BACKEND_ROOT).
-  - Tested locally with `gunicorn --bind 0.0.0.0:5000 wsgi:app`.
+## Completed Steps:
+- [x] 1. Update backend/config.py: Add `https://ryanmart-fronntend.onrender.com` to CORS_ORIGINS
+- [x] 2. Updated frontend/src/services/api.js to use deployed backend `https://ryanmart-bacckend.onrender.com`
+- [x] 3. Health check: `curl https://ryanmart-bacckend.onrender.com/api/health` → healthy, CORS origins include fronntend
+- [x] 4. CORS preflight on bacckend: Returns Access-Control-Allow-Origin: https://ryanmart-fronntend.onrender.com, Access-Control-Allow-Credentials: true, Allow: POST,OPTIONS ✓
+- [ ] 5. Deploy changes and test login from frontend
+- [ ] 6. Update TODO_cors_fix.md as completed
 
-## Pending Tasks
-*(Existing TODOs from various files - consolidate as needed)*
+**Next: Proceed to step 1?**
 
-- Fix remaining 500 errors (purchases, car expenses, etc.)
-- CORS/JSON fixes
-- API endpoint improvements
-- Spolige tracker enhancements
-- ...
