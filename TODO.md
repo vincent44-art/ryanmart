@@ -1,16 +1,37 @@
-# Car Expenses 500 Error Fix - Reports Tab CEO Page
+# API 500 Error Fix Plan - Purchases & Other Expenses
+Tracking progress on fixing 500 errors in purchases API and empty other expenses data.
 
-## Plan Status: ✅ APPROVED
+## Steps to Complete:
 
-### Steps:
-- [x] 1. Create this TODO.md 
-- [x] 2. Fix `backend/resources/expenses_fixed.py` (imports, SQL, error handling) ✅
-- [x] 3. Test local: `cd backend && python3 app.py` ✅ Backend running on http://127.0.0.1:5000
-- [ ] 4. Test frontend: Login CEO → Reports tab → check console/network for /api/car-expenses (200 OK)
-- [ ] 5. Update TODO_car_expenses_500_fix.md as complete
-- [ ] 6. Deploy to Render (git push / redeploy)
-- [ ] 7. Verify production: ryanmart-bacckend.onrender.com/api/car-expenses
+### 1. [ ] Create this TODO.md (IN PROGRESS)
+### 2. [✅] Fix backend/resources/purchases.py
+   - Parameterize all raw SQL queries
+   - Fix logger import issues
+   - Sanitize LIMIT/OFFSET inputs
+   - Improve error handling
+   
+### 3. [✅] Fix backend/resources/other_expenses.py  
+   - Parameterize SQL queries for empty data issue
+   - Ensure proper JSON response structure
+   
+### 4. [ ] Remove duplicate backend/resources/purchases_fixed.py
 
-**Root cause**: SQL column mismatch → fixed with .mappings(), safe_float, full columns, conditional PDF import.
+### 5. [ ] Test backend with test_purchase_api.py
+   ```bash
+   python test_purchase_api.py
+   ```
+   Expected: All endpoints return JSON (even 401s)
 
-**Current step**: 4/7 - Test frontend locally
+### 6. [ ] Restart backend server
+
+### 7. [ ] Test frontend PurchaserDashboard
+   - Login as purchaser
+   - Verify purchases load without 500
+   - Test add purchase form
+   
+### 8. [ ] [ ] Update progress in this file
+
+## Current Status
+- Plan approved ✅
+- Files analyzed ✅
+

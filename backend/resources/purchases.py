@@ -12,9 +12,11 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from sqlalchemy import text
+from sqlalchemy import text, bindparam
 import io
 import logging
+
+logger = logging.getLogger(__name__)
 
 # Blueprint for non-Resource routes
 purchases_bp = Blueprint('purchases_bp', __name__)

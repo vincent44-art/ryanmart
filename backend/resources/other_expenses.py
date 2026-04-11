@@ -13,6 +13,9 @@ from reportlab.lib.units import inch
 from sqlalchemy import text
 import io
 import logging
+import re
+
+logger = logging.getLogger(__name__)
 
 def safe_float(value, default=0.0):
     """Safely convert a value to float, handling strings and None"""
@@ -149,8 +152,13 @@ class OtherExpensesResource(Resource):
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def get(self):
         try:
-            # Use raw SQL to fetch other expenses as strings to avoid numeric type conversion issues
-            expenses_result = db.session.execute(text("SELECT id, expense_type, description, amount::text, date, user_id FROM other_expenses ORDER BY date DESC")).fetchall()
+            # Use raw SQL with safe query
+            expenses_query = text("""
+                SELECT id, expense_type, description, amount::text, date, user_id 
+                FROM other_expenses 
+                ORDER BY date DESC
+            """)
+            expenses_result = db.session.execute(expenses_query).fetchall()
             # Convert to proper dict objects for compatibility
             expenses = []
             for row in expenses_result:
@@ -163,9 +171,11 @@ class OtherExpensesResource(Resource):
                     'user_id': row[5]
                 }
                 expenses.append(expense_dict)
+            logger.info(f"Fetched {len(expenses)} other expenses")
         except Exception as e:
+            logger.error(f"Error fetching other expenses: {str(e)}")
             db.session.rollback()
-            return make_response_data(success=False, message=f"Error fetching other expenses: {str(e)}", status_code=500)
+            return make_response_data(success=False, message="Failed to fetch other expenses.", status_code=500)
 
         return make_response_data(data=expenses, message="Other expenses fetched successfully.")
 
