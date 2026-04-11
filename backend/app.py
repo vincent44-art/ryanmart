@@ -22,13 +22,18 @@ from datetime import timedelta, datetime
 from werkzeug.security import generate_password_hash
 from flask_restful import Api
 
-# Ensure backend package is importable
+
 BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
 if BACKEND_ROOT not in sys.path:
     sys.path.insert(0, BACKEND_ROOT)
 
 # Load environment variables early
 load_dotenv()
+
+import config
+import extensions
+Config = config.Config
+db = extensions.db
 
 # Path to your React build folder
 FRONTEND_BUILD_DIR = os.path.abspath(os.path.join(BACKEND_ROOT, '..', 'frontend', 'build'))
