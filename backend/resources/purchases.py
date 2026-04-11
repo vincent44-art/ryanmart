@@ -131,55 +131,55 @@ class PurchaseListResource(Resource):
                 status_code=500
             )
 
-@jwt_required()
-@role_required('purchaser')
-def post(self):
-    """Create new purchase record."""
-    data = parser.parse_args()
-    current_user = get_current_user()
-    logger = logging.getLogger('purchases')
-    
-    logger.info(f"Creating purchase for user {current_user.email if current_user else 'unknown'}: {data}")
+    @jwt_required()
+    @role_required('purchaser')
+    def post(self):
+        """Create new purchase record."""
+        data = parser.parse_args()
+        current_user = get_current_user()
+        logger = logging.getLogger('purchases')
+        
+        logger.info(f"Creating purchase for user {current_user.email if current_user else 'unknown'}: {data}")
 
-    try:
-        purchase_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-    except ValueError:
-        logger.error(f"Invalid date format: {data.get('date')}")
-        return make_response_data(
-            success=False,
-            message="Invalid date format. Use YYYY-MM-DD.",
-            status_code=400
-        )
+        try:
+            purchase_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        except ValueError:
+            logger.error(f"Invalid date format: {data.get('date')}")
+            return make_response_data(
+                success=False,
+                message="Invalid date format. Use YYYY-MM-DD.",
+                status_code=400
+            )
 
-    try:
-        new_purchase = Purchase(
-            purchaser_id=current_user.id,
-            employee_name=data['employeeName'],
-            fruit_type=data['fruitType'],
-            quantity=data['quantity'],
-            unit=data['unit'],
-            buyer_name=data['buyerName'],
-            cost=data['amount'],
-            purchase_date=purchase_date,
-            amount_per_kg=data['amountPerKg'],
-            spolige=data.get('spolige')
-        )
-        db.session.add(new_purchase)
-        db.session.commit()
-        logger.info(f"Purchase created successfully: ID {new_purchase.id}")
-        return make_response_data(
-            data=new_purchase.to_dict(),
-            message="Purchase recorded successfully.",
-            status_code=201
-        )
-    except Exception as e:
-        logger.error(f"Purchase create failed: {str(e)}", exc_info=True)
-        db.session.rollback()
-        return make_response_data(
-            success=False,
-            message=f"Failed to record purchase: {str(e)}",
-            status_code=500
-        )
+        try:
+            new_purchase = Purchase(
+                purchaser_id=current_user.id,
+                employee_name=data['employeeName'],
+                fruit_type=data['fruitType'],
+                quantity=data['quantity'],
+                unit=data['unit'],
+                buyer_name=data['buyerName'],
+                cost=data['amount'],
+                purchase_date=purchase_date,
+                amount_per_kg=data['amountPerKg'],
+                spolige=data.get('spolige')
+            )
+            db.session.add(new_purchase)
+            db.session.commit()
+            logger.info(f"Purchase created successfully: ID {new_purchase.id}")
+            return make_response_data(
+                data=new_purchase.to_dict(),
+                message="Purchase recorded successfully.",
+                status_code=201
+            )
+        except Exception as e:
+            logger.error(f"Purchase create failed: {str(e)}", exc_info=True)
+            db.session.rollback()
+            return make_response_data(
+                success=False,
+                message=f"Failed to record purchase: {str(e)}",
+                status_code=500
+            )
 
 class PurchaseResource(Resource):
     @role_required('ceo')

@@ -113,10 +113,6 @@ api.add_resource(SaleResource, '/sales/<int:sale_id>')
 api.add_resource(ClearSalesResource, '/sales/clear')
 api.add_resource(SaleSummaryResource, '/sales/summary')
 
-# ----------- EXTRA ROUTES (from purchases.py) -----------
-# This ensures /api/purchases/<email> and /api/ceo/messages work
-api_bp.register_blueprint(purchases_bp, url_prefix='/api')
-
 # =====================================================================
 # NOTE: The catch-all route has been REMOVED from here.
 # 404 handling is now done in backend/app.py to ensure proper JSON responses
