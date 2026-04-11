@@ -169,6 +169,7 @@ def create_app(config_class=Config):
          expose_headers=["Content-Length", "X-Requested-With"],
          max_age=86400)  # 24 hours for preflight cache
     
+    app.config['ALLOWED_ORIGINS'] = allowed_origins
     app.logger.info(f"CORS initialized with origins: {allowed_origins}")
     # =====================================================================
 
@@ -191,7 +192,7 @@ def create_app(config_class=Config):
             'status_code': 401
         }), 401
 
-@jwt.unauthorized_loader
+    @jwt.unauthorized_loader
     def missing_token_callback(error):
         db.session.rollback()
         return make_response_data(
