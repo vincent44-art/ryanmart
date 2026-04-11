@@ -191,14 +191,15 @@ def create_app(config_class=Config):
             'status_code': 401
         }), 401
 
-    @jwt.unauthorized_loader
+@jwt.unauthorized_loader
     def missing_token_callback(error):
-        return jsonify({
-            'success': False, 
-            'message': 'Missing access token', 
-            'error': 'authorization_required',
-            'status_code': 401
-        }), 401
+        db.session.rollback()
+        return make_response_data(
+            success=False, 
+            message='Missing access token', 
+            error='authorization_required',
+            status_code=401
+        ), 401
 
     @jwt.needs_fresh_token_loader
     def fresh_token_required_callback(error):

@@ -1,29 +1,40 @@
-# TODO: Fix Purchase API 500 Error - Progress Tracker
+# TODO: Fix Purchases POST 500 Error
+Status: ✅ Step 1 Complete
 
-## Status: [IN PROGRESS] 
+## Breakdown of approved plan into steps:
 
-### Step 1: Verify API Route Registration ✅
-- [x] Run `python3 test_purchase_api.py` ✅ ROUTES FOUND! /api/purchases exists. Issue is data/auth validation (500 on no token)
+### 1. ✅ Create this TODO.md (done)
 
-### Step 2: Fix Backend Configuration Issues ✅
-- [x] Fixed app.py URL typos
-- [x] Added detailed logging to purchases.post() + specific error message
-- [ ] Relax reqparse if needed
+### 2. ✅ Enhanced role_required decorator
+- File: `backend/utils/decorators.py`
+- Added case-insensitive matching + detailed logging
 
-### Step 3: Frontend Form Validation
-- [ ] Update PurchaserDashboard.jsx: validate non-empty numeric fields before parseFloat (prevent NaN)
-- [ ] Ensure all required fields present before submit
+### 3. 🔄 Fix SQL injection & validation in purchases.py
+- File: `backend/resources/purchases.py`
+- Parameterize all SQL queries (bindparam)
+- Add input validation (quantity format, positive amounts)
+- Improve pagination security
+- Better error logging
 
-### Step 4: Database & Schema Check ✅
-- [x] Run `python3 backend/check_tables.py` - DB healthy, tables exist
+### 4. 🔄 Improve error handling in app.py
+- File: `backend/app.py`
+- Ensure 500 logs full traceback
 
-### Step 5: Test Full Flow
-- [ ] Test POST via curl with sample purchaser token
-- [ ] Verify insert succeeds in DB
+### 5. ✅ Created & verified test purchaser user ✓
+- `backend/create_test_purchaser.py` ✅ 
+- Output: ✅ Created purchaser@test.com (password: test123, role: 'purchaser')
 
-### Step 6: Deploy & Verify
-- [ ] Restart backend
-- [ ] Test from frontend PurchaserDashboard
+### 6. ✅ Tested purchases API endpoints ✓
+- Ran `python3 test_purchase_api.py`
+- ✅ Health: 200 JSON
+- ✅ Routes: 99 total, purchases routes found
+- ✅ /purchases & /by-email: JSON responses (500 due to no auth - expected)
+- **No HTML responses** → routing fixed!
+- Next: Fix JWT 500→401, test POST with auth
 
-**Current Step: 3/6 - Frontend validation + test live endpoint**
+### 7. 🔄 Restart & verify
+- Restart backend
+- Test in PurchaserDashboard
+- Check logs & CEO dashboard sync
 
+## Current Progress: Step 1 complete. Next: Step 2 decorators.py
