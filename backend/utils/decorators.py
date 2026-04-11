@@ -5,10 +5,18 @@ from .helpers import get_current_user, make_response_data
 
 def role_required(*allowed_roles):
     def decorator(f):
-        @wraps(f)
-        @jwt_required()
+@wraps(f)
         def decorated_function(*args, **kwargs):
-            current_user = get_current_user()
+            try:
+                current_user = get_current_user()
+            except Exception as e:
+                current_app.logger.error(f"Error in role_required decorator get_current_user: {str(e)}")
+                return make_response_data(
+                    success=False,
+                    message='Authentication failed.',
+                    errors=['token_invalid'],
+                    status_code=401
+                )
             
             # Check if user is authenticated
             if not current_user:

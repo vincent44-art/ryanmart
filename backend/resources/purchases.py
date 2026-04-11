@@ -33,6 +33,8 @@ parser.add_argument('date', type=str, required=True, help="Purchase date (YYYY-M
 parser.add_argument('amountPerKg', type=float, required=True, help="Amount per kg")
 parser.add_argument('spolige', type=str, required=False)
 
+logger.info("Purchase parser defined")
+
 # --- New Routes ---
 @purchases_bp.route("/ceo/messages", methods=["GET"])
 def get_ceo_messages():
@@ -151,8 +153,16 @@ class PurchaseListResource(Resource):
     @role_required('purchaser')
     def post(self):
         """Create new purchase record."""
+        logger.info("POST /api/purchases - Request received")
+        logger.info(f"Raw request headers: {dict(request.headers)}")
+        logger.info(f"Raw request data: {request.get_data(as_text=True)}")
+        
         data = parser.parse_args()
+        logger.info(f"Parsed data: {data}")
+        
         current_user = get_current_user()
+        logger.info(f"Current user: ID={current_user.id if current_user else None}, email={current_user.email if current_user else None}, role={getattr(current_user, 'role', None)}")
+        
         logger = logging.getLogger('purchases')
         
         logger.info(f"Creating purchase for user {current_user.email if current_user else 'unknown'}: {data}")
@@ -186,6 +196,8 @@ class PurchaseListResource(Resource):
             )
 
         try:
+            logger.info(f"Creating Purchase object - quantity='{data['quantity']}' (type: {type(data['quantity'])}), amount={amount} (type: {type(amount)}), amount_per_kg={amount_per_kg} (type: {type(amount_per_kg)})")
+            
             new_purchase = Purchase(
                 purchaser_id=current_user.id,
                 employee_name=data['employeeName'],
@@ -198,9 +210,11 @@ class PurchaseListResource(Resource):
                 amount_per_kg=amount_per_kg,
                 spolige=data.get('spolige')
             )
+            logger.info(f"Purchase object created, adding to session...")
             db.session.add(new_purchase)
+            logger.info("Committing to DB...")
             db.session.commit()
-            logger.info(f"Purchase created successfully: ID {new_purchase.id}")
+            logger.info(f"✅ Purchase created successfully: ID {new_purchase.id}")
             return make_response_data(
                 data=new_purchase.to_dict(),
                 message="Purchase recorded successfully.",
