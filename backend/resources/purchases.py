@@ -51,9 +51,15 @@ class PurchaseListResource(Resource):
         # Pagination parameters
         page = request.args.get('page', default=1, type=int)
         per_page = request.args.get('per_page', default=20, type=int)
+        
+        # Validate pagination params
+        if page < 1:
+            page = 1
+        if per_page < 1 or per_page > 100:
+            per_page = 20
 
         try:
-            # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues
+            # Use raw SQL with parameters to prevent SQL injection
             # Get total count first
             count_result = db.session.execute(text("SELECT COUNT(*) FROM purchase")).fetchone()
             total_count = count_result[0] if count_result else 0
@@ -61,8 +67,18 @@ class PurchaseListResource(Resource):
             # Calculate offset for pagination
             offset = (page - 1) * per_page
 
-            # Fetch paginated purchases - FIXED: Removed spolige reference
-            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase ORDER BY purchase_date DESC LIMIT {per_page} OFFSET {offset}")).fetchall()
+            # Fetch paginated purchases - SECURE: Parameterized LIMIT/OFFSET
+            purchases_result = db.session.execute(
+                text("""
+                    SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, 
+                           unit, buyer_name, cost::text, purchase_date, created_at, 
+                           amount_per_kg::text 
+                    FROM purchase 
+                    ORDER BY purchase_date DESC 
+                    LIMIT :limit OFFSET :offset
+                """),
+                {"limit": per_page, "offset": offset}
+            ).fetchall()
 
             # Convert to dict-like objects for compatibility
             purchases = []
@@ -141,6 +157,7 @@ class PurchaseListResource(Resource):
         
         logger.info(f"Creating purchase for user {current_user.email if current_user else 'unknown'}: {data}")
 
+        # Validate inputs
         try:
             purchase_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         except ValueError:
@@ -148,6 +165,23 @@ class PurchaseListResource(Resource):
             return make_response_data(
                 success=False,
                 message="Invalid date format. Use YYYY-MM-DD.",
+                status_code=400
+            )
+
+        amount = safe_float(data['amount'])
+        amount_per_kg = safe_float(data['amountPerKg'])
+        
+        if amount <= 0 or amount_per_kg <= 0:
+            return make_response_data(
+                success=False,
+                message="Amount and amount per KG must be positive numbers.",
+                status_code=400
+            )
+        
+        if not data['quantity'] or len(str(data['quantity']).strip()) == 0:
+            return make_response_data(
+                success=False,
+                message="Quantity is required and cannot be empty.",
                 status_code=400
             )
 
@@ -159,9 +193,9 @@ class PurchaseListResource(Resource):
                 quantity=data['quantity'],
                 unit=data['unit'],
                 buyer_name=data['buyerName'],
-                cost=float(data['amount']),
+                cost=amount,
                 purchase_date=purchase_date,
-                amount_per_kg=float(data['amountPerKg']),
+                amount_per_kg=amount_per_kg,
                 spolige=data.get('spolige')
             )
             db.session.add(new_purchase)
@@ -323,8 +357,16 @@ class PurchaseByEmailResource(Resource):
                     message="No user found with this email."
                 )
 
-            # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues - FIXED
-            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchaser_id = {user.id}")).fetchall()
+            # Use raw SQL with parameters to avoid SQL injection - SECURE
+            purchases_result = db.session.execute(
+                text("""
+                    SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, 
+                           unit, buyer_name, cost::text, purchase_date, created_at, 
+                           amount_per_kg::text 
+                    FROM purchase WHERE purchaser_id = :purchaser_id
+                """),
+                {"purchaser_id": user.id}
+            ).fetchall()
 
             # Convert to dict-like objects for compatibility
             purchases = []
@@ -382,8 +424,16 @@ class DailyPurchasesReportResource(Resource):
             return make_response_data(success=False, message="Invalid date format. Use YYYY-MM-DD.", status_code=400)
 
         try:
-            # Use raw SQL to fetch purchases as strings to avoid numeric type conversion issues - FIXED
-            purchases_result = db.session.execute(text(f"SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, unit, buyer_name, cost::text, purchase_date, created_at, amount_per_kg::text FROM purchase WHERE purchase_date = '{report_date}'")).fetchall()
+            # Use raw SQL with parameters to avoid SQL injection - SECURE
+            purchases_result = db.session.execute(
+                text("""
+                    SELECT id, purchaser_id, employee_name, fruit_type, quantity::text, 
+                           unit, buyer_name, cost::text, purchase_date, created_at, 
+                           amount_per_kg::text 
+                    FROM purchase WHERE purchase_date = :report_date
+                """),
+                {"report_date": report_date}
+            ).fetchall()
 
             # Convert to dict-like objects for compatibility
             purchases = []
