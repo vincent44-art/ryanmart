@@ -140,8 +140,8 @@ def create_app(config_class=Config):
     configured_origins = app.config.get('CORS_ORIGINS', [])
     
     # Production URLs - MUST match exactly what's deployed
-    PRODUCTION_FRONTEND = "https://ryanmart-fronntend.onrender.com"
-    PRODUCTION_BACKEND = "https://ryanmart-bacckend.onrender.com"
+ryanmart-frontend.onrender.com
+ryanmart-backend.onrender.com
     DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
     
     if configured_origins:

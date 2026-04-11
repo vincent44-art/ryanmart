@@ -165,14 +165,35 @@ const PurchaserDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Frontend validation
+    const requiredFields = ['employeeName', 'fruitType', 'quantity', 'unit', 'buyerName', 'amount', 'amountPerKg', 'date'];
+    for (let field of requiredFields) {
+      if (!formData[field] || formData[field].toString().trim() === '') {
+        setError(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+        return;
+      }
+    }
+    
+    const amountNum = parseFloat(formData.amount);
+    const amountPerKgNum = parseFloat(formData.amountPerKg);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      setError('Total amount must be a positive number');
+      return;
+    }
+    if (isNaN(amountPerKgNum) || amountPerKgNum <= 0) {
+      setError('Amount per KG must be a positive number');
+      return;
+    }
+    
     try {
       setLoading(true);
       const newPurchase = {
         ...formData,
         purchaserEmail: user.email,
         quantity: formData.quantity, // Keep as string
-        amount: parseFloat(formData.amount),
-        amountPerKg: parseFloat(formData.amountPerKg)
+        amount: amountNum,
+        amountPerKg: amountPerKgNum
       };
       const response = await addPurchase(newPurchase);
       setPurchases(prev => [...prev, response.data]);

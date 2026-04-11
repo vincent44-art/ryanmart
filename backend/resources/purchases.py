@@ -167,11 +167,11 @@ class PurchaseListResource(Resource):
                 status_code=201
             )
         except Exception as e:
-            logger.error(f"Error creating purchase: {str(e)}")
+logger.error(f"Purchase create failed for user {current_user.email if current_user else 'unknown'}: data={data}, full_error={str(e)}", exc_info=True)
             db.session.rollback()
             return make_response_data(
                 success=False,
-                message="Failed to record purchase. Please try again later.",
+                message=f"Failed to record purchase: {str(e)[:100]}",
                 status_code=500
             )
 
