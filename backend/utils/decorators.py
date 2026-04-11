@@ -5,7 +5,7 @@ from .helpers import get_current_user, make_response_data
 
 def role_required(*allowed_roles):
     def decorator(f):
-@wraps(f)
+        @wraps(f)
         def decorated_function(*args, **kwargs):
             try:
                 current_user = get_current_user()

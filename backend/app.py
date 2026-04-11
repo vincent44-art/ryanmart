@@ -54,7 +54,7 @@ def ensure_database_initialized(app):
 
                 existing = User.query.filter_by(email=default_email).first()
                 if not existing:
-                    from backend.models.user import User, UserRole
+                    from models.user import User, UserRole
                     role_val = getattr(UserRole, "CEO", getattr(UserRole, "ADMIN", "CEO"))
                     user = User(
                         email=default_email,
@@ -80,9 +80,9 @@ def ensure_database_initialized(app):
                 app.logger.exception(f"Database initialization error: {e}")
                 break
 
-from backend.config import Config
-from backend.extensions import db
-from backend.models.user import User
+from config import Config
+from extensions import db
+from models.user import User
 
 def create_app(config_class=Config):
     """Flask application factory."""
@@ -159,7 +159,7 @@ def create_app(config_class=Config):
     @jwt.unauthorized_loader
     def missing_token_callback(error):
         db.session.rollback()
-        from backend.utils.helpers import make_response_data
+        from utils.helpers import make_response_data
         resp = make_response_data(
             success=False, 
             message='Missing access token', 
@@ -202,13 +202,13 @@ def create_app(config_class=Config):
     api = Api(app, catch_all_404s=False)
     
     # Register blueprints and resources (abridged - all existing routes preserved)
-    from backend.resources import api_bp, dashboard_bp
+    from resources import api_bp
     app.register_blueprint(api_bp, url_prefix='/api')
-    app.register_blueprint(dashboard_bp)
+    # dashboard_bp not exported from resources/__init__.py
     
     # Add key API resources (existing functionality preserved)
-    from backend.resources.auth import LoginResource, RefreshResource, MeResource, ChangePasswordResource
-    from backend.resources import CurrentStockResource
+    from resources.auth import LoginResource, RefreshResource, MeResource, ChangePasswordResource
+    from resources import CurrentStockResource
     api.add_resource(LoginResource, '/api/auth/login')
     api.add_resource(RefreshResource, '/api/auth/refresh')
     api.add_resource(MeResource, '/api/auth/me')
@@ -227,7 +227,8 @@ def create_app(config_class=Config):
         })
     
     # Direct route handlers - FIXED: Use current_app instead of app/allowed_origins
-    from backend.models.stock_tracking import StockTracking
+    from flask_jwt_extended import jwt_required
+    from models.stock_tracking import StockTracking
     @app.route('/api/stock-tracking', methods=['GET', 'POST', 'OPTIONS'])
     @jwt_required()
     def stock_tracking_direct():
