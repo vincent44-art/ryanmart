@@ -1,37 +1,38 @@
-# API 500 Error Fix Plan - Purchases & Other Expenses
-Tracking progress on fixing 500 errors in purchases API and empty other expenses data.
+# RyanMart Project TODO Tracker
 
-## Steps to Complete:
+## 🚀 Priority 1 - CRITICAL (Breaking Changes)
+- [x] Fix purchase 500 error (model numeric types + data mapping) ✅ COMPLETE
+  - Model: cost, amount_per_kg → Float
+  - Resource: added float() conversion + validation
+  - Indentation fixed
+  - Update models/purchases.py → cost, amount_per_kg → Float
+  - Align resources/purchases.py constructor params
+  - Run alembic migration
+  - Test PurchaserDashboard form submission
+- [ ] Generate & run Alembic migration for purchase model changes
+- [ ] Test full purchase flow → CEO dashboard sync
+- [ ] Backend restart & production deploy
 
-### 1. [ ] Create this TODO.md (IN PROGRESS)
-### 2. [✅] Fix backend/resources/purchases.py
-   - Parameterize all raw SQL queries
-   - Fix logger import issues
-   - Sanitize LIMIT/OFFSET inputs
-   - Improve error handling
-   
-### 3. [✅] Fix backend/resources/other_expenses.py  
-   - Parameterize SQL queries for empty data issue
-   - Ensure proper JSON response structure
-   
-### 4. [ ] Remove duplicate backend/resources/purchases_fixed.py
+## 🔧 Priority 2 - HIGH (API Stability)
+- [ ] Fix remaining 500 errors (car_expenses, other_expenses, etc.)
+- [ ] Complete CORS fixes for production deploy
+- [ ] Fix login/session expiry handling
+- [ ] Stock tracking API improvements
 
-### 5. [ ] Test backend with test_purchase_api.py
-   ```bash
-   python test_purchase_api.py
-   ```
-   Expected: All endpoints return JSON (even 401s)
+## 📱 Frontend Improvements
+- [ ] Update all dashboards for real-time sync
+- [ ] Fix PDF generation edge cases
+- [ ] Add loading states & better error UX
 
-### 6. [ ] Restart backend server
+## 🛠️ Backend Refactoring
+- [ ] Consistent numeric types across all models (Float vs String)
+- [ ] Add comprehensive API validation
+- [ ] Improve error logging & monitoring
 
-### 7. [ ] Test frontend PurchaserDashboard
-   - Login as purchaser
-   - Verify purchases load without 500
-   - Test add purchase form
-   
-### 8. [ ] [ ] Update progress in this file
+## 🚀 Deployment
+- [ ] Production CORS config (exact frontend URL)
+- [ ] Environment variable validation
+- [ ] Health checks & monitoring
 
-## Current Status
-- Plan approved ✅
-- Files analyzed ✅
+**Current Status: Fixing purchase 500 error → Step 1/5 complete**
 

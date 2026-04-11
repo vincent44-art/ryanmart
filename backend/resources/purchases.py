@@ -28,9 +28,9 @@ parser.add_argument('fruitType', type=str, required=True)
 parser.add_argument('quantity', type=str, required=True)
 parser.add_argument('unit', type=str, required=True)
 parser.add_argument('buyerName', type=str, required=True)
-parser.add_argument('amount', type=float, required=True)
-parser.add_argument('date', type=str, required=True)
-parser.add_argument('amountPerKg', type=float, required=True)
+parser.add_argument('amount', type=float, required=True, help="Total purchase amount")
+parser.add_argument('date', type=str, required=True, help="Purchase date (YYYY-MM-DD)")
+parser.add_argument('amountPerKg', type=float, required=True, help="Amount per kg")
 parser.add_argument('spolige', type=str, required=False)
 
 # --- New Routes ---
@@ -159,9 +159,9 @@ class PurchaseListResource(Resource):
                 quantity=data['quantity'],
                 unit=data['unit'],
                 buyer_name=data['buyerName'],
-                cost=data['amount'],
+                cost=float(data['amount']),
                 purchase_date=purchase_date,
-                amount_per_kg=data['amountPerKg'],
+                amount_per_kg=float(data['amountPerKg']),
                 spolige=data.get('spolige')
             )
             db.session.add(new_purchase)

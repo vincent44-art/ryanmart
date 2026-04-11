@@ -13,10 +13,10 @@ class Purchase(db.Model):
     quantity = db.Column(db.String(50), nullable=False)
     unit = db.Column(db.String(20), nullable=False)
     buyer_name = db.Column(db.String(100), nullable=False)
-    cost = db.Column(db.String(50), nullable=False)
+    cost = db.Column(db.Float, nullable=False)
     purchase_date = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    amount_per_kg = db.Column(db.String(50), nullable=False, default='0')
+    amount_per_kg = db.Column(db.Float, nullable=False, default=0.0)
     # Spolige field for tracking spoilage
     spolige = db.Column(db.String(256), nullable=True)
 
