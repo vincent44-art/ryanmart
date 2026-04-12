@@ -205,9 +205,7 @@ class PurchaseListResource(Resource):
                 cost=amount,
                 purchase_date=purchase_date,
                 amount_per_kg=amount_per_kg,
-                spolige=data.get('spolige')
-            )
-            logger.info(f"Purchase object created, adding to session...")
+                spolige=data.get('spolige') if data.get('spolige') else None\n            )\n            logger.info(f"Purchase object created, adding to session...")
             db.session.add(new_purchase)
             logger.info("Committing to DB...")
             db.session.commit()
