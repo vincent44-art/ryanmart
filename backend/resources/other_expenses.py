@@ -149,6 +149,7 @@ def generate_other_expenses_pdf(expenses, report_date):
     return buffer.getvalue()
 
 class OtherExpensesResource(Resource):
+    @jwt_required()
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def get(self):
         try:
@@ -179,6 +180,7 @@ class OtherExpensesResource(Resource):
 
         return make_response_data(data=expenses, message="Other expenses fetched successfully.")
 
+    @jwt_required()
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def post(self):
         # Wrap everything in try-catch to ensure we always return JSON

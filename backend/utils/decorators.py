@@ -1,6 +1,6 @@
 from functools import wraps
 from flask_jwt_extended import jwt_required
-from flask import jsonify
+from flask import current_app, jsonify
 from .helpers import get_current_user, make_response_data
 
 def role_required(*allowed_roles):
