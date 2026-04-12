@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse
 from flask import request, send_file
 from extensions import db
 from models.other_expense import OtherExpense
+from flask_jwt_extended import jwt_required
 from utils.helpers import make_response_data, get_current_user
 from utils.decorators import role_required
 from datetime import datetime
@@ -234,6 +235,7 @@ class OtherExpensesResource(Resource):
             )
 
 class OtherExpenseResource(Resource):
+    @jwt_required()
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def delete(self, expense_id):
         expense = OtherExpense.query.get(expense_id)
@@ -244,6 +246,7 @@ class OtherExpenseResource(Resource):
         return make_response_data(success=True, message="Expense deleted successfully.")
 
 class OtherExpensesPDFResource(Resource):
+    @jwt_required()
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')
     def get(self):
         date_param = request.args.get('date')
