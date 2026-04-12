@@ -125,7 +125,6 @@ def create_app(config_class=Config):
             allowed_origins = DEVELOPMENT_LOCALHOST
     
     app.config['ALLOWED_ORIGINS'] = allowed_origins
-app.config['CORS_ORIGINS'] = allowed_origins
     
     CORS(app, resources={
         r"/api/*": {
@@ -189,18 +188,6 @@ app.config['CORS_ORIGINS'] = allowed_origins
             'error': 'token_revoked',
             'status_code': 401
         }), 401
-    
-
-        origin = request.headers.get('Origin', '')
-        allowed = current_app.config['ALLOWED_ORIGINS']
-        if origin in allowed:
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-            response.headers['Access-Control-Max-Age'] = '86400'
-            response.headers['Vary'] = 'Origin'
-        return response
 
     # API Setup
     api = Api(app, catch_all_404s=False)
@@ -279,7 +266,7 @@ app.config['CORS_ORIGINS'] = allowed_origins
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Internal server error', 'status_code': 500}), 500
     
-# Force CORS headers - ENHANCED FOR ACAH
+    # Force CORS headers - ENHANCED FOR ACAH
     @app.after_request
     def after_request(response):
         if request.path.startswith('/api'):
