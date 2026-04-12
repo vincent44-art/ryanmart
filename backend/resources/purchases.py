@@ -46,7 +46,6 @@ class PurchaseListResource(Resource):
     @jwt_required()
     @role_required('ceo', 'purchaser')
     def get(self):
-        logger = logging.getLogger('purchases')
         current_user = get_current_user()
         logger.info(f"Fetching purchases for user: {current_user.email if current_user else 'unknown'}")
 
@@ -162,8 +161,6 @@ class PurchaseListResource(Resource):
         
         current_user = get_current_user()
         logger.info(f"Current user: ID={current_user.id if current_user else None}, email={current_user.email if current_user else None}, role={getattr(current_user, 'role', None)}")
-        
-        logger = logging.getLogger('purchases')
         
         logger.info(f"Creating purchase for user {current_user.email if current_user else 'unknown'}: {data}")
 
@@ -289,7 +286,6 @@ class PurchaseSummaryResource(Resource):
                 }
                 purchases.append(type('PurchaseObj', (), purchase_dict)())
         except Exception as e:
-            logger = logging.getLogger('purchases')
             logger.error(f"Error fetching purchases for summary: {str(e)}")
             db.session.rollback()
             purchases = []
@@ -324,7 +320,6 @@ class PurchaseByEmailResource(Resource):
         Requires JWT authentication.
         Email is passed as query parameter.
         """
-        logger = logging.getLogger('purchases')
 
         try:
             # Get current user from JWT to verify access
@@ -542,7 +537,6 @@ class DailyPurchasesReportResource(Resource):
                 mimetype='application/pdf'
             )
         except Exception as e:
-            logger = logging.getLogger('purchases')
             logger.error(f"Error generating purchases PDF: {str(e)}", exc_info=True)
             db.session.rollback()
             return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
