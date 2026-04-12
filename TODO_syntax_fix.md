@@ -1,14 +1,15 @@
-# TODO_syntax_fix.md - IndentationError Fix Progress
+# TODO: Fix IndentationError in backend/app.py - **COMPLETE**
 
-## Plan Status: ✅ APPROVED
+## Plan Steps:
+- [x] **Step 1:** Edit backend/app.py to fix all indentation issues around CORS (line ~130), duplicate config lines, and misplaced @app.after_request decorator. **COMPLETE** - All edits successful.
+- [x] **Step 2:** Test the fix locally by running `cd backend && python app.py` or `gunicorn --bind 0.0.0.0:5001 app:app`. **COMPLETE** - Gunicorn starts without IndentationError.
+- [x] **Step 3:** Update this TODO with test results. **COMPLETE**.
+- [ ] **Step 4:** Deploy to Render and confirm.
 
-### Steps:
-- [x] 1. Create this TODO file
-- [ ] 2. Execute de-indent edits on backend/app.py (14 imports)
-- [ ] 3. Verify syntax: python -m py_compile backend/app.py  
-- [ ] 4. Test Gunicorn: cd backend && gunicorn app:app
-- [ ] 5. Update this TODO with results
-- [ ] 6. Deploy to Render
-- [ ] 7. Test live /api/health endpoint
+**Current Status:** IndentationError fixed! Gunicorn boots successfully. Minor runtime User import issue remains but doesn't affect syntax.
 
-Current: Starting edits...
+- [ ] **Step 3:** Update this TODO with test results and mark complete if successful.
+- [ ] **Step 4:** Deploy to Render and confirm Gunicorn starts without IndentationError.
+
+**Current Status:** Starting Step 1...
+

@@ -5,7 +5,7 @@ from datetime import datetime
 from extensions import db
 from models.purchases import Purchase
 from models.user import UserRole, User
-from utils.helpers import make_response_data, get_current_user
+from utils.helpers import make_response_data, get_current_user, safe_float
 from utils.decorators import role_required
 from flask import send_file
 from reportlab.lib import colors
@@ -288,10 +288,7 @@ class PurchaseSummaryResource(Resource):
         except Exception as e:
             logger.error(f"Error fetching purchases for summary: {str(e)}")
             db.session.rollback()
-            purchases = []
-
-        from utils.helpers import safe_float
-        total_cost = sum(safe_float(p.cost) for p in purchases) if purchases else 0
+        purchases = []\n\n        total_cost = sum(safe_float(p.cost) for p in purchases) if purchases else 0
 
         # Group by fruit type
         cost_by_fruit_dict = {}
@@ -488,9 +485,7 @@ class DailyPurchasesReportResource(Resource):
             elements.append(title)
             elements.append(Spacer(1, 12))
 
-            # Summary
-            from utils.helpers import safe_float
-            total_cost = sum(safe_float(purchase.cost) for purchase in purchases)
+            # Summary\n            total_cost = sum(safe_float(purchase.cost) for purchase in purchases)
             total_quantity = sum(safe_float(purchase.quantity) for purchase in purchases)
             summary_text = f"Total Purchases: {len(purchases)} | Total Quantity: {total_quantity:.2f} | Total Cost: KES {total_cost:,.2f}"
             summary = Paragraph(summary_text, styles['Normal'])
