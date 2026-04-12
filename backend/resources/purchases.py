@@ -288,7 +288,9 @@ class PurchaseSummaryResource(Resource):
         except Exception as e:
             logger.error(f"Error fetching purchases for summary: {str(e)}")
             db.session.rollback()
-        purchases = []\n\n        total_cost = sum(safe_float(p.cost) for p in purchases) if purchases else 0
+        purchases = []
+
+        total_cost = sum(safe_float(p.cost) for p in purchases) if purchases else 0
 
         # Group by fruit type
         cost_by_fruit_dict = {}
@@ -485,7 +487,8 @@ class DailyPurchasesReportResource(Resource):
             elements.append(title)
             elements.append(Spacer(1, 12))
 
-            # Summary\n            total_cost = sum(safe_float(purchase.cost) for purchase in purchases)
+            # Summary
+            total_cost = sum(safe_float(purchase.cost) for purchase in purchases)
             total_quantity = sum(safe_float(purchase.quantity) for purchase in purchases)
             summary_text = f"Total Purchases: {len(purchases)} | Total Quantity: {total_quantity:.2f} | Total Cost: KES {total_cost:,.2f}"
             summary = Paragraph(summary_text, styles['Normal'])
