@@ -192,10 +192,11 @@ def create_app(config_class=Config):
     # API Setup
     api = Api(app, catch_all_404s=False)
     
-    # Register blueprints and resources (abridged - all existing routes preserved)
-    from resources import api_bp
+    # Register blueprints and resources
+    from resources import api_bp, blueprints
     app.register_blueprint(api_bp, url_prefix='/api')
-    # dashboard_bp not exported from resources/__init__.py
+    for bp in blueprints:
+        app.register_blueprint(bp)
     
     # Add key API resources (existing functionality preserved)
     from resources.auth import LoginResource, RefreshResource, MeResource, ChangePasswordResource

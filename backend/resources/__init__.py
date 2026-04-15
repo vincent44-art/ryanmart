@@ -20,7 +20,8 @@ from .dashboard import CEODashboardResource, SellerDashboardResource, PurchaserD
 from .clear_all import ClearAllDataResource
 from .profile_image import ProfileImageUploadResource
 from .seller_fruits import SellerFruitListResource, SellerFruitResource
-from .sales import SaleListResource, SaleResource, ClearSalesResource, SaleSummaryResource
+from .sales_bp import sales_bp
+from .drivers_bp import drivers_bp_full as drivers_bp
 
 
 class CurrentStockResource(Resource):
@@ -46,8 +47,16 @@ class CurrentStockResource(Resource):
 # MAIN API BLUEPRINT
 # =====================================================================
 # All routes under this blueprint are prefixed with /api when registered in app.py
+blueprints = [
+    sales_bp,
+    drivers_bp,
+]
+
+# Filter None values
+blueprints = [bp for bp in blueprints if bp is not None]
+
 api_bp = Blueprint('api', __name__)
-api = Api(api_bp, catch_all_404s=False)  # We handle 404s in app.py
+api = Api(api_bp, catch_all_404s=False)
 
 # =====================================================================
 # ROUTE REGISTRATIONS
@@ -107,8 +116,7 @@ api.add_resource(StorekeeperDashboardResource, '/storekeeper/dashboard')
 # ----------- CLEAR ALL DATA -----------
 api.add_resource(ClearAllDataResource, '/clear-all')
 
-# ----------- SALES -----------
-api.add_resource(SaleListResource, '/sales')
+
 api.add_resource(SaleResource, '/sales/<int:sale_id>')
 api.add_resource(ClearSalesResource, '/sales/clear')
 api.add_resource(SaleSummaryResource, '/sales/summary')
