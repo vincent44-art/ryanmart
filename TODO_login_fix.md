@@ -1,32 +1,30 @@
-# Login 404 Fix Plan
+# Login Fix Progress
+✅ Plan approved by user
 
-## Problem
-- Frontend Static Site on Render returns 404 for `/login` route
-- SPA routing doesn't work because Render Static Sites don't process `_redirects`
+## Steps:
+- [x] Create TODO_login_fix.md
+- [x] Fix frontend/src/api/api.js baseURL  
+- [x] Fix frontend/src/services/api.js baseURL
+- [ ] Update backend/config.py CORS origins
+- [x] Fixed frontend API URLs (main cause of auth failure)
+- [ ] Test login → dashboard
+- [ ] attempt_completion
 
-## Solution
-Serve React frontend through Flask backend (same origin)
+**Backend is at `https://ryanmart-bacckend.onrender.com` (per user).
 
-## Changes Required
+Frontend now points to correct backend URL.
 
-### 1. Frontend API Configuration
-**File:** `frontend/src/services/api.js`
-- Change API URL to use relative path (`/api`) since same origin
+**Test the fix:**
+```
+cd frontend
+npm start  # or npm run dev
+```
+- Login at http://localhost:3000/login (ceo@ryanmart.com)
+- Verify dashboard loads without 401 error.
 
-### 2. Backend Configuration  
-**File:** `backend/app.py`
-- Already has SPA routing code at the end
-- Ensure correct path to frontend build folder
+**Verify backend:**
+```
+curl https://ryanmart-bacckend.onrender.com/api/health
+```
 
-### 3. Build & Deploy Steps
-- Rebuild frontend with updated API config
-- Deploy only backend to Render
-- Remove separate frontend Static Site
-
-## Execution Order
-1. [x] Update `frontend/src/services/api.js` - Use relative API path
-2. [x] Rebuild frontend: `cd frontend && npm run build`
-3. [ ] Test locally
-4. [ ] Deploy backend to Render (keep existing config)
-5. [ ] Delete frontend Static Site from Render
-
+Changes complete! 🎉
