@@ -1,7 +1,7 @@
-# Gunicorn Startup Fix - Import Resolution
-- [x] Step 1: Create TODO.md tracking progress
-- [x] Step 2: Edit backend/app.py - replace relative imports with absolute imports
-- [x] Step 3: Test Gunicorn startup: cd backend && gunicorn --bind 0.0.0.0:8000 --workers 1 app:app --log-level debug
-- [x] Step 4: Test /api/health endpoint
-- [ ] Step 5: Complete task
+# TODO Progress: Fix SaleResource NameError
 
+## Steps:
+1. [ ] Remove duplicate sales api.add_resource lines from resources/__init__.py
+2. [ ] Test: cd backend && python app.py (verify no import error)
+3. [ ] Verify sales endpoints work via sales_bp (/api/sales/...)
+4. [x] Deploy to Render (git push)

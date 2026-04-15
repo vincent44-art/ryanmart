@@ -117,9 +117,7 @@ api.add_resource(StorekeeperDashboardResource, '/storekeeper/dashboard')
 api.add_resource(ClearAllDataResource, '/clear-all')
 
 
-api.add_resource(SaleResource, '/sales/<int:sale_id>')
-api.add_resource(ClearSalesResource, '/sales/clear')
-api.add_resource(SaleSummaryResource, '/sales/summary')
+
 
 # =====================================================================
 # NOTE: The catch-all route has been REMOVED from here.
