@@ -1,0 +1,34 @@
+
+#!/usr/bin/env python3
+"""Add spolige column to purchase table - emergency fix"""
+import sys
+sys.path.insert(0, &#x27;/home/vincent/ryanmart/backend&#x27;)
+from config import Config
+from sqlalchemy import create_engine, text
+
+print("Connecting to DB...")
+engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
+with engine.connect() as conn:
+    # Check if column exists
+    result = conn.execute(text("""
+        SELECT column_name FROM information_schema.columns 
+        WHERE table_name = &#x27;purchase&#x27; AND column_name = &#x27;spolige&#x27;
+    """)).fetchone()
+    if result:
+        print("✓ spolige column already exists")
+    else:
+        conn.execute(text("ALTER TABLE purchase ADD COLUMN spolige VARCHAR(256)"))
+        conn.commit()
+        print("✓ Added spolige column to purchase table")
+    # Verify
+    columns = conn.execute(text("""
+        SELECT column_name, data_type, is_nullable 
+        FROM information_schema.columns 
+        WHERE table_name = &#x27;purchase&#x27; ORDER BY ordinal_position
+    """)).fetchall()
+    print("Purchase table columns:")
+    for col in columns:
+        print(f"  - {col[0]}: {col[1]} ({col[2]})")
+engine.dispose()
+print("Done.")
+

@@ -1,19 +1,27 @@
-# TODO: Move Spolige Column to End of Table
+# Spolige Purchase Column Fix - Progress Tracker
 
-## Task: Move the Spolige column to the end of the table in both CarExpensesTab and PurchasesTab
+**Status:** 🟡 IN PROGRESS (Step 1/7)
 
-### Changes Required:
+## Approved Plan Steps:
 
-1. **CarExpensesTab.jsx**:
-   - Move "Spolige" column from position 6 to the end (before Actions)
-   - Current order: Type, Description, Car Name, Car Number Plate, Stock Name, Spolige, Amount, Date, Driver, Actions
-   - New order: Type, Description, Car Name, Car Number Plate, Stock Name, Amount, Date, Driver, Spolige, Actions
+### 1. ✅ Verify current schema
+   - Run `python3 backend/check_tables.py`
+   - Confirm `purchase` table missing `spolige` column
 
-2. **PurchasesTab.jsx**:
-   - Move "Spolige" column from position 7 to the end (before Actions)
-   - Current order: Date, Purchaser, Fruit, Quantity, Unit, Farmer, Spolige, Amount per KG, Total Amount, Actions
-   - New order: Date, Purchaser, Fruit, Quantity, Unit, Farmer, Amount per KG, Total Amount, Spolige, Actions
+### 2. Generate Alembic migration
+   - `cd backend &amp;&amp; alembic revision --autogenerate -m "add_spolige_to_purchase"`
 
-### Status:
-- [ ] Update CarExpensesTab.jsx
-- [ ] Update PurchasesTab.jsx
+### 3. Review/edit migration file
+
+### 4. Apply locally
+   - `cd backend &amp;&amp; alembic upgrade head`
+
+### 5. Test purchase API
+   - `python3 test_purchase_api.py`
+
+### 6. Update TODOs &amp; commit changes
+
+### 7. Deploy to Render &amp; verify prod
+
+**Current Action:** Running schema check...
+
