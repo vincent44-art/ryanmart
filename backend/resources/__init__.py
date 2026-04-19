@@ -16,7 +16,9 @@ from .other_expenses import OtherExpensesResource, OtherExpenseResource, OtherEx
 from .salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
 from .gradients import GradientListResource, ClearGradientsResource
 from .messages import MessageListResource, MessageResource, ClearMessagesResource
-from .dashboard import CEODashboardResource, SellerDashboardResource, PurchaserDashboardResource, StorekeeperDashboardResource
+# Dashboard resources moved to dedicated files - import from correct locations
+from .ceo_dashboard import CEODashboardResource
+from .dashboard import SellerDashboardResource, PurchaserDashboardResource, StorekeeperDashboardResource
 from .clear_all import ClearAllDataResource
 from .profile_image import ProfileImageUploadResource
 from .seller_fruits import SellerFruitListResource, SellerFruitResource
