@@ -22,6 +22,7 @@ from .dashboard import SellerDashboardResource, PurchaserDashboardResource, Stor
 from .clear_all import ClearAllDataResource
 from .profile_image import ProfileImageUploadResource
 from .seller_fruits import SellerFruitListResource, SellerFruitResource
+from .stock_tracking import StockTrackingListResource, StockTrackingAggregatedResource, ClearStockTrackingResource, StockTrackingResource, StockTrackingPDFResource, StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource, StockTrackingCombinedPDFResource
 from .sales_bp import sales_bp
 from .drivers_bp import drivers_bp_full as drivers_bp
 
@@ -114,6 +115,16 @@ api.add_resource(CEODashboardResource, '/ceo/dashboard')
 api.add_resource(SellerDashboardResource, '/seller/dashboard')
 api.add_resource(PurchaserDashboardResource, '/purchaser/dashboard')
 api.add_resource(StorekeeperDashboardResource, '/storekeeper/dashboard')
+
+# ----------- STOCK TRACKING -----------
+api.add_resource(StockTrackingListResource, '/stock-tracking')
+api.add_resource(StockTrackingAggregatedResource, '/stock-tracking/aggregated')
+api.add_resource(StockTrackingResource, '/stock-tracking/<int:record_id>')
+api.add_resource(ClearStockTrackingResource, '/stock-tracking/clear', endpoint='clear_stock_tracking')
+api.add_resource(StockTrackingPDFResource, '/stock-tracking/pdf/<int:record_id>')
+api.add_resource(StockTrackingGroupPDFResource, '/stock-tracking/pdf/group')
+api.add_resource(StockTrackingUnmovedPDFResource, '/stock-tracking/pdf/unmoved')
+api.add_resource(StockTrackingCombinedPDFResource, '/stock-tracking/pdf/combined')
 
 # ----------- CLEAR ALL DATA -----------
 api.add_resource(ClearAllDataResource, '/clear-all')
