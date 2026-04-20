@@ -14,7 +14,7 @@ const getBackendUrl = () => {
   
   // In production, use the correct backend URL
   if (process.env.NODE_ENV === 'production') {
-    return 'https://ryanmart-bacckend.onrender.com';
+    return 'https://ryanmart-backend.onrender.com';
   }
   
   // Development fallback

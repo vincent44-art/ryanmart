@@ -14,7 +14,7 @@ const isHtmlResponse = (text) => {
 // Fetch inventory data
 export const fetchInventory = async (token = null) => {
   try {
-    const response = await api.get('/inventory');
+    const response = await api.get('/api/inventory');
     return response;
   } catch (error) {
     console.error('Error fetching inventory:', error);
@@ -25,7 +25,7 @@ export const fetchInventory = async (token = null) => {
 // Fetch stock movements
 export const fetchStockMovements = async (token = null) => {
   try {
-    const response = await api.get('/stock-movements');
+    const response = await api.get('/api/stock-movements');
     return response;
   } catch (error) {
     console.error('Error fetching stock movements:', error);
@@ -36,7 +36,7 @@ export const fetchStockMovements = async (token = null) => {
 // Fetch purchases data
 export const fetchPurchases = async (userEmail = null) => {
   try {
-    const endpoint = userEmail ? `/purchases/${userEmail}` : '/purchases';
+    const endpoint = userEmail ? `/api/purchases/${userEmail}` : '/api/purchases';
     const response = await api.get(endpoint);
     return response;
   } catch (error) {
@@ -49,7 +49,7 @@ export const fetchPurchases = async (userEmail = null) => {
 export const fetchSales = async (userEmail = null) => {
   try {
     // Use relative URL with /api prefix since api.js baseURL is the backend URL without /api
-    const endpoint = userEmail ? `/sales/email/${userEmail}` : '/sales';
+    const endpoint = userEmail ? `/api/sales/email/${userEmail}` : '/api/sales';
     const response = await api.get(endpoint);
     // Return the sales data array from the response
     // For /api/sales/email/{email}, the backend returns data directly in response.data.data
@@ -74,7 +74,7 @@ export const fetchSales = async (userEmail = null) => {
 // Fetch other expenses
 export const fetchOtherExpenses = async () => {
   try {
-    const response = await api.get('/other_expenses');
+    const response = await api.get('/api/other_expenses');
     return response;
   } catch (error) {
     console.error('Error fetching other expenses:', error);
@@ -85,7 +85,7 @@ export const fetchOtherExpenses = async () => {
 // Fetch users data
 export const fetchUsers = async () => {
   try {
-    const response = await api.get('/users');
+    const response = await api.get('/api/users');
     return response;
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -217,7 +217,7 @@ export const getAllUsers = async () => {
 // Fetch car expenses
 export const fetchCarExpenses = async () => {
   try {
-    const response = await api.get('/car-expenses');
+    const response = await api.get('/api/car-expenses');
     return response;
   } catch (error) {
     console.error('Error fetching car expenses:', error);

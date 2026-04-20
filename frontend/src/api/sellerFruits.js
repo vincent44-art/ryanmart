@@ -29,7 +29,7 @@ export const createSellerFruit = async (fruitData, token = null) => {
 
 // Update a seller fruit
 export const updateSellerFruit = async (fruitId, fruitData) => {
-  const response = await api.put(`/seller-fruits/${fruitId}`, fruitData);
+  const response = await api.put(`/api/seller-fruits/${fruitId}`, fruitData);
   return response.data;
 };
 

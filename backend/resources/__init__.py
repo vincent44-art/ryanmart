@@ -23,6 +23,7 @@ from .clear_all import ClearAllDataResource
 from .profile_image import ProfileImageUploadResource
 from .seller_fruits import SellerFruitListResource, SellerFruitResource
 from .stock_tracking import StockTrackingListResource, StockTrackingAggregatedResource, ClearStockTrackingResource, StockTrackingResource, StockTrackingPDFResource, StockTrackingGroupPDFResource, StockTrackingUnmovedPDFResource, StockTrackingCombinedPDFResource
+from .spolige import SpoligeListResource, SpoligeResource
 from .sales_bp import sales_bp
 from .drivers_bp import drivers_bp_full as drivers_bp
 
@@ -125,6 +126,14 @@ api.add_resource(StockTrackingPDFResource, '/stock-tracking/pdf/<int:record_id>'
 api.add_resource(StockTrackingGroupPDFResource, '/stock-tracking/pdf/group')
 api.add_resource(StockTrackingUnmovedPDFResource, '/stock-tracking/pdf/unmoved')
 api.add_resource(StockTrackingCombinedPDFResource, '/stock-tracking/pdf/combined')
+
+# ----------- CLEAR ALL DATA -----------
+api.add_resource(SellerFruitListResource, '/seller-fruits')
+api.add_resource(SellerFruitResource, '/seller-fruits/<int:fruit_id>')
+
+# ----------- SPOLIGE -----------
+api.add_resource(SpoligeListResource, '/spolige')
+api.add_resource(SpoligeResource, '/spolige/<int:spolige_id>')
 
 # ----------- CLEAR ALL DATA -----------
 api.add_resource(ClearAllDataResource, '/clear-all')
