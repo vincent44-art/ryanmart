@@ -4,6 +4,7 @@ from extensions import db
 from models.inventory import Inventory
 from models.stock_movement import StockMovement
 from utils.helpers import make_response_data, get_current_user
+from flask_jwt_extended import jwt_required
 from utils.decorators import role_required
 from sqlalchemy import text
 
@@ -16,6 +17,7 @@ parser.add_argument('location', type=str)
 parser.add_argument('expiry_date', type=str)
 
 class InventoryListResource(Resource):
+    @jwt_required()
     @role_required('ceo', 'storekeeper')
     def get(self):
         try:
@@ -44,6 +46,7 @@ class InventoryListResource(Resource):
 
         return make_response_data(data=[item.to_dict() for item in inventory], message="Inventory fetched.")
 
+    @jwt_required()
     @role_required('storekeeper')
     def post(self):
         data = parser.parse_args()
@@ -70,6 +73,7 @@ class InventoryListResource(Resource):
         return make_response_data(data=new_item.to_dict(), message="Inventory item added.", status_code=201)
 
 class InventoryResource(Resource):
+    @jwt_required()
     @role_required('storekeeper')
     def put(self, inv_id):
         item = Inventory.query.get_or_404(inv_id)
@@ -86,6 +90,7 @@ class InventoryResource(Resource):
         db.session.commit()
         return make_response_data(data=item.to_dict(), message="Inventory item updated.")
 
+    @jwt_required()
     @role_required('storekeeper')
     def delete(self, inv_id):
         item = Inventory.query.get_or_404(inv_id)
@@ -94,6 +99,7 @@ class InventoryResource(Resource):
         return make_response_data(message="Inventory item deleted.")
 
 class ClearInventoryResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def delete(self):
         try:

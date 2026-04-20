@@ -18,6 +18,7 @@ parser.add_argument('is_active', type=bool)
 parser.add_argument('profile_image', type=str)
 
 class UserListResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def get(self):
         users = User.query.order_by(User.id).all()
@@ -25,6 +26,7 @@ class UserListResource(Resource):
 
 
 
+    @jwt_required()
     @role_required('ceo')
     def post(self):
         data = parser.parse_args()
@@ -47,6 +49,7 @@ class UserListResource(Resource):
         return make_response_data(data=user.to_dict(), message="User created successfully.", status_code=201)
 
 class UserResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def put(self, user_id):
         user = User.query.get_or_404(user_id)
@@ -69,6 +72,7 @@ class UserResource(Resource):
         db.session.commit()
         return make_response_data(data=user.to_dict(), message="User updated successfully.")
 
+    @jwt_required()
     @role_required('ceo')
     def delete(self, user_id):
         # Use raw SQL for all operations to avoid ORM numeric type issues
@@ -180,6 +184,7 @@ class UserResource(Resource):
                 )
 
 class UserSalaryResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def put(self, user_id):
         parser = reqparse.RequestParser()
@@ -192,6 +197,7 @@ class UserSalaryResource(Resource):
         return make_response_data(data=user.to_dict(), message="User salary updated.")
 
 class UserPaymentResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def put(self, user_id):
         parser = reqparse.RequestParser()
