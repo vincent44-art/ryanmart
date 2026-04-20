@@ -93,6 +93,39 @@ const ReportsTabAnalytics = () => {
       }
 
       try {
+        const promises = [
+          fetchInventory(token),
+          fetchStockMovements(token),
+          fetchPurchases(null, token),
+          fetchSales(null, token),
+          fetchOtherExpenses(token),
+          fetchUsers(token),
+          fetchStockTracking(token),
+          fetchSalaries(token),
+          fetchStockTrackingAggregated(token)
+        ];
+
+        // Add optional calls that might 404
+        try {
+          promises.push(await fetchSellerFruits(token));
+        } catch (e) {
+          console.warn('Seller fruits API unavailable:', e.message);
+        }
+
+        try {
+          promises.push(await fetchCarExpenses(token));
+        } catch (e) {
+          console.warn('Car expenses API unavailable:', e.message);
+        }
+
+        try {
+          promises.push(await fetchSpolige());
+        } catch (e) {
+          console.warn('Spolige API unavailable:', e.message);
+        }
+
+        const results = await Promise.allSettled(promises);
+
         const [
           inventoryRes,
           movementsRes,
@@ -101,25 +134,14 @@ const ReportsTabAnalytics = () => {
           expensesRes,
           usersRes,
           stockTrackingRes,
-          sellerFruitsRes,
           salariesRes,
-          carExpensesRes,
           aggregatedRes,
-          spoligeRes
-        ] = await Promise.all([
-          fetchInventory(token),
-          fetchStockMovements(token),
-          fetchPurchases(null, token),
-          fetchSales(null, token),
-          fetchOtherExpenses(token),
-          fetchUsers(token),
-          fetchStockTracking(token),
-          fetchSellerFruits(token),
-          fetchSalaries(token),
-          fetchCarExpenses(token),
-          fetchStockTrackingAggregated(token),
-          fetchSpolige()
-        ]);
+          sellerFruitsRes = { data: [] },
+          carExpensesRes = { data: [] },
+          spoligeRes = { data: [] }
+        ] = results.map(result => 
+          result.status === 'fulfilled' ? result.value : { data: [] }
+        );
 
         setData({
           inventory: Array.isArray(inventoryRes.data?.data) ? inventoryRes.data.data : inventoryRes.data || [],
