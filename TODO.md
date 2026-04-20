@@ -1,13 +1,31 @@
-# API 404 Fixes - Blueprint/Resource Registration
-Status: ✅ Approved & In Progress
+# Fix Stock Tracking 401 Unauthorized Errors
+Current Working Directory: /home/vincent/ryanmart
 
-## Step 1: [x] Create TODO.md ✅
-## Step 2: Fix backend/resources/__init__.py - Export all blueprints
-## Step 3: Update backend/resources/sales.py - Add blueprint + register SaleByEmailResource  
-## Step 4: Update backend/app.py - Import/register all blueprints
-## Step 5: Test endpoints `cd backend && python -m flask --app app.py routes`
-## Step 6: Browser test: Login → Driver/Seller dashboard (no 404s)
-## Step 7: attempt_completion
+## Status: [IN PROGRESS] ✅
 
-**Goal**: Fix all post-login 404s (drivers/{email}/expenses, sales/email/{email})
+### Breakdown of Approved Plan:
+
+**1. [✅ COMPLETED] Create TODO.md** - Tracking file created
+
+**2. [PENDING] Remove conflicting direct route from backend/app.py**
+   - Remove `@app.route('/api/stock-tracking')` handler (~lines 220-240)
+   - Allows Restful StockTrackingListResource to handle requests
+   
+**3. [PENDING] Fix token retrieval in frontend/src/components/StockTrackerTab.jsx**
+   - Change `localStorage.getItem('access_token') || localStorage.getItem('token')`
+   - To `localStorage.getItem('access_token')` only
+   
+**4. [PENDING] Verify API_BASE_URL in frontend/src/api/stockTracking.js**
+   - Ensure uses correct `https://ryanmart-backend.onrender.com` (not 'bacckend')
+   
+**5. [PENDING] Test & Verify**
+   - Restart backend/frontend
+   - Check browser console for 401 errors
+   - Verify StockTrackerTab loads data
+
+**6. [PENDING] attempt_completion**
+
+---
+
+**Next Step:** Edit backend/app.py to remove conflicting route
 

@@ -9,6 +9,7 @@ from models.inventory import Inventory
 from models.purchases import Purchase
 from models.spolige import Spolige
 from utils.helpers import make_response_data
+from flask_jwt_extended import jwt_required
 from utils.decorators import role_required
 from datetime import datetime, timedelta
 from flask import send_file, make_response, request, jsonify
@@ -65,6 +66,7 @@ parser.add_argument('spoilage', type=float)
 parser.add_argument('totalStockCost', type=float)
 
 class StockTrackingListResource(Resource):
+    @jwt_required()
     @role_required('storekeeper', 'ceo', 'seller', 'purchaser', 'driver', 'admin', 'it')
     def get(self):
         # Get all individual records without aggregation
@@ -75,6 +77,7 @@ class StockTrackingListResource(Resource):
 
         return make_response_data(data=data, message="Stock tracking records fetched.")
 
+    @jwt_required()
     @role_required('storekeeper', 'ceo')
     def post(self):
         data = parser.parse_args()
@@ -169,6 +172,7 @@ class StockTrackingListResource(Resource):
             return make_response_data(success=False, message=f"Invalid date format or error: {str(e)}", status_code=400)
 
 class ClearStockTrackingResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def delete(self):
         num_deleted = StockTracking.query.delete()
@@ -176,6 +180,7 @@ class ClearStockTrackingResource(Resource):
         return make_response_data(message=f"Successfully cleared {num_deleted} stock tracking records.")
 
 class StockTrackingResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def delete(self, record_id):
         record = StockTracking.query.get_or_404(record_id)
@@ -622,6 +627,7 @@ def generate_unmoved_stock_pdf(records):
 
 
 class StockTrackingPDFResource(Resource):
+    @jwt_required()
     @role_required('storekeeper', 'ceo', 'seller', 'purchaser', 'driver', 'admin', 'it')
     def get(self, record_id):
         try:
@@ -641,6 +647,7 @@ class StockTrackingPDFResource(Resource):
             return make_response_data(success=False, message=f"Error generating PDF: {str(e)}", status_code=500)
 
 class StockTrackingGroupPDFResource(Resource):
+    @jwt_required()
     @role_required('storekeeper', 'ceo', 'seller', 'purchaser', 'driver', 'admin', 'it')
     def get(self):
         try:
@@ -673,6 +680,7 @@ class StockTrackingGroupPDFResource(Resource):
 
 
 class StockTrackingUnmovedPDFResource(Resource):
+    @jwt_required()
     @role_required('storekeeper', 'ceo', 'seller', 'purchaser', 'driver', 'admin', 'it')
     def get(self):
         try:
@@ -902,6 +910,7 @@ def generate_stock_pdf_combined(date):
 
 
 class StockTrackingCombinedPDFResource(Resource):
+    @jwt_required()
     @role_required('storekeeper', 'ceo', 'seller', 'purchaser', 'driver', 'admin', 'it')
     def get(self):
         try:
@@ -932,6 +941,7 @@ class StockTrackingCombinedPDFResource(Resource):
 
 
 class StockTrackingAggregatedResource(Resource):
+    @jwt_required()
     @role_required('storekeeper', 'ceo', 'seller', 'purchaser', 'driver', 'admin', 'it')
     def get(self):
         try:
