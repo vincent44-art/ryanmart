@@ -38,6 +38,9 @@ db = extensions.db
 # Path to your React build folder
 FRONTEND_BUILD_DIR = os.path.abspath(os.path.join(BACKEND_ROOT, '..', 'frontend', 'build'))
 
+PRODUCTION_FRONTEND = "https://ryanmart-frontend.onrender.com"
+DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
+
 def ensure_database_initialized(app):
     """Initialize database and seed default admin user."""
     with app.app_context():
@@ -111,10 +114,7 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     migrate.init_app(app, db)
     
-    # CORS Configuration - FIXED SCOPING
-PRODUCTION_FRONTEND = "https://ryanmart-fronntend.onrender.com"
-    DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
-    
+    # CORS Configuration
     configured_origins = app.config.get('CORS_ORIGINS', [])
     if configured_origins:
         allowed_origins = configured_origins
