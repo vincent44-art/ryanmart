@@ -112,7 +112,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     
     # CORS Configuration - FIXED SCOPING
-    PRODUCTION_FRONTEND = "https://ryanmart-frontend.onrender.com"
+PRODUCTION_FRONTEND = "https://ryanmart-fronntend.onrender.com"
     DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
     
     configured_origins = app.config.get('CORS_ORIGINS', [])

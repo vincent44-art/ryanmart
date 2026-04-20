@@ -66,12 +66,7 @@ class Config:
     else:
         # Production and development fallback URLs
         # These MUST match the exact deployed URLs for CORS to work
-        CORS_ORIGINS = [
-            "https://ryanmart-fronntend.onrender.com",  # Deployed frontend (double n)
-            "https://ryanmart-frontend.onrender.com",   # Original/correct spelling
-            "http://localhost:3000",  # React Create App default
-            "http://localhost:5173",  # Vite default
-        ]
+        CORS_ORIGINS = [\n            "https://ryanmart-fronntend.onrender.com",  # Deployed frontend (double n)\n            "http://localhost:3000",  # React Create App default\n            "http://localhost:5173",  # Vite default\n        ]
 
     # IT Alert Rules
     ALERT_RULES = {

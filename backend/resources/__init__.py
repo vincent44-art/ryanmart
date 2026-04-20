@@ -11,7 +11,7 @@ from .purchases import (
     ClearPurchasesResource, PurchaseSummaryResource, PurchaseByEmailResource
 )
 from .stock import StockMovementListResource, ClearStockMovementsResource
-from .expenses import CarExpensesResource
+from .expenses_fixed import CarExpensesResource
 from .other_expenses import OtherExpensesResource, OtherExpenseResource, OtherExpensesPDFResource
 from .salaries import SalariesResource, SalaryResource, SalaryPaymentToggleStatusResource
 from .gradients import GradientListResource, ClearGradientsResource
@@ -70,7 +70,7 @@ api = Api(api_bp, catch_all_404s=False)
 # ----------- AUTHENTICATION ROUTES -----------
 # NOTE: Auth routes are registered in app.py to avoid duplicate registration
 
-# ----------- USER MANAGEMENT -----------
+# ----------- USER MANAGEMENT -----------\napi.add_resource(UsersForSalaryResource, '/users/for-salary')
 api.add_resource(UserListResource, '/users')
 api.add_resource(UserResource, '/users/<int:user_id>')
 api.add_resource(UserSalaryResource, '/users/<int:user_id>/salary')
@@ -85,8 +85,7 @@ api.add_resource(ClearInventoryResource, '/inventory/clear')
 api.add_resource(StockMovementListResource, '/stock-movements')
 api.add_resource(ClearStockMovementsResource, '/stock-movements/clear')
 
-# ----------- EXPENSES -----------
-api.add_resource(OtherExpensesResource, '/other_expenses')
+# ----------- EXPENSES -----------\napi.add_resource(CarExpensesResource, '/car-expenses')\napi.add_resource(CarExpensesResource, '/car-expenses/<int:expense_id>')\napi.add_resource(OtherExpensesResource, '/other_expenses')
 api.add_resource(OtherExpenseResource, '/other_expenses/<int:expense_id>')
 api.add_resource(OtherExpensesPDFResource, '/other_expenses/pdf')
 # CarExpensesResource registered in app.py to handle both endpoints
