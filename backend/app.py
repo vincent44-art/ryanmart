@@ -101,7 +101,8 @@ def create_app(config_class=Config):
         database_url = database_url[len("DATABASE_URL="):]
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
+    app.config['JWT_LEEWAY'] = timedelta(minutes=5)
     
     # App settings
     app.url_map.strict_slashes = False
