@@ -4,3 +4,4 @@ from models.assignment import Assignment
 from models.seller_fruit import SellerFruit
 from models.sales import Sale
 from models.salary import Salary
+from models.spolige import Spolige

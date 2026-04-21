@@ -43,6 +43,7 @@ DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
 
 def ensure_database_initialized(app):
     """Initialize database and seed default admin user."""
+    from models.user import User, UserRole
     with app.app_context():
         max_retries = 8
         delay = 1.0
