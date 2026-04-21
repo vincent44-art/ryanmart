@@ -90,8 +90,8 @@ api.add_resource(ClearStockMovementsResource, '/stock-movements/clear')
 api.add_resource(OtherExpensesResource, '/other_expenses')
 api.add_resource(OtherExpenseResource, '/other_expenses/<int:expense_id>')
 api.add_resource(OtherExpensesPDFResource, '/other_expenses/pdf')
-api.add_resource(CarExpensesResource, '/car-expenses')
-api.add_resource(CarExpensesResource, '/car-expenses/<int:expense_id>')
+api.add_resource(CarExpensesResource, '/car-expenses', endpoint='car_expenses_list')
+api.add_resource(CarExpensesResource, '/car-expenses/<int:expense_id>', endpoint='car_expenses_detail')
 
 # ----------- SALARIES -----------
 api.add_resource(SalariesResource, '/salaries')
