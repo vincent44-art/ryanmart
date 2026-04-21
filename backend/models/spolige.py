@@ -13,6 +13,7 @@ class Spolige(db.Model):
     date = db.Column(db.Date, default=datetime.utcnow)
     stock_tracking_id = db.Column(db.Integer, db.ForeignKey('stock_tracking.id'), nullable=True)  # Link to stock tracking record
     source = db.Column(db.String(50), nullable=True, default='manual')  # 'manual' or 'automatic'
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

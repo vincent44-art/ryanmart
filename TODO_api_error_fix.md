@@ -1,11 +1,18 @@
-# API Error Fix Progress - 500/401 Errors on purchases/other_expenses
+# API Error Fix Progress
+## Status: ✅ In Progress
 
-## Steps from Approved Plan:
-- [x] 1. Create TODO tracking file ✅
-- [x] 2. Fix decorators.py (add current_app import) ✅
-- [x] 3. Fix other_expenses.py (reorder decorators) ✅
-- [x] 4. Test /api/purchases POST ✅ (code fixes applied, test script run)
-- [ ] 5. Test /api/other_expenses GET
-- [ ] 5. Test /api/other_expenses GET
-- [ ] 6. Run test_purchase_api.py
-- [ ] 7. Complete task
+### Step 1: [✅ COMPLETE] Create TODO.md
+### Step 2: Fix backend routing/imports  
+**Files:** `backend/resources/__init__.py`
+### Step 3: Fix spolige 500 error
+**Files:** `backend/resources/spolige.py`
+### Step 4: Add sample data to tables
+**Scripts:** `backend/create_sample_car_expenses.py`, new scripts for others
+### Step 5: Test endpoints
+**Commands:** curl tests for each API
+### Step 6: Frontend verification
+**Action:** Reload ReportsTab, check console
+### Step 7: [FINAL] attempt_completion
+
+**Current Progress:** 1/7 complete
+

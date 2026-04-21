@@ -70,7 +70,8 @@ api = Api(api_bp, catch_all_404s=False)
 # ----------- AUTHENTICATION ROUTES -----------
 # NOTE: Auth routes are registered in app.py to avoid duplicate registration
 
-# ----------- USER MANAGEMENT -----------\napi.add_resource(UsersForSalaryResource, '/users/for-salary')
+# ----------- USER MANAGEMENT -----------
+api.add_resource(UsersForSalaryResource, '/users/for-salary')
 api.add_resource(UserListResource, '/users')
 api.add_resource(UserResource, '/users/<int:user_id>')
 api.add_resource(UserSalaryResource, '/users/<int:user_id>/salary')
@@ -85,10 +86,12 @@ api.add_resource(ClearInventoryResource, '/inventory/clear')
 api.add_resource(StockMovementListResource, '/stock-movements')
 api.add_resource(ClearStockMovementsResource, '/stock-movements/clear')
 
-# ----------- EXPENSES -----------\napi.add_resource(CarExpensesResource, '/car-expenses')\napi.add_resource(CarExpensesResource, '/car-expenses/<int:expense_id>')\napi.add_resource(OtherExpensesResource, '/other_expenses')
+# ----------- EXPENSES -----------
+api.add_resource(OtherExpensesResource, '/other_expenses')
 api.add_resource(OtherExpenseResource, '/other_expenses/<int:expense_id>')
 api.add_resource(OtherExpensesPDFResource, '/other_expenses/pdf')
-# CarExpensesResource registered in app.py to handle both endpoints
+api.add_resource(CarExpensesResource, '/car-expenses')
+api.add_resource(CarExpensesResource, '/car-expenses/<int:expense_id>')
 
 # ----------- SALARIES -----------
 api.add_resource(SalariesResource, '/salaries')
@@ -126,7 +129,7 @@ api.add_resource(StockTrackingGroupPDFResource, '/stock-tracking/pdf/group')
 api.add_resource(StockTrackingUnmovedPDFResource, '/stock-tracking/pdf/unmoved')
 api.add_resource(StockTrackingCombinedPDFResource, '/stock-tracking/pdf/combined')
 
-# ----------- CLEAR ALL DATA -----------
+# ----------- SELLER FRUITS -----------
 api.add_resource(SellerFruitListResource, '/seller-fruits')
 api.add_resource(SellerFruitResource, '/seller-fruits/<int:fruit_id>')
 
@@ -136,9 +139,6 @@ api.add_resource(SpoligeResource, '/spolige/<int:spolige_id>')
 
 # ----------- CLEAR ALL DATA -----------
 api.add_resource(ClearAllDataResource, '/clear-all')
-
-
-
 
 # =====================================================================
 # NOTE: The catch-all route has been REMOVED from here.

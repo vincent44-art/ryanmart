@@ -24,14 +24,42 @@ class SpoligeListResource(Resource):
         if not user:
             return {"message": "User not found"}, 404
         
-        # CEO sees all records
-        if getattr(user, 'role', None) == 'ceo':
-            spolige_records = Spolige.query.all()
-        else:
-            # Others see only their own records
-            spolige_records = Spolige.query.filter_by(created_by=current_user_id).all()
+        import logging
+        logger = logging.getLogger(__name__)
         
-        return [record.to_dict() for record in spolige_records], 200
+        try:
+
+            if getattr(user, 'role', None) == 'ceo':
+                spolige_records = Spolige.query.all()
+            else:
+                # Others see only their own records
+                spolige_records = Spolige.query.filter_by(created_by=current_user_id).all()
+        except Exception as e:
+            logger.error(f"Database query failed: {str(e)}")
+            # Fallback to raw SQL
+            try:
+                query = text("""
+                    SELECT id, fruit_name, quantity, stage, amount_per_kg, total_amount, 
+                           description, date, created_by, created_at, updated_at
+                    FROM spolige 
+                    ORDER BY created_at DESC
+                """)
+                result = db.session.execute(query).fetchall()
+                spolige_records = []
+                for row in result:
+                    spolige_records.append({
+                        'id': row[0], 'fruit_name': row[1], 'quantity': float(row[2]) if row[2] else 0,
+                        'stage': row[3], 'amount_per_kg': float(row[4]) if row[4] else 0, 
+                        'total_amount': float(row[5]) if row[5] else 0,
+                        'description': row[6], 'date': row[7].isoformat() if row[7] else None,
+                        'created_by': row[8], 'created_at': row[9].isoformat() if row[9] else None,
+                        'updated_at': row[10].isoformat() if row[10] else None
+                    })
+            except Exception as fallback_e:
+                logger.error(f"Raw SQL fallback failed: {str(fallback_e)}")
+                spolige_records = []
+        
+        return [record.to_dict() for record in spolige_records] if spolige_records else [], 200
     
     @jwt_required()
     def post(self):
