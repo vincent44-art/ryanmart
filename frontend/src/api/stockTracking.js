@@ -5,8 +5,9 @@ const getApiBaseUrl = () => {
     return envUrl;
   }
   if (process.env.NODE_ENV === 'production') {
-'https://ryanmart-backend.onrender.com';
+    return 'https://ryanmart-backend.onrender.com';
   }
+
   return 'http://localhost:5000';
 };
 
