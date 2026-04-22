@@ -1,3 +1,9 @@
-- [x] 1. Edit backend/app.py: Fixed IndentationError by moving CORS globals to module level and fixing typo. **DONE**
-- [x] 2. Test locally: Syntax confirmed fixed (no IndentationError). **DONE**
-- [x] 3. Test Gunicorn: Ready (import succeeds). **DONE**
+# Fix IndentationError in backend/app.py
+
+## Steps:
+- [x] 1. Create this TODO.md to track progress
+- [ ] 2. Fix indentation in backend/app.py using edit_file
+- [ ] 3. Test syntax: python backend/app.py
+- [ ] 4. Update TODO.md as complete
+- [ ] 5. Attempt completion
+
