@@ -15,7 +15,7 @@ import autoTable from 'jspdf-autotable';
 
 // API base URL - use environment variable or default to backend URL
 // NOTE: The base URL should NOT include /api since API endpoints are already defined with /api prefix
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-bacckend.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ryanmart-backend.onrender.com';
 
 // Helper function to check if response text is HTML (server error page)
 const isHtmlResponse = (text) => {

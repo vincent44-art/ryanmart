@@ -5,7 +5,7 @@ import { Download, Trash2, AlertCircle } from 'lucide-react';
 // IMPORTANT: Ensure BASE_URL includes /api suffix since backend routes are prefixed with /api
 const BASE_URL = process.env.REACT_APP_API_BASE_URL 
   ? `${process.env.REACT_APP_API_BASE_URL}/api` 
-  : 'https://ryanmart-bacckend.onrender.com/api';
+  : 'https://ryanmart-backend.onrender.com/api';
 
 const formatKenyanCurrency = (amount) =>
   new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(amount || 0);
