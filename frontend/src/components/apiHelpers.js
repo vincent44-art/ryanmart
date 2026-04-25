@@ -96,7 +96,7 @@ export const fetchUsers = async () => {
 // Fetch users for salary dropdown - accessible by any authenticated user
 export const fetchUsersForSalary = async () => {
   try {
-    const response = await api.get('/users/for-salary');
+    const response = await api.get('/api/users/for-salary');
     return response;
   } catch (error) {
     console.error('Error fetching users for salary:', error);
