@@ -76,6 +76,7 @@ class SaleListResource(Resource):
             db.session.rollback()
             return make_response_data(success=False, message=f"Error fetching sales: {str(e)}", status_code=500)
 
+    @jwt_required()
     @role_required('ceo', 'seller')
     def post(self):
         current_user = get_current_user()
@@ -163,6 +164,7 @@ class SaleByEmailResource(Resource):
 
 
 class SaleResource(Resource):
+    @jwt_required()
     @role_required('ceo', 'seller')
     def get(self, sale_id):
         current_user = get_current_user()
@@ -181,6 +183,7 @@ class SaleResource(Resource):
 
         return make_response_data(True, 200, 'Sale fetched successfully', sale_data)
 
+    @jwt_required()
     @role_required('ceo', 'seller')
     def put(self, sale_id):
         current_user = get_current_user()
@@ -215,6 +218,7 @@ class SaleResource(Resource):
 
         return make_response_data(True, 200, 'Sale updated successfully', sale_data)
 
+    @jwt_required()
     @role_required('ceo', 'seller')
     def delete(self, sale_id):
         current_user = get_current_user()
@@ -240,6 +244,7 @@ class SaleResource(Resource):
 
 
 class SaleSummaryResource(Resource):
+    @jwt_required()
     @role_required('ceo', 'seller')
     def get(self):
         current_user = get_current_user()
@@ -263,6 +268,7 @@ class SaleSummaryResource(Resource):
 
 
 class ClearSalesResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def delete(self):
         current_user = get_current_user()
@@ -274,6 +280,7 @@ class ClearSalesResource(Resource):
 
         return make_response_data(True, 200, f'{num_deleted} sales cleared successfully', {'deleted_count': num_deleted})
 
+    @jwt_required()
     @role_required('seller')
     def post(self):
         data = parser.parse_args()
@@ -335,6 +342,7 @@ class CustomerDebtResource(Resource):
 
 
 class DailySalesReportResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def get(self, date_str):
         try:
@@ -444,6 +452,7 @@ class DailySalesReportResource(Resource):
 
 
 class CustomerDebtReportResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def get(self, customer_email):
         try:

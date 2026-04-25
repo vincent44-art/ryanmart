@@ -227,6 +227,7 @@ class PurchaseListResource(Resource):
             )
 
 class PurchaseResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def put(self, purchase_id):
         purchase = Purchase.query.get_or_404(purchase_id)
@@ -246,6 +247,7 @@ class PurchaseResource(Resource):
             message="Purchase record updated."
         )
 
+    @jwt_required()
     @role_required('ceo')
     def delete(self, purchase_id):
         purchase = Purchase.query.get_or_404(purchase_id)
@@ -254,6 +256,7 @@ class PurchaseResource(Resource):
         return make_response_data(message="Purchase record deleted.")
 
 class ClearPurchasesResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def delete(self):
         num_deleted = Purchase.query.delete()
@@ -263,6 +266,7 @@ class ClearPurchasesResource(Resource):
         )
 
 class PurchaseSummaryResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def get(self):
         # Fetch all purchases using raw SQL to avoid PostgreSQL numeric type issues
@@ -424,6 +428,7 @@ class PurchaseByEmailResource(Resource):
             )
 
 class DailyPurchasesReportResource(Resource):
+    @jwt_required()
     @role_required('ceo')
     def get(self, date_str):
         try:
