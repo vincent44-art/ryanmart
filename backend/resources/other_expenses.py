@@ -245,6 +245,12 @@ class OtherExpenseResource(Resource):
         db.session.commit()
         return make_response_data(success=True, message="Expense deleted successfully.")
 
+    def options(self, expense_id=None):
+        """Handle CORS preflight requests explicitly."""
+        from flask import make_response
+        response = make_response('', 204)
+        return response
+
 class OtherExpensesPDFResource(Resource):
     @jwt_required()
     @role_required('ceo', 'seller', 'driver', 'storekeeper', 'purchaser', 'admin', 'it')

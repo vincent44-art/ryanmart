@@ -126,6 +126,12 @@ class CarExpensesResource(Resource):
         db.session.commit()
         return make_response_data(data=None, message="Car expense deleted successfully.", status_code=200)
 
+    def options(self, expense_id=None):
+        """Handle CORS preflight requests explicitly."""
+        from flask import make_response
+        response = make_response('', 204)
+        return response
+
 class DriverExpenseReportResource(Resource):
     @jwt_required()
     def get(self, driver_email):

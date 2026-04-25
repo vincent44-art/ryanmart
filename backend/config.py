@@ -67,7 +67,8 @@ class Config:
         # Production and development fallback URLs
         # These MUST match the exact deployed URLs for CORS to work
         CORS_ORIGINS = [
-            "https://ryanmart-frontend.onrender.com",  # Deployed frontend
+            "https://ryanmart-fronntend.onrender.com",  # Actual deployed URL (typo)
+            "https://ryanmart-frontend.onrender.com",   # Correct spelling
             "http://localhost:3000",  # React Create App default
             "http://localhost:5173",  # Vite default
         ]
@@ -107,4 +108,3 @@ try:
     print("[startup] SQLAlchemy:", _sa.__version__)
 except Exception:
     pass
-

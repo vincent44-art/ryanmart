@@ -38,7 +38,10 @@ db = extensions.db
 # Path to your React build folder
 FRONTEND_BUILD_DIR = os.path.abspath(os.path.join(BACKEND_ROOT, '..', 'frontend', 'build'))
 
-PRODUCTION_FRONTEND = "https://ryanmart-frontend.onrender.com"
+PRODUCTION_FRONTENDS = [
+    "https://ryanmart-fronntend.onrender.com",  # Actual deployed URL (typo)
+    "https://ryanmart-frontend.onrender.com",   # Correct spelling
+]
 DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
 
 def ensure_database_initialized(app):
@@ -122,14 +125,14 @@ def create_app(config_class=Config):
         allowed_origins = configured_origins
     else:
         if os.environ.get('FLASK_ENV') == 'production':
-            allowed_origins = [PRODUCTION_FRONTEND]
+            allowed_origins = PRODUCTION_FRONTENDS
         else:
             allowed_origins = DEVELOPMENT_LOCALHOST
     
     app.config['ALLOWED_ORIGINS'] = allowed_origins
     
     CORS(app, resources={
-        r"/api/*": {
+        r"/api/.*": {
             "origins": allowed_origins,
             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token"],
@@ -279,6 +282,7 @@ def create_app(config_class=Config):
                 response.headers['Access-Control-Allow-Origin'] = origin or '*'
                 response.headers['Access-Control-Allow-Credentials'] = 'true'
                 response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, X-CSRF-Token'
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH, OPTIONS'
                 response.headers['Access-Control-Max-Age'] = '86400'
                 response.headers['Vary'] = 'Origin'
         return response
