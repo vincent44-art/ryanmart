@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask import request, jsonify, current_app
 import io
-from flask_jwt_extended import jwt_required, get_current_user
+from flask_jwt_extended import jwt_required
 from datetime import datetime
 from sqlalchemy import func, text
 from sqlalchemy.orm import joinedload
@@ -15,7 +15,7 @@ from flask import send_file
 from extensions import db
 from models.sales import Sale
 from utils.decorators import role_required
-from utils.helpers import make_response_data
+from utils.helpers import make_response_data, get_current_user
 import logging
 
 logger = logging.getLogger('sales')
