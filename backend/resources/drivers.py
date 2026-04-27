@@ -5,7 +5,7 @@ from models.driver import DriverExpense
 from models.user import db
 import logging
 
-drivers_bp = Blueprint('drivers', __name__, url_prefix='/api/drivers')
+drivers_bp = Blueprint('drivers_routes', __name__)
 logger = logging.getLogger('drivers')
 
 @drivers_bp.route('/<driver_email>/expenses', methods=['GET'])
