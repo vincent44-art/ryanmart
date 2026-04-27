@@ -164,7 +164,7 @@ const UserManagementTab = ({ data }) => {
                       onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                     >
                       <option value="purchaser">Purchaser</option>
-                      <option value="seller">Seller</option>
+                      <option value="seller">Sales</option>
                       <option value="driver">Driver</option>
                       <option value="storekeeper">Storekeeper</option>
                       <option value="it">IT</option>
