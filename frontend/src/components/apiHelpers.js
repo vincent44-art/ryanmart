@@ -107,7 +107,8 @@ export const fetchUsersForSalary = async () => {
 // Create a new sale
 export const createSale = async (saleData) => {
   try {
-    const response = await api.post('/sales', saleData);
+    // Sales endpoints are registered under /api/sales
+    const response = await api.post('/api/sales', saleData);
     return response;
   } catch (error) {
     console.error('Error creating sale:', error);
