@@ -121,7 +121,7 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-  const data = { seller, buyer, invoiceNum, date, dueDate, payment, paymentDetails, paymentTerms, items, subtotal: getSubtotal(), tax, taxAmount: getTaxAmount(), discount, finalTotal: getFinalTotal(), expectedAmount, balance: getBalance(), customerName };
+    const data = { seller, buyer, invoiceNum, date, dueDate, payment, paymentDetails, paymentTerms, items, subtotal: getSubtotal(), tax, taxAmount: getTaxAmount(), discount, finalTotal: getFinalTotal(), expectedAmount, balance: getBalance(), customerName };
     setSubmittedData(data);
     // Save to backend
     api.post('/api/receipts', data).catch(err => console.error('Failed to save invoice:', err));

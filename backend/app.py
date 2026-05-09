@@ -39,9 +39,11 @@ db = extensions.db
 FRONTEND_BUILD_DIR = os.path.abspath(os.path.join(BACKEND_ROOT, '..', 'frontend', 'build'))
 
 PRODUCTION_FRONTENDS = [
-    "https://ryanmart-fronntend.onrender.com",  # Actual deployed URL (typo)
-    "https://ryanmart-frontend.onrender.com",   # Correct spelling
+    "https://ryanmart-frontend.onrender.com",
+    # Keep the legacy typo origin too (if you still have older frontend builds deployed)
+    "https://ryanmart-fronntend.onrender.com",
 ]
+
 DEVELOPMENT_LOCALHOST = ["http://localhost:3000", "http://localhost:5173"]
 
 def ensure_database_initialized(app):
