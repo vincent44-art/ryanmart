@@ -372,7 +372,9 @@ export const fetchSalaries = async () => {
 // Delete salary
 export const deleteSalary = async (salaryId) => {
   try {
-    const response = await api.delete(`/api/salaries/${salaryId}`);
+    // Backend route is /api/salary/<int:salary_id>
+    // (not /api/salaries/<id>)
+    const response = await api.delete(`/api/salary/${salaryId}`);
     return response;
   } catch (error) {
     console.error('Error deleting salary:', error);
