@@ -183,10 +183,34 @@ class StockTrackingResource(Resource):
     @jwt_required()
     @role_required('ceo')
     def delete(self, record_id):
-        record = StockTracking.query.get_or_404(record_id)
-        db.session.delete(record)
-        db.session.commit()
-        return make_response_data(message=f"Stock tracking record {record_id} deleted successfully.")
+        logger = logging.getLogger('stock_tracking')
+        try:
+            record = StockTracking.query.get_or_404(record_id)
+
+            # Manual cascade cleanup (prevents FK constraint violations on some DBs)
+            # Spolige rows referencing this stock_tracking record.
+            try:
+                Spolige.query.filter(Spolige.stock_tracking_id == record.id).delete(synchronize_session=False)
+            except Exception:
+                logger.exception(f"Failed cleaning Spolige for stock_tracking_id={record.id}")
+                db.session.rollback()
+                raise
+
+            # Delete the stock tracking record itself.
+            db.session.delete(record)
+            db.session.commit()
+
+            return make_response_data(message=f"Stock tracking record {record_id} deleted successfully.")
+        except Exception as e:
+            db.session.rollback()
+            logger.exception(f"Error deleting StockTracking record_id={record_id}: {str(e)}")
+            # Return a clean JSON error instead of 500 stack traces.
+            return make_response_data(
+                success=False,
+                message=f"Failed to delete stock tracking record {record_id}. {str(e)}",
+                status_code=500,
+            )
+
 
 
 def generate_stock_pdf(stock_record):
