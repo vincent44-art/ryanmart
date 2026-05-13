@@ -30,6 +30,11 @@ class LoginResource(Resource):
                 email = args['email']
                 password = args['password']
 
+            # Backward-compatibility: allow legacy @sellers.com emails to authenticate
+            # against accounts stored with @sales.com.
+            if isinstance(email, str) and email.lower().endswith('@sellers.com'):
+                email = email[:-len('@sellers.com')] + '@sales.com'
+
             user = User.query.filter_by(email=email).first()
             if user and user.check_password(password):
                 # Avoid AttributeError if role is None or not an Enum
