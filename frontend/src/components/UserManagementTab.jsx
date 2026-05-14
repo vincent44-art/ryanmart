@@ -165,6 +165,7 @@ const UserManagementTab = ({ data }) => {
                     >
                       <option value="purchaser">Purchaser</option>
                       <option value="seller">Sales</option>
+                      <option value="sales">Sales</option>
                       <option value="driver">Driver</option>
                       <option value="storekeeper">Storekeeper</option>
                       <option value="it">IT</option>
