@@ -231,18 +231,9 @@ const OtherExpensesTab = ({ token }) => {
                     {Object.keys(expensesByDate).length > 0 ? (
                       Object.entries(expensesByDate).map(([date, dateExpenses]) => (
                         <React.Fragment key={date}>
-                          {/* PDF Download Row for the Date */}
                           <tr className="table-info">
                             <td colSpan="6" className="text-center py-2">
                               <strong>{new Date(date).toLocaleDateString()}</strong>
-                              <a
-                                href={`/api/other-expenses/pdf?date=${encodeURIComponent(date)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-sm btn-outline-primary ms-3"
-                              >
-                                Download PDF for {new Date(date).toLocaleDateString()}
-                              </a>
                             </td>
                           </tr>
                           {/* Individual Expense Rows */}
