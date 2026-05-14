@@ -38,7 +38,7 @@ class UserListResource(Resource):
         role_value = data['role'].lower()
         # Backward-compat: frontend may send "sales" but backend UserRole uses "seller"
         if role_value == 'sales':
-            role_value = 'seller'
+            role_value = 'sales'
         user = User(
             email=data['email'],
             name=data['name'],
@@ -66,7 +66,7 @@ class UserResource(Resource):
         user.name = data['name']
         role_value = data['role'].lower()
         if role_value == 'sales':
-            role_value = 'seller'
+            role_value = 'salesr'
         user.role = UserRole(role_value)
         user.salary = data.get('salary', user.salary)
         user.is_active = data.get('is_active', user.is_active)

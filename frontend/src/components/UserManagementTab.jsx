@@ -56,7 +56,10 @@ const UserManagementTab = ({ data }) => {
     switch (role) {
       case 'ceo': return 'bg-danger';
       case 'purchaser': return 'bg-primary';
-      case 'sales': return 'bg-success';
+      // UI dropdown uses "sales" but backend role is "seller"
+      case 'sales':
+      case 'seller':
+        return 'bg-success';
       case 'driver': return 'bg-warning';
       case 'storekeeper': return 'bg-info';
       case 'it': return 'bg-dark';
