@@ -8,7 +8,7 @@ const UserManagementTab = ({ data }) => {
     name: '',
     email: '',
     role: 'purchaser',
-    status: 'active'
+    status: 'active', // UI-only; backend uses is_active
   });
   const [users, setUsers] = useState([]);
 
@@ -28,8 +28,18 @@ const UserManagementTab = ({ data }) => {
       alert('Password is required!');
       return;
     }
-    const userToAdd = { ...newUser, password };
-    const success = await addUser(userToAdd);
+
+    // Backend expects: is_active (boolean), not status
+    const is_active = newUser.status === 'active';
+    const payload = {
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      password,
+      is_active,
+    };
+
+    const success = await addUser(payload);
     if (success) {
       setNewUser({ name: '', email: '', role: 'purchaser', status: 'active' });
       setShowAddModal(false);
@@ -37,8 +47,9 @@ const UserManagementTab = ({ data }) => {
   };
 
   const toggleUserStatus = (userId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'blocked' : 'active';
-    updateUser(userId, { status: newStatus });
+    // Backend expects: is_active (boolean)
+    const is_active = currentStatus !== 'active';
+    updateUser(userId, { is_active });
   };
 
   const getRoleColor = (role) => {
@@ -165,7 +176,6 @@ const UserManagementTab = ({ data }) => {
                     >
                       <option value="purchaser">Purchaser</option>
                       <option value="seller">Sales</option>
-                      <option value="sales">Sales</option>
                       <option value="driver">Driver</option>
                       <option value="storekeeper">Storekeeper</option>
                       <option value="it">IT</option>
