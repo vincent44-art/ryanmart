@@ -36,6 +36,9 @@ class UserListResource(Resource):
 
         # Ensure role is lowercase for Enum compatibility
         role_value = data['role'].lower()
+        # Backward-compat: frontend may send "sales" but backend UserRole uses "seller"
+        if role_value == 'sales':
+            role_value = 'seller'
         user = User(
             email=data['email'],
             name=data['name'],
@@ -61,7 +64,10 @@ class UserResource(Resource):
 
         user.email = data['email']
         user.name = data['name']
-        user.role = UserRole(data['role'])
+        role_value = data['role'].lower()
+        if role_value == 'sales':
+            role_value = 'seller'
+        user.role = UserRole(role_value)
         user.salary = data.get('salary', user.salary)
         user.is_active = data.get('is_active', user.is_active)
         user.profile_image = data.get('profile_image', user.profile_image)
