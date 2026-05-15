@@ -29,12 +29,18 @@ const UserManagementTab = ({ data }) => {
       return;
     }
 
-    // Backend expects: is_active (boolean), not status
+    // Backend expects: is_active (boolean), not status.
+    // Also normalize role for backend enum compatibility.
     const is_active = newUser.status === 'active';
+
+    // UI dropdown uses "sales" but backend enum is "seller".
+    // If you send "sales", backend may reject as invalid choice -> 400.
+    const normalizedRole = (newUser.role === 'sales') ? 'seller' : newUser.role;
+
     const payload = {
       name: newUser.name,
       email: newUser.email,
-      role: newUser.role,
+      role: normalizedRole,
       password,
       is_active,
     };
