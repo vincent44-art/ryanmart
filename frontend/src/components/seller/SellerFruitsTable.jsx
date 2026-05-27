@@ -364,19 +364,7 @@ const SellerFruitsTable = ({
           </table>
         </div>
 
-        {/* PDF Download Row for each stock group */}
-        {Array.from(groupedByStock.entries()).map(([stockName, group], idx) => (
-          <div key={stockName} className="my-2 d-flex align-items-center">
-            <span className="me-2 fw-bold">{stockName} PDF:</span>
-            <button
-              className="btn btn-outline-success btn-sm"
-              onClick={() => downloadSellerFruitsPDF(stockName, group)}
-              title={`Download PDF for ${stockName}`}
-            >
-              <i className="bi bi-download"></i> Download PDF
-            </button>
-          </div>
-        ))}
+
 
         {/* Summary Statistics */}
         {filteredAndSortedData.length > 0 && (
