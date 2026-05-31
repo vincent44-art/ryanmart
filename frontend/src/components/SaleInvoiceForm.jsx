@@ -71,12 +71,12 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
     loadStockRecords();
   }, []);
 
-  // Automatically set customer name from buyer name
+  // Keep customerName in sync with Buyer Name input (including custom names not in the dropdown)
   useEffect(() => {
-    if (buyer.name && !customerName) {
-      setCustomerName(buyer.name);
-    }
-  }, [buyer.name, customerName]);
+    const normalized = (buyer.name || '').trim();
+    setCustomerName(normalized);
+  }, [buyer.name]);
+
 
   function handleItemChange(idx, field, value) {
     const newItems = items.map((item, i) =>
