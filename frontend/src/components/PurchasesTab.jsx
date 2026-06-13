@@ -60,7 +60,7 @@ const PurchasesTab = (props) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
       currency: 'KES'
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   const handleDelete = async (id) => {
@@ -113,8 +113,15 @@ const PurchasesTab = (props) => {
     purchase.buyerName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Sort purchases by date in descending order (most recent first)
-  const sortedPurchases = [...filteredPurchases].sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Group purchases by date (like SalesTab does)
+  const purchasesByDate = filteredPurchases.reduce((acc, purchase) => {
+    const date = purchase.date || 'Unknown Date';
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(purchase);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(purchasesByDate).sort((a, b) => new Date(b) - new Date(a));
 
   if (loading) {
     return (
@@ -162,46 +169,91 @@ const PurchasesTab = (props) => {
 
       <div className="card shadow-sm">
         <div className="card-body p-0">
-          {sortedPurchases.length > 0 ? (
+          {sortedDates.length > 0 ? (
             <div className="table-responsive">
-              <table className="table table-hover mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th>Date</th>
-                    <th>Purchaser</th>
-                    <th>Fruit</th>
-                    <th>Quantity</th>
-                    <th>Unit</th>
-                    <th>Farmer</th>
-                    <th>Amount per KG</th>
-                    <th>Total Amount</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedPurchases.map(purchase => (
-                    <tr key={purchase.id}>
-                      <td>{new Date(purchase.date).toLocaleDateString()}</td>
-                      <td>{purchase.purchaserEmail}</td>
-                      <td>{purchase.fruitType}</td>
-                      <td>{purchase.quantity}</td>
-                      <td>{purchase.unit}</td>
-                      <td>{purchase.buyerName}</td>
-                      <td>{formatCurrency(purchase.amountPerKg)}</td>
-                      <td className="fw-bold text-success">{formatCurrency(purchase.amount)}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDelete(purchase.id)}
-                          title="Delete purchase"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="p-3">
+                {sortedDates.map((date, index) => {
+                  const dayPurchases = purchasesByDate[date] || [];
+                  const totalAmount = dayPurchases.reduce((sum, p) => sum + (p.amount || 0), 0);
+                  const totalQuantity = dayPurchases.reduce((sum, p) => sum + parseFloat(p.quantity || 0), 0);
+
+                  return (
+                    <div key={date}>
+                      {index > 0 && <div style={{ height: '2px', backgroundColor: 'black', margin: '20px 0' }} />}
+
+                      <div className="d-flex justify-content-between align-items-center mb-3 px-3 pt-3">
+                        <h4 className="mb-0">
+                          {new Date(date).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </h4>
+                        <div className="d-flex align-items-center gap-3">
+                          <div className="text-muted">
+                            <small>
+                              {dayPurchases.length} purchase{dayPurchases.length !== 1 ? 's' : ''} |
+                              Total: {formatCurrency(totalAmount)} |
+                              Qty: {totalQuantity.toFixed(2)}
+                            </small>
+                          </div>
+                          <button
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={() => downloadDailyReport(date)}
+                            title="Download PDF Report"
+                          >
+                            <Download size={16} className="me-1" />
+                            PDF
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="table-responsive mb-4">
+                        <table className="table table-hover mb-0">
+                          <thead className="table-light">
+                            <tr>
+                              <th>Purchaser</th>
+                              <th>Fruit</th>
+                              <th>Quantity</th>
+                              <th>Unit</th>
+                              <th>Farmer</th>
+                              <th>Amount per KG</th>
+                              <th>Total Amount</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dayPurchases.map(purchase => (
+                              <tr key={purchase.id}>
+                                <td>{purchase.purchaserEmail}</td>
+                                <td>{purchase.fruitType}</td>
+                                <td>{purchase.quantity}</td>
+                                <td>{purchase.unit}</td>
+                                <td>{purchase.buyerName}</td>
+                                <td>{formatCurrency(purchase.amountPerKg)}</td>
+                                <td className="fw-bold text-success">{formatCurrency(purchase.amount)}</td>
+                                <td>
+                                  <button
+                                    className="btn btn-sm btn-outline-danger"
+                                    onClick={() => handleDelete(purchase.id)}
+                                    title="Delete purchase"
+                                    style={{ padding: '0.25rem 0.5rem' }}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Spacer to keep last section from sticking to card edge */}
+              <div style={{ height: 8 }} />
             </div>
           ) : (
             <div className="text-center py-4">
@@ -217,4 +269,5 @@ const PurchasesTab = (props) => {
 };
 
 export default PurchasesTab;
+
 
