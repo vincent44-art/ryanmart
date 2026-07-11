@@ -95,7 +95,9 @@ const Dashboard = () => {
       case 'purchases':
         return <PurchasesTab data={data?.purchases} onPurchaseAdded={handlePurchaseAdded} />;
       case 'sales':
-        return <SalesTab data={data?.sales} />;
+        // Fix: CEO sales tab must use row-level sales API (SalesTab fetches /api/sales internally)
+        // Avoid relying on dashboard aggregates/possible missing fields.
+        return <SalesTab />;
       case 'stock-tracker':
         return <StockTrackerTab userRole={user?.role} />;
       case 'reports':
