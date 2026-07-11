@@ -121,36 +121,32 @@ export default function SaleInvoiceForm({ onSellerFruitsAdded }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    const data = { seller, buyer, invoiceNum, date, dueDate, payment, paymentDetails, paymentTerms, items, subtotal: getSubtotal(), tax, taxAmount: getTaxAmount(), discount, finalTotal: getFinalTotal(), expectedAmount, balance: getBalance(), customerName };
+    const data = {
+      seller,
+      buyer,
+      invoiceNum,
+      date,
+      dueDate,
+      payment,
+      paymentDetails,
+      paymentTerms,
+      items,
+      subtotal: getSubtotal(),
+      tax,
+      taxAmount: getTaxAmount(),
+      discount,
+      finalTotal: getFinalTotal(),
+      expectedAmount,
+      balance: getBalance(),
+      customerName,
+    };
+
+    // Only save the receipt header on submit/preview.
+    // Creating sales line-items is done in handleSaveToTable()
+    // to prevent duplicate inserts (submit + save flow previously both created sales).
     setSubmittedData(data);
 
-    // Save receipt header to backend
     api.post('/api/receipts', data).catch(err => console.error('Failed to save invoice:', err));
-
-    // IMPORTANT: Also create sales line items so CEO dashboard "Sales" updates.
-    // (CEO dashboard is driven by the `sale` table, not the `receipt` table.)
-    (async () => {
-      try {
-        if (!customerName) return;
-        for (const item of data.items.filter(i => i.fruit && i.quantity && i.unitPrice)) {
-          await createSale({
-            stock_name: selectedStockName,
-            fruit_name: item.fruit,
-            qty: parseFloat(item.quantity),
-            unit_price: parseFloat(item.unitPrice),
-            date: data.date,
-            customer_name: customerName
-          });
-        }
-
-        // refresh parent tabs/tables if needed
-        if (typeof onSellerFruitsAdded === 'function') {
-          onSellerFruitsAdded();
-        }
-      } catch (err) {
-        console.error('Error creating sale line items:', err);
-      }
-    })();
   }
 
   function downloadReceipt() {
